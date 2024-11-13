@@ -1,0 +1,26 @@
+.input-file {
+  position: relative;
+  overflow: hidden;
+}
+
+.input-file-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+
+.upload-list {
+  :global(.ant-list-item) {
+    padding: 0 8px !important;
+  }
+}
+
+.tips {
+  color: #9c9b9b;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}

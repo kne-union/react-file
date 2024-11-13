@@ -1,15 +1,160 @@
 {
-  "isFull": false,
+  "isFull": true,
   "list": [
     {
-      "title": "这里填写示例标题",
-      "description": "这里填写示例说明",
+      "title": "File",
+      "description": "从oss获取文件地址",
       "code": "./base.js",
       "scope": [
         {
           "name": "_ReactFile",
           "packageName": "@kne/current-lib_react-file",
           "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "Image",
+      "description": "显示图片",
+      "code": "./image.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "Download",
+      "description": "文件下载",
+      "code": "./download.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "FileButton",
+      "description": "预览文件按钮",
+      "code": "./file-button.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "FileList",
+      "description": "文件列表",
+      "code": "./file-list.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "FileUpload",
+      "description": "文件上传",
+      "code": "./file-upload.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "FilePreview",
+      "description": "文件预览",
+      "code": "./preview.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
         }
       ]
     }

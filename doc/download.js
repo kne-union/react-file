@@ -1,5 +1,6 @@
-const { default: File } = _ReactFile;
+const { Download } = _ReactFile;
 const { createWithRemoteLoader } = remoteLoader;
+const { Flex } = antd;
 
 const BaseExample = createWithRemoteLoader({
   modules: ['components-core:Global@PureGlobal']
@@ -22,9 +23,11 @@ const BaseExample = createWithRemoteLoader({
       }
     }
   }}>
-    <File id="123">{({ url }) => {
-      return url;
-    }}</File>
+    <Flex gap={8}>
+      <Download id="123">下载文件</Download>
+      <Download id="123" filename="图片">下载文件并设置名称</Download>
+      <Download src="/logo192.png" filename="图片">直接通过src链接下载</Download>
+    </Flex>
   </PureGlobal>;
 });
 
