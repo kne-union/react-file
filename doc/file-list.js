@@ -1,5 +1,5 @@
 const { FileList } = _ReactFile;
-const { createWithRemoteLoader } = remoteLoader;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
 const { Divider } = antd;
 
 const BaseExample = createWithRemoteLoader({
@@ -11,6 +11,7 @@ const BaseExample = createWithRemoteLoader({
       return { data: { code: 0, data: api.loader() } };
     }, apis: {
       file: {
+        staticUrl: getPublicPath('react-file') || window.PUBLIC_URL,
         getUrl: {
           loader: async ({ params }) => {
             const urlMap = {
@@ -32,15 +33,15 @@ const BaseExample = createWithRemoteLoader({
     }
   }}>
     <FileList dataSource={[{
-      uuid: "121233",
-      type: "uploading",
-      filename: "张三的简历.doc",
+      uuid: '121233',
+      type: 'uploading',
+      filename: '张三的简历.doc'
     },
       {
-        id: "2",
-        filename: "我是一份简历.pdf",
-        date: "2022-07-15T11:09:15.000+08:00",
-        userName: "用户名",
+        id: '2',
+        filename: '我是一份简历.pdf',
+        date: '2022-07-15T11:09:15.000+08:00',
+        userName: '用户名'
       }]} />
     <Divider />
     <FileList dataSource={[]} />

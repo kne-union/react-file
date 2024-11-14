@@ -4,14 +4,25 @@ import { UploadOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
 import style from './style.module.scss';
 import defaultAccept from './defaultAccept';
+import { useContext } from '@kne/global-context';
 
 const FileInput = p => {
+  const { locale: contextLocale } = useContext();
+  const locale = Object.assign(
+    {},
+    {
+      上传文件: '上传文件'
+    },
+    contextLocale,
+    p.locale
+  );
+
   const ref = useRef(null);
   const { children, className, buttonText, accept, multiple, onChange, ...props } = Object.assign(
     {},
     {
       accept: defaultAccept,
-      buttonText: '上传文件',
+      buttonText: locale['上传文件'],
       children: ({ children, ...props }) => {
         return (
           <Button icon={<UploadOutlined />} {...props}>
@@ -21,7 +32,8 @@ const FileInput = p => {
         );
       }
     },
-    p
+    p,
+    { locale }
   );
 
   const resetFileInput = () => {

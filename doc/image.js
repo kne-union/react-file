@@ -1,5 +1,5 @@
 const { Image } = _ReactFile;
-const { createWithRemoteLoader } = remoteLoader;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
 const { Divider } = antd;
 
 const BaseExample = createWithRemoteLoader({
@@ -11,6 +11,7 @@ const BaseExample = createWithRemoteLoader({
       return { data: { code: 0, data: api.loader() } };
     }, apis: {
       file: {
+        staticUrl: getPublicPath('react-file') || window.PUBLIC_URL,
         getUrl: {
           loader: async ({ params }) => {
             return new Promise(resolve => {
@@ -39,10 +40,10 @@ const BaseExample = createWithRemoteLoader({
         <Image.Avatar shape="square" />
         <Image.Avatar gender="F" id="xxxxxx" shape="square" />
         <Divider />
-        <Image.Avatar gender="F" size={30}/>
-        <Image.Avatar gender="M" size={50}/>
-        <Image.Avatar size={80}/>
-        <Image.Avatar gender="F" id="xxxxxx" size={100}/>
+        <Image.Avatar gender="F" size={30} />
+        <Image.Avatar gender="M" size={50} />
+        <Image.Avatar size={80} />
+        <Image.Avatar gender="F" id="xxxxxx" size={100} />
       </InfoPage.Part>
     </InfoPage>
   </PureGlobal>;

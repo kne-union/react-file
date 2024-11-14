@@ -1,5 +1,5 @@
 const { FileButton } = _ReactFile;
-const { createWithRemoteLoader } = remoteLoader;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
 
 const BaseExample = createWithRemoteLoader({
   modules: ['components-core:Global@PureGlobal']
@@ -10,6 +10,7 @@ const BaseExample = createWithRemoteLoader({
       return { data: { code: 0, data: api.loader() } };
     }, apis: {
       file: {
+        staticUrl: getPublicPath('react-file') || window.PUBLIC_URL,
         getUrl: {
           loader: async ({ params }) => {
             const urlMap = {

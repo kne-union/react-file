@@ -1,18 +1,32 @@
 import { useState, useMemo, useRef } from 'react';
 import createDeferred from '@kne/create-deferred';
-import { usePreset } from '@kne/global-context';
+import { useContext, usePreset } from '@kne/global-context';
 import useRefCallback from '@kne/use-ref-callback';
 import { App } from 'antd';
 import uniqueId from 'lodash/uniqueId';
 
 const useFileUpload = p => {
+  const { locale: contextLocale } = useContext();
+  const locale = Object.assign(
+    {},
+    {
+      '上传文件不能超过最大允许数量%s': '上传文件不能超过最大允许数量%s',
+      '文件%s不能超过%sMB!': '文件%s不能超过%sMB!',
+      '文件%s上传错误%s': '文件%s上传错误%s',
+      '文件%s上传异常%s': '文件%s上传异常%s'
+    },
+    contextLocale,
+    p.locale
+  );
+
   const { multiple, fileSize, maxLength, value, concurrentCount, onAdd, onError, onSave, onChange, onUpload } = Object.assign(
     {},
     {
       concurrentCount: 1,
       value: []
     },
-    p
+    p,
+    { locale }
   );
 
   const { apis } = usePreset();
@@ -26,18 +40,18 @@ const useFileUpload = p => {
   const onFileSelected = useRefCallback(async fileList => {
     const allowCount = maxLength - value.length;
     if (!(maxLength === 1 || multiple !== true) && fileList.length > allowCount) {
-      message.error(`上传文件不能超过最大允许数量${maxLength}`);
+      message.error(locale['上传文件不能超过最大允许数量%s'].replace('%s', maxLength));
       return;
     }
     await Promise.allSettled(
       fileList.map(async file => {
         if (file.size > fileSize * 1024 * 1024) {
-          message.error(`文件${file.name}不能超过${fileSize}MB!`);
+          message.error((values => locale['文件%s不能超过%sMB!'].replace(/%s/g, () => values.shift()))([file.name, fileSize]));
           return;
         }
         const uuid = uniqueId();
         const catchError = e => {
-          const errMsg = e.message || `文件${file.name}上传错误${e.message ? ':' + e.message : ''}`;
+          const errMsg = e.message || (values => locale['文件%s上传错误%s'].replace(/%s/g, () => values.shift()))([file.name, e.message ? ':' + e.message : '']);
           message.error(errMsg);
           onError && onError({ file, error: e, errMsg });
           setUploadingList(list => {
@@ -73,7 +87,7 @@ const useFileUpload = p => {
           const { data } = await deferred(() => uploadFun({ file }));
 
           if (data.code !== 0) {
-            catchError(new Error(`文件${file.name}上传异常${data.msg ? ':' + data.msg : ''}`));
+            catchError(new Error((values => locale['文件%s上传异常%s'].replace(/%s/g, () => values.shift()))([file.name, data.msg ? ':' + data.msg : ''])));
             return;
           }
 

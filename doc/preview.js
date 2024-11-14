@@ -1,5 +1,5 @@
 const { FilePreview } = _ReactFile;
-const { createWithRemoteLoader } = remoteLoader;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
 
 const BaseExample = createWithRemoteLoader({
   modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
@@ -10,7 +10,7 @@ const BaseExample = createWithRemoteLoader({
       return { data: { code: 0, data: api.loader() } };
     }, apis: {
       file: {
-        getUrl: {
+        staticUrl: getPublicPath('react-file') || window.PUBLIC_URL, getUrl: {
           loader: async ({ params }) => {
             const urlMap = {
               1: '/mock/demo.jpg',
