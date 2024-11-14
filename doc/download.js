@@ -1,5 +1,5 @@
 const { Download } = _ReactFile;
-const { createWithRemoteLoader } = remoteLoader;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
 const { Flex } = antd;
 
 const BaseExample = createWithRemoteLoader({
@@ -11,6 +11,7 @@ const BaseExample = createWithRemoteLoader({
       return { data: { code: 0, data: api.loader() } };
     }, apis: {
       file: {
+        staticUrl: getPublicPath('react-file') || window.PUBLIC_URL,
         getUrl: {
           loader: async ({ params }) => {
             return new Promise(resolve => {

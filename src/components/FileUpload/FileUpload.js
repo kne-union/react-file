@@ -7,8 +7,20 @@ import defaultAccept from './defaultAccept';
 import { Flex } from 'antd';
 import omit from 'lodash/omit';
 import style from './style.module.scss';
+import { useContext } from '@kne/global-context';
 
 const FileUpload = p => {
+  const { locale: contextLocale } = useContext();
+  const locale = Object.assign(
+    {},
+    {
+      上传文件: '上传文件',
+      '支持扩展名%s，单个文件大小不超过%sM，最多上传%s个附件': '支持扩展名%s，单个文件大小不超过%sM，最多上传%s个附件'
+    },
+    contextLocale,
+    p.locale
+  );
+
   const { className, fileSize, maxLength, multiple, size, accept, children, renderTips, showUploadList, onSave, ossUpload, getPermission, concurrentCount, apis, ...props } = Object.assign(
     {},
     {
@@ -17,14 +29,15 @@ const FileUpload = p => {
       renderTips: defaultTips => {
         return defaultTips;
       },
-      children: '上传文件',
+      children: locale['上传文件'],
       multiple: true,
       showUploadList: true,
       maxLength: 10,
       fileSize: 30,
       concurrentCount: 10
     },
-    p
+    p,
+    { locale }
   );
 
   const [propsValue, onChange] = useControlValue(props);
@@ -40,14 +53,16 @@ const FileUpload = p => {
     onChange,
     concurrentCount
   });
-
-  const previewFileList = [...uploadingList, ...value];
-
-  const tipsText = renderTips(`支持扩展名${accept.map(str => str.replace(/^\./, '')).join('、')},单个文件大小不超过${fileSize}M，最多上传${maxLength}个附件`, {
-    fileSize,
-    maxLength,
-    accept
-  });
+  const values = [accept.map(str => str.replace(/^\./, '')).join('、'), fileSize, maxLength];
+  const previewFileList = [...value, ...uploadingList];
+  const tipsText = renderTips(
+    locale['支持扩展名%s，单个文件大小不超过%sM，最多上传%s个附件'].replace(/%s/g, () => values.shift()),
+    {
+      fileSize,
+      maxLength,
+      accept
+    }
+  );
 
   return (
     <Flex vertical gap={8}>
