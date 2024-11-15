@@ -22,7 +22,11 @@ const OptionButtons = p => {
 
   return (
     <Flex justify="end">
-      {hasPreview && getPermission('preview', item) && <FileButton type="text" icon={<EyeOutlined />} apis={apis} id={id} src={src} filename={filename} />}
+      {hasPreview && getPermission('preview', item) && (
+        <FileButton type="text" icon={<EyeOutlined />} apis={apis} id={id} src={src} filename={filename}>
+          {() => null}
+        </FileButton>
+      )}
       {getPermission('edit', item) && (
         <LoadingButton
           type="text"
