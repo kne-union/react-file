@@ -20,7 +20,7 @@ const FileModal = p => {
     {
       footer: null,
       openDownload: true,
-      renderModal: modalProps => <Modal {...modalProps} />
+      renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
     },
     p,
     { locale }
