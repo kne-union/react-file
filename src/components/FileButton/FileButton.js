@@ -1,10 +1,28 @@
 import React, { useState } from 'react';
+import { LinkOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import FileModal from './FileModal';
 
 const FileButton = p => {
   const [open, onOpenChange] = useState(false);
-  const { filename, originName, id, src, title, modalProps, children, ...props } = Object.assign({}, p);
+  const { filename, originName, id, src, title, modalProps, children, ...props } = Object.assign(
+    {},
+    {
+      icon: <LinkOutlined />
+    },
+    p
+  );
+  const fileModalProps = Object.assign({}, modalProps, {
+    filename: filename || originName,
+    id,
+    src,
+    title,
+    open,
+    onCancel: () => {
+      onOpenChange(false);
+    }
+  });
+
   return (
     <>
       <Button
@@ -13,19 +31,9 @@ const FileButton = p => {
           onOpenChange(true);
         }}
       >
-        {children || filename || originName}
+        {typeof children === 'function' ? children(filename || originName) : children || filename || originName}
       </Button>
-      <FileModal
-        {...modalProps}
-        filename={filename || originName}
-        id={id}
-        src={src}
-        title={title}
-        open={open}
-        onCancel={() => {
-          onOpenChange(false);
-        }}
-      />
+      <FileModal {...fileModalProps} open={open} onOpenChange={onOpenChange} />
     </>
   );
 };

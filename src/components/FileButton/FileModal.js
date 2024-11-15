@@ -2,10 +2,11 @@ import React from 'react';
 import { Modal, Space, App } from 'antd';
 import Download from '../Download';
 import FilePreview from '../FilePreview';
-import style from './style.modules.scss';
 import { useContext } from '@kne/global-context';
+import useControlValue from '@kne/use-control-value';
+import style from './style.modules.scss';
 
-const FileModal = p => {
+export const useFileModalProps = p => {
   const { locale: contextLocale } = useContext();
   const locale = Object.assign(
     {},
@@ -15,19 +16,26 @@ const FileModal = p => {
     contextLocale,
     p.locale
   );
-  const { renderModal, title, filename, originName, openDownload, id, src, apis, ...props } = Object.assign(
+  const { title, filename, originName, openDownload, id, src, apis, ...props } = Object.assign(
     {},
     {
       footer: null,
-      openDownload: true,
-      renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
+      openDownload: true
     },
-    p,
-    { locale }
+    p
   );
+  const [open, onOpenChange] = useControlValue(props, {
+    value: 'open',
+    default: 'defaultOpen',
+    onChange: 'onOpenChange'
+  });
   const { message } = App.useApp();
-  return renderModal({
+  return {
     ...props,
+    open,
+    onCancel: () => {
+      onOpenChange(false);
+    },
     title: (
       <Space size={10} className={style['file-title']}>
         <span className={style['ellipse']}>{title || filename || originName}</span>
@@ -51,7 +59,19 @@ const FileModal = p => {
         <FilePreview id={id} src={src} filename={filename || originName} apis={apis} />
       </div>
     )
-  });
+  };
+};
+
+const FileModal = p => {
+  const { renderModal, ...props } = Object.assign(
+    {},
+    {
+      renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
+    },
+    p
+  );
+  const fileProps = useFileModalProps(props);
+  return renderModal(fileProps);
 };
 
 export default FileModal;
