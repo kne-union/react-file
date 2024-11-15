@@ -17,7 +17,7 @@ const useDownload = ({ id, src, filename, staticUrl: staticUrlProps, apis: curre
       paramsType: 'params',
       paramsName: 'id'
     },
-    apis.file.getUrl
+    apis.file?.getUrl
   );
   const fetchProps = {};
   fetchProps[paramsType] = { [paramsName]: id };
