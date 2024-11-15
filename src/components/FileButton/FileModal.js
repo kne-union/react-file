@@ -20,13 +20,14 @@ const FileModal = p => {
     {
       footer: null,
       openDownload: true,
-      renderModal: modalProps => <Modal {...Object.assign({}, props, modalProps)} />
+      renderModal: modalProps => <Modal {...modalProps} />
     },
     p,
     { locale }
   );
   const { message } = App.useApp();
   return renderModal({
+    ...props,
     title: (
       <Space size={10} className={style['file-title']}>
         <span className={style['ellipse']}>{title || filename || originName}</span>

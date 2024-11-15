@@ -4,7 +4,7 @@ import FileModal from './FileModal';
 
 const FileButton = p => {
   const [open, onOpenChange] = useState(false);
-  const { filename, originName, id, src, title, modalProps, ...props } = Object.assign({}, p);
+  const { filename, originName, id, src, title, modalProps, children, ...props } = Object.assign({}, p);
   return (
     <>
       <Button
@@ -12,7 +12,9 @@ const FileButton = p => {
         onClick={() => {
           onOpenChange(true);
         }}
-      />
+      >
+        {children || filename || originName}
+      </Button>
       <FileModal
         {...modalProps}
         filename={filename || originName}
