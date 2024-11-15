@@ -4,6 +4,7 @@ import { usePreset } from '@kne/global-context';
 import useRefCallback from '@kne/use-ref-callback';
 import { useFetch } from '@kne/react-fetch';
 import downloadBlobFile from './downloadBlobFile';
+import { formatStaticUrl } from '../../common/useStaticUrl';
 
 const useDownload = ({ id, src, filename, staticUrl: staticUrlProps, apis: currentApis, onError, onSuccess }) => {
   const { message } = App.useApp();
@@ -25,7 +26,7 @@ const useDownload = ({ id, src, filename, staticUrl: staticUrlProps, apis: curre
   const showError = useRefCallback(onError || message.error);
   const successHandler = useRefCallback(onSuccess);
   const downloadHandler = useRefCallback(src => {
-    return downloadBlobFile(/^https?:\/\//.test(src) ? src : staticUrl + src, filename)
+    return downloadBlobFile(formatStaticUrl({ staticUrl, url: src }), filename)
       .then(successHandler)
       .catch(e => {
         showError(e.message);

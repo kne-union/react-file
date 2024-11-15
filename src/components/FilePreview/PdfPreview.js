@@ -43,8 +43,9 @@ const PdfPreview = memo(p => {
   const [numPages, setNumPages] = useState(0);
   const { apis: baseApis } = usePreset();
   const apis = Object.assign({}, baseApis, propsApis);
+  //  https://uc.fatalent.cn/packages/pdfjs-dist/4.4.168 https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168
   const pdfjsUrl = pdfjsUrlProps || apis.file?.pdfjsUrl || 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168';
-  pdfjs.GlobalWorkerOptions.workerSrc = pdfjsUrl + '/build/pdf.worker.mjs';
+  pdfjs.GlobalWorkerOptions.workerSrc = pdfjsUrl + '/build/pdf.worker.min.mjs';
   const documentProps = useMemo(() => {
     return {
       file: url,

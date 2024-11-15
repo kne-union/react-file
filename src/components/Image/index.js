@@ -4,6 +4,7 @@ import withOSSFile from '../../hocs/withOSSFile';
 import classnames from 'classnames';
 import { Avatar, Skeleton } from 'antd';
 import loadImage from './loadImage';
+import useStaticUrl from '../../common/useStaticUrl';
 import style from './style.module.scss';
 import { ReactComponent as PhotoFail } from './photo-fail.svg';
 import { ReactComponent as AvatarDefault } from './avatar-default.svg';
@@ -20,11 +21,11 @@ const avatarMale = <AvatarMale />;
 const ImageInner = ({ data, className, alt, innerLoading, loading, error, innerError, children, onClick, staticUrl: staticUrlProps }) => {
   const { apis: baseApis } = usePreset();
   const apis = Object.assign({}, baseApis);
-  const staticUrl = staticUrlProps || apis.file?.staticUrl || '';
+  const fileUrl = useStaticUrl({ staticUrl: staticUrlProps || apis.file?.staticUrl, url: data });
   return (
     <Fetch
       loader={loadImage}
-      params={{ data: /^https?:\/\//.test(data) ? data : staticUrl + data }}
+      params={{ data: fileUrl }}
       error={innerError || error}
       loading={innerLoading || loading}
       render={({ data }) => {
