@@ -1,13 +1,12 @@
 import React from 'react';
 import withOSSFile from '../../hocs/withOSSFile';
 import { typeFormatComponent } from './typeFormat';
-import { usePreset } from '@kne/global-context';
+import useStaticUrl from '../../common/useStaticUrl';
 
 const OSSFilePreview = withOSSFile(({ data, id, staticUrl: staticUrlProps, className, fetchApi, filename, ...props }) => {
-  const { apis } = usePreset();
-  const staticUrl = staticUrlProps || apis.file?.staticUrl || '';
+  const fileUrl = useStaticUrl({ staticUrl: staticUrlProps, url: data });
   const PreviewComponent = (filename && typeFormatComponent(filename)) || typeFormatComponent(data);
-  return <PreviewComponent {...props} className={className} url={/^https?:\/\//.test(data) ? data : staticUrl + data} />;
+  return <PreviewComponent {...props} className={className} url={fileUrl} />;
 });
 
 export default OSSFilePreview;

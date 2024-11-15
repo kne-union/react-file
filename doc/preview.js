@@ -13,12 +13,12 @@ const BaseExample = createWithRemoteLoader({
         staticUrl: getPublicPath('react-file') || window.PUBLIC_URL, getUrl: {
           loader: async ({ params }) => {
             const urlMap = {
-              1: '/mock/demo.jpg',
-              2: '/mock/demo2.pdf',
-              3: '/mock/demo2.html',
-              4: '/mock/demo.txt',
+              1: '/mock/resume.png',
+              2: '/mock/resume.pdf',
+              3: '/mock/resume.html',
+              4: '/mock/resume.txt',
               5: '/mock/audio.wav',
-              6: '/mock/office.docx'
+              6: '/mock/resume.docx'
             };
             return new Promise(resolve => {
               setTimeout(() => {
