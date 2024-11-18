@@ -1,5 +1,5 @@
 import React from 'react';
-import { Col, List as AntdList, Row, Space, Spin, Typography } from 'antd';
+import { Col, List as AntdList, Modal, Row, Space, Spin, Typography } from 'antd';
 import FileType from '@kne/react-file-type';
 import OptionButtons from './OptionButtons';
 import last from 'lodash/last';
@@ -17,7 +17,7 @@ const List = p => {
     contextLocale,
     p.locale
   );
-  const { className, dataSource, getPermission, infoItemRenders, onDelete, onEdit, apis } = Object.assign(
+  const { className, dataSource, getPermission, infoItemRenders, onDelete, onEdit, apis, renderModal } = Object.assign(
     {},
     {
       infoItemRenders: [
@@ -30,7 +30,8 @@ const List = p => {
       ],
       getPermission: () => {
         return true;
-      }
+      },
+      renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
     },
     p,
     { locale }
@@ -66,7 +67,7 @@ const List = p => {
                 })}
               <Col className={style['list-options']}>
                 {type !== 'uploading' ? (
-                  <OptionButtons getPermission={getPermission} item={item} apis={apis} onDelete={onDelete} onEdit={onEdit} />
+                  <OptionButtons getPermission={getPermission} item={item} apis={apis} onDelete={onDelete} renderModal={renderModal} onEdit={onEdit} />
                 ) : (
                   <Space className={style['loading']}>
                     <Spin size="small" />
