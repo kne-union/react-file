@@ -4,7 +4,7 @@ import useFileUpload from './useFileUpload';
 import FileInput from './FileInput';
 import FileList from '../FileList';
 import defaultAccept from './defaultAccept';
-import { Flex } from 'antd';
+import { Flex, Modal } from 'antd';
 import omit from 'lodash/omit';
 import style from './style.module.scss';
 import { useContext } from '@kne/global-context';
@@ -21,7 +21,7 @@ const FileUpload = p => {
     p.locale
   );
 
-  const { className, fileSize, maxLength, multiple, size, accept, children, renderTips, showUploadList, onSave, ossUpload, getPermission, concurrentCount, apis, ...props } = Object.assign(
+  const { className, fileSize, maxLength, multiple, size, accept, children, renderTips, showUploadList, onSave, ossUpload, getPermission, concurrentCount, apis, renderModal, ...props } = Object.assign(
     {},
     {
       defaultValue: [],
@@ -34,7 +34,8 @@ const FileUpload = p => {
       showUploadList: true,
       maxLength: 10,
       fileSize: 30,
-      concurrentCount: 10
+      concurrentCount: 10,
+      renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
     },
     p,
     { locale }
@@ -89,6 +90,7 @@ const FileUpload = p => {
             onChange(newList);
           }}
           apis={apis}
+          renderModal={renderModal}
         />
       )}
     </Flex>

@@ -33,6 +33,7 @@ export const useFileModalProps = p => {
   return {
     ...props,
     open,
+    onOpenChange,
     onCancel: () => {
       onOpenChange(false);
     },
@@ -62,7 +63,7 @@ export const useFileModalProps = p => {
   };
 };
 
-const FileModal = p => {
+export const useFileModal = p => {
   const { renderModal, ...props } = Object.assign(
     {},
     {
@@ -71,7 +72,13 @@ const FileModal = p => {
     p
   );
   const fileProps = useFileModalProps(props);
-  return renderModal(fileProps);
+
+  return Object.assign({}, fileProps, { renderModal: props => renderModal(Object.assign({}, fileProps, props)) });
+};
+
+const FileModal = p => {
+  const { renderModal } = useFileModal(p);
+  return renderModal();
 };
 
 export default FileModal;
