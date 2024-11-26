@@ -20,7 +20,7 @@ export const useFileModalProps = p => {
     {},
     {
       footer: null,
-      openDownload: true
+      openDownload: false
     },
     p
   );
