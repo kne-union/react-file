@@ -42,7 +42,9 @@ const HtmlPreview = p => {
     p.locale
   );
 
-  const { className, url, maxWidth, ...props } = Object.assign({}, p, { locale });
+  const { className, url, maxWidth, ignoreContent, ...props } = Object.assign({}, p, { locale });
+
+  const defaultIframe = <iframe title={locale['文件预览']} src={url} width="100%" className={style['html-preview-iframe']} />;
 
   return (
     <div
@@ -51,21 +53,26 @@ const HtmlPreview = p => {
         maxWidth
       }}
     >
-      <Fetch
-        url={url}
-        transformResponse={({ data }) => {
-          return {
-            data: {
-              code: 200,
-              results: data
-            }
-          };
-        }}
-        error={<iframe title={locale['文件预览']} src={url} width="100%" className={style['html-preview-iframe']} />}
-        render={({ data }) => {
-          return <HtmlInnerPreview {...props} url={url} data={data} />;
-        }}
-      />
+      {ignoreContent ? (
+        defaultIframe
+      ) : (
+        <Fetch
+          url={url}
+          transformResponse={({ data }) => {
+            return {
+              data: {
+                code: 200,
+                results: data
+              }
+            };
+          }}
+          showError={false}
+          error={defaultIframe}
+          render={({ data }) => {
+            return <HtmlInnerPreview {...props} url={url} data={data} />;
+          }}
+        />
+      )}
     </div>
   );
 };

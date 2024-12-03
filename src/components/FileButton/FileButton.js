@@ -5,7 +5,7 @@ import FileModal from './FileModal';
 
 const FileButton = p => {
   const [open, onOpenChange] = useState(false);
-  const { filename, originName, id, src, title, modalProps, children, ...props } = Object.assign(
+  const { filename, originName, id, src, title, modalProps, openDownload, children, ...props } = Object.assign(
     {},
     {
       icon: <LinkOutlined />
@@ -18,6 +18,7 @@ const FileButton = p => {
     src,
     title,
     open,
+    openDownload,
     onCancel: () => {
       onOpenChange(false);
     }

@@ -24,7 +24,7 @@ const OfficePreview = ({ url, apis: propsApis, className, ...props }) => {
       render={({ data }) => {
         const { data: fileList } = data;
         return fileList.map(({ url, type }) => {
-          return <TypePreview {...props} type={type} url={url} className={className} key={url} />;
+          return <TypePreview {...props} type={type} ignoreContent url={url} className={className} key={url} />;
         });
       }}
     />
