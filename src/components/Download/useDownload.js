@@ -55,7 +55,7 @@ const useDownload = ({ id, src, filename, staticUrl: staticUrlProps, apis: curre
     isLoading: isLoading || downLoading,
     download: () => {
       if (src) {
-        return downloadHandler(data);
+        return downloadHandler(src);
       }
       return refresh(id ? fetchProps : {});
     }
