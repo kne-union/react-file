@@ -22,7 +22,7 @@ const typeFormat = url => {
   if (/.(html|htm)$/.test(_path)) {
     return 'html';
   }
-  if (/.(doc|docx|xls|xlsx|ppt|pptx)$/.test(_path)) {
+  if (/.(doc|docx|xls|xlsx|ppt|pptx|csv)$/.test(_path)) {
     return 'office';
   }
   if (/.(mp3|wav|ogg|aac)$/.test(_path)) {

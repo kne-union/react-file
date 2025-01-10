@@ -18,7 +18,7 @@ const Download = p => {
     p.locale
   );
 
-  const { id, filename, api, onSuccess, onError, onClick, ...props } = Object.assign(
+  const { id, src, filename, api, onSuccess, onError, onClick, ...props } = Object.assign(
     {},
     {
       filename: locale['未命名下载文件']
@@ -29,6 +29,7 @@ const Download = p => {
 
   const { isLoading, download } = useDownload({
     id,
+    src,
     filename,
     api,
     onError,
