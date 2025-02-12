@@ -93,11 +93,11 @@ const useFileUpload = p => {
 
           const outputData = onSave
             ? await Promise.resolve(onSave(data, file, uuid))
-            : {
+            : Object.assign({}, data.data, {
                 filename: data.data.filename || data.data.originName || file.name,
                 id: data.data.id,
                 uuid
-              };
+              });
 
           setUploadingList(list => {
             const newList = list.slice(0);
@@ -109,7 +109,7 @@ const useFileUpload = p => {
             onChange([outputData]);
           } else {
             onChange(list => {
-              const newList = list.slice(0);
+              const newList = (list || []).slice(0);
               newList.push(outputData);
               return newList;
             });
