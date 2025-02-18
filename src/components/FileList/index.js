@@ -5,18 +5,15 @@ import OptionButtons from './OptionButtons';
 import last from 'lodash/last';
 import dayjs from 'dayjs';
 import style from './style.module.scss';
-import { useContext } from '@kne/global-context';
+import { createWithIntlProvider, useIntl } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 
-const List = p => {
-  const { locale: contextLocale } = useContext();
-  const locale = Object.assign(
-    {},
-    {
-      正在上传: '正在上传'
-    },
-    contextLocale,
-    p.locale
-  );
+const List = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(p => {
+  const { formatMessage } = useIntl();
   const { className, dataSource, getPermission, infoItemRenders, onDelete, onEdit, apis, renderModal } = Object.assign(
     {},
     {
@@ -33,8 +30,7 @@ const List = p => {
       },
       renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
     },
-    p,
-    { locale }
+    p
   );
   return (
     <AntdList
@@ -71,7 +67,7 @@ const List = p => {
                 ) : (
                   <Space className={style['loading']}>
                     <Spin size="small" />
-                    <Typography.Link>{locale['正在上传']}</Typography.Link>
+                    <Typography.Link>{formatMessage({ id: 'uploading' })}</Typography.Link>
                   </Space>
                 )}
               </Col>
@@ -82,7 +78,7 @@ const List = p => {
       bordered
     />
   );
-};
+});
 
 export default List;
 

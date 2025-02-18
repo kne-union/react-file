@@ -4,20 +4,14 @@ import { PrinterOutlined } from '@ant-design/icons';
 import Download from '../Download';
 import PrintButton from '../PrintButton';
 import FilePreview from '../FilePreview';
-import { useContext } from '@kne/global-context';
 import useControlValue from '@kne/use-control-value';
+import { createIntlProvider, useIntl } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 import style from './style.modules.scss';
 
+const IntlProvider = createIntlProvider('zh-CN', zhCn, 'react-file');
+
 export const useFileModalProps = p => {
-  const { locale: contextLocale } = useContext();
-  const locale = Object.assign(
-    {},
-    {
-      下载成功: '下载成功'
-    },
-    contextLocale,
-    p.locale
-  );
   const { title, filename, originName, openDownload, openPrint, id, src, apis, ...props } = Object.assign(
     {},
     {
@@ -45,17 +39,21 @@ export const useFileModalProps = p => {
       <Space size={10} className={style['file-title']}>
         <span className={style['ellipse']}>{title || filename || originName}</span>
         {openDownload && (
-          <Download
-            className="btn-no-padding"
-            type="link"
-            id={id}
-            src={src}
-            apis={apis}
-            filename={filename || originName}
-            onSuccess={() => {
-              message.success(locale['下载成功']);
-            }}
-          />
+          <IntlProvider>
+            {({ formatMessage }) => (
+              <Download
+                className="btn-no-padding"
+                type="link"
+                id={id}
+                src={src}
+                apis={apis}
+                filename={filename || originName}
+                onSuccess={() => {
+                  message.success(formatMessage({ id: 'downloadSuccess' }));
+                }}
+              />
+            )}
+          </IntlProvider>
         )}
         {openPrint && <PrintButton contentRef={ref} type="link" icon={<PrinterOutlined />} />}
       </Space>

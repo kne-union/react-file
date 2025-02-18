@@ -1,9 +1,9 @@
 import download from './downloadAction';
 import { getAjax } from '@kne/react-fetch';
 
-const downloadBlobFile = async (input, filename = 'file') => {
+const downloadBlobFile = async (input, filename = 'file', locale) => {
   if (!input) {
-    throw new Error('未获取到下载的文件信息');
+    throw new Error(locale?.notFoundFile || '未获取到下载的文件信息');
   }
   if (typeof input === 'string' && /blob:http(s)?:/.test(input)) {
     download(input, filename);

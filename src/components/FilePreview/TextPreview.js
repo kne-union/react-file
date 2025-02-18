@@ -3,8 +3,15 @@ import { getAjax } from '@kne/react-fetch';
 import style from './style.module.scss';
 import { Spin } from 'antd';
 import classnames from 'classnames';
+import { createWithIntlProvider, useIntl } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 
-const TextPreview = ({ url, className, maxWidth }) => {
+const TextPreview = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(({ url, className, maxWidth }) => {
+  const { formatMessage } = useIntl();
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -34,9 +41,9 @@ const TextPreview = ({ url, className, maxWidth }) => {
           <Spin />
         </div>
       ) : null}
-      <div className={style['text-outer']}>{error ? <div className={style['error']}>文件加载失败</div> : <div className={style['text-inner']}>{text}</div>}</div>
+      <div className={style['text-outer']}>{error ? <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div> : <div className={style['text-inner']}>{text}</div>}</div>
     </div>
   );
-};
+});
 
 export default TextPreview;

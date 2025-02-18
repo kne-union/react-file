@@ -7,20 +7,15 @@ import defaultAccept from './defaultAccept';
 import { Flex, Modal } from 'antd';
 import omit from 'lodash/omit';
 import style from './style.module.scss';
-import { useContext } from '@kne/global-context';
+import { createWithIntlProvider, useIntl } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 
-const FileUpload = p => {
-  const { locale: contextLocale } = useContext();
-  const locale = Object.assign(
-    {},
-    {
-      上传文件: '上传文件',
-      '支持扩展名%s，单个文件大小不超过%sM，最多上传%s个附件': '支持扩展名%s，单个文件大小不超过%sM，最多上传%s个附件'
-    },
-    contextLocale,
-    p.locale
-  );
-
+const FileUpload = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(p => {
+  const { formatMessage } = useIntl();
   const { className, fileSize, maxLength, multiple, size, accept, children, renderTips, showUploadList, onSave, ossUpload, getPermission, concurrentCount, apis, renderModal, ...props } = Object.assign(
     {},
     {
@@ -29,7 +24,7 @@ const FileUpload = p => {
       renderTips: defaultTips => {
         return defaultTips;
       },
-      children: locale['上传文件'],
+      children: formatMessage({ id: 'fileUpload' }),
       multiple: true,
       showUploadList: true,
       maxLength: 10,
@@ -37,8 +32,7 @@ const FileUpload = p => {
       concurrentCount: 10,
       renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
     },
-    p,
-    { locale }
+    p
   );
 
   const [propsValue, onChange] = useControlValue(props);
@@ -57,7 +51,14 @@ const FileUpload = p => {
   const values = [accept.map(str => str.replace(/^\./, '')).join('、'), fileSize, maxLength];
   const previewFileList = [...value, ...uploadingList];
   const tipsText = renderTips(
-    locale['支持扩展名%s，单个文件大小不超过%sM，最多上传%s个附件'].replace(/%s/g, () => values.shift()),
+    formatMessage(
+      { id: 'uploadTips' },
+      {
+        fileSize,
+        maxLength,
+        accept: accept.map(str => str.replace(/^\./, '')).join(',')
+      }
+    ),
     {
       fileSize,
       maxLength,
@@ -95,6 +96,6 @@ const FileUpload = p => {
       )}
     </Flex>
   );
-};
+});
 
 export default FileUpload;
