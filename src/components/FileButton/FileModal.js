@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Modal, Space, App } from 'antd';
+import { PrinterOutlined } from '@ant-design/icons';
 import Download from '../Download';
+import PrintButton from '../PrintButton';
 import FilePreview from '../FilePreview';
 import { useContext } from '@kne/global-context';
 import useControlValue from '@kne/use-control-value';
@@ -16,11 +18,12 @@ export const useFileModalProps = p => {
     contextLocale,
     p.locale
   );
-  const { title, filename, originName, openDownload, id, src, apis, ...props } = Object.assign(
+  const { title, filename, originName, openDownload, openPrint, id, src, apis, ...props } = Object.assign(
     {},
     {
       footer: null,
-      openDownload: false
+      openDownload: false,
+      openPrint: false
     },
     p
   );
@@ -30,6 +33,7 @@ export const useFileModalProps = p => {
     onChange: 'onOpenChange'
   });
   const { message } = App.useApp();
+  const ref = useRef();
   return {
     ...props,
     open,
@@ -53,10 +57,11 @@ export const useFileModalProps = p => {
             }}
           />
         )}
+        {openPrint && <PrintButton contentRef={ref} type="link" icon={<PrinterOutlined />} />}
       </Space>
     ),
     children: (
-      <div className={style['file-modal-outer']}>
+      <div ref={ref} className={style['file-modal-outer']}>
         <FilePreview id={id} src={src} filename={filename || originName} apis={apis} />
       </div>
     )
