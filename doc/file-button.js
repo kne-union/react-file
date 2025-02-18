@@ -31,10 +31,10 @@ const BaseExample = createWithRemoteLoader({
       }
     }
   }}>
-    <FileButton id="1" filename="demo.jpg" modalProps={{ width: 800 }}>预览demo.jpg</FileButton>
-    <FileButton id="2" filename="demo2.pdf" modalProps={{ width: 800 }}>预览demo2.pdf</FileButton>
-    <FileButton id="3" filename="demo2.html" modalProps={{ width: 800 }}>预览demo2.html</FileButton>
-    <FileButton id="6" filename="resume.docx" modalProps={{ width: 800 }} type="link">resume.docx</FileButton>
+    <FileButton id="1" filename="demo.jpg" openPrint modalProps={{ width: 800 }}>预览demo.jpg</FileButton>
+    <FileButton id="2" filename="demo2.pdf" openPrint modalProps={{ width: 800 }}>预览demo2.pdf</FileButton>
+    <FileButton id="3" filename="demo2.html" openPrint modalProps={{ width: 800 }}>预览demo2.html</FileButton>
+    <FileButton id="6" filename="resume.docx" openPrint modalProps={{ width: 800 }} type="link">resume.docx</FileButton>
   </PureGlobal>;
 });
 
