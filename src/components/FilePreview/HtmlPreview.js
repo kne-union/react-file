@@ -3,11 +3,18 @@ import React, { useEffect, useRef } from 'react';
 import classnames from 'classnames';
 import style from './style.module.scss';
 import Fetch from '@kne/react-fetch';
-import { useContext, usePreset } from '@kne/global-context';
+import { usePreset } from '@kne/global-context';
+import { createWithIntlProvider, useIntl } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 
-const HtmlInnerPreview = ({ data, apis: propsApis, contentWindowUrl: contentWindowUrlProps, locale }) => {
+const HtmlInnerPreview = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(({ data, apis: propsApis, contentWindowUrl: contentWindowUrlProps }) => {
   const ref = useRef(null);
   const { apis: baseApis } = usePreset();
+  const { formatMessage } = useIntl();
   const apis = Object.assign({}, baseApis, propsApis);
   //  https://uc.fatalent.cn/packages/@kne/iframe-resizer/0.1.2/dist/contentWindow.js https://cdn.jsdelivr.net/npm/@kne/iframe-resizer@0.1.3/dist/contentWindow.js
   const contentWindowUrl = contentWindowUrlProps || apis.file?.contentWindowUrl || 'https://cdn.jsdelivr.net/npm/@kne/iframe-resizer@0.1.3/dist/contentWindow.js';
@@ -28,23 +35,18 @@ const HtmlInnerPreview = ({ data, apis: propsApis, contentWindowUrl: contentWind
   useEffect(() => {
     iFrameResize({ checkOrigin: false }, ref.current);
   }, []);
-  return <iframe title={locale['文件预览']} frameBorder="0" width="100%" ref={ref} />;
-};
+  return <iframe title={formatMessage({ id: 'filePreview' })} frameBorder="0" width="100%" ref={ref} />;
+});
 
-const HtmlPreview = p => {
-  const { locale: contextLocale } = useContext();
-  const locale = Object.assign(
-    {},
-    {
-      文件预览: '文件预览'
-    },
-    contextLocale,
-    p.locale
-  );
+const HtmlPreview = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(p => {
+  const { formatMessage } = useIntl();
+  const { className, url, maxWidth, ignoreContent, ...props } = Object.assign({}, p);
 
-  const { className, url, maxWidth, ignoreContent, ...props } = Object.assign({}, p, { locale });
-
-  const defaultIframe = <iframe title={locale['文件预览']} src={url} width="100%" className={style['html-preview-iframe']} />;
+  const defaultIframe = <iframe title={formatMessage({ id: 'filePreview' })} src={url} width="100%" className={style['html-preview-iframe']} />;
 
   return (
     <div
@@ -75,6 +77,6 @@ const HtmlPreview = p => {
       )}
     </div>
   );
-};
+});
 
 export default HtmlPreview;

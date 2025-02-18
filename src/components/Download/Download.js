@@ -1,30 +1,25 @@
 import React from 'react';
 import { Button } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
-import { useContext } from '@kne/global-context';
 import useDownload from './useDownload';
 import downloadAction from './downloadAction';
 import downloadBlobFile from './downloadBlobFile';
 import omit from 'lodash/omit';
+import { createWithIntlProvider, useIntl } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 
-const Download = p => {
-  const { locale: contextLocale } = useContext();
-  const locale = Object.assign(
-    {},
-    {
-      未命名下载文件: '未命名下载文件'
-    },
-    contextLocale,
-    p.locale
-  );
-
+const Download = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(p => {
+  const { formatMessage } = useIntl();
   const { id, src, filename, api, onSuccess, onError, onClick, ...props } = Object.assign(
     {},
     {
-      filename: locale['未命名下载文件']
+      filename: formatMessage({ id: 'unnamedDownloadFile' })
     },
-    p,
-    { locale }
+    p
   );
 
   const { isLoading, download } = useDownload({
@@ -47,7 +42,7 @@ const Download = p => {
       }}
     />
   );
-};
+});
 
 Download.useDownload = useDownload;
 Download.download = downloadAction;

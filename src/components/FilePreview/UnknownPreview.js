@@ -1,8 +1,15 @@
 import React from 'react';
 import { Result } from 'antd';
 import style from './style.module.scss';
+import { createWithIntlProvider } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 
-const UnknownPreview = ({ maxWidth }) => {
+const UnknownPreview = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(({ maxWidth }) => {
+  const { formatMessage } = useIntl();
   return (
     <div
       className={style['container']}
@@ -11,10 +18,10 @@ const UnknownPreview = ({ maxWidth }) => {
       }}
     >
       <div className={style['text-outer']}>
-        <Result status="500" title="不支持的文件类型" subTitle="系统不支持该文件类型预览，请下载到本地后进行预览" />
+        <Result status="500" title={formatMessage({ id: 'unSupportFileType' })} subTitle={formatMessage({ id: 'unSupportFileTypeDescription' })} />
       </div>
     </div>
   );
-};
+});
 
 export default UnknownPreview;

@@ -1,6 +1,6 @@
 {
   "name": "@kne/react-file",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "提供了文件上传，文件预览，文件批量管理等功能",
   "syntax": {
     "esmodules": true
@@ -15,7 +15,9 @@
     "init-example": "modules-dev-libs-init",
     "build:md": "npx @kne/md-doc",
     "start:md": "npx @kne/md-doc --watch",
-    "build:lib": "microbundle --no-compress --format modern,cjs --jsx React.createElement --jsxFragment React.Fragment",
+    "build:locale": "microbundle src/locale/*.js -o dist/locale --no-compress --format modern,cjs ",
+    "build:lib-main": "microbundle --no-compress --format modern,cjs --jsx React.createElement --jsxFragment React.Fragment",
+    "build:lib": "run-s build:locale build:lib-main",
     "start:lib": "microbundle watch --no-compress --format modern,cjs --jsx React.createElement --jsxFragment React.Fragment",
     "build:example": "cd example && npm run build",
     "start:example": "cd example && npm run start",
@@ -92,6 +94,7 @@
     "@kne/iframe-resizer": "^0.1.3",
     "@kne/react-fetch": "^1.5.5",
     "@kne/react-file-type": "^1.0.7",
+    "@kne/react-intl": "^0.1.5",
     "@kne/use-control-value": "^0.1.8",
     "@kne/use-ref-callback": "^0.1.2",
     "@kne/use-resize": "^0.1.1",

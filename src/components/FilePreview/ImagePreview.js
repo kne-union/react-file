@@ -2,10 +2,17 @@ import React, { useEffect, useState } from 'react';
 import style from './style.module.scss';
 import { Spin } from 'antd';
 import classnames from 'classnames';
+import { createWithIntlProvider, useIntl } from '@kne/react-intl';
+import zhCn from '../../locale/zh-CN';
 
-const ImagePreview = ({ url, scale, rotate, className, maxWidth }) => {
+const ImagePreview = createWithIntlProvider(
+  'zh-CN',
+  zhCn,
+  'react-file'
+)(({ url, scale, rotate, className, maxWidth }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const { formatMessage } = useIntl();
   useEffect(() => {
     const image = new Image();
     image.src = url;
@@ -37,9 +44,9 @@ const ImagePreview = ({ url, scale, rotate, className, maxWidth }) => {
           <Spin />
         </div>
       ) : null}
-      {error ? <div className={style['error']}>图片加载失败</div> : <img src={url} alt="简历预览" />}
+      {error ? <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div> : <img src={url} alt={formatMessage({ id: 'filePreview' })} />}
     </div>
   );
-};
+});
 
 export default ImagePreview;
