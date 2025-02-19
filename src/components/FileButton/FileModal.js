@@ -38,24 +38,26 @@ export const useFileModalProps = p => {
     title: (
       <Space size={10} className={style['file-title']}>
         <span className={style['ellipse']}>{title || filename || originName}</span>
-        {openDownload && (
-          <IntlProvider>
-            {({ formatMessage }) => (
-              <Download
-                className="btn-no-padding"
-                type="link"
-                id={id}
-                src={src}
-                apis={apis}
-                filename={filename || originName}
-                onSuccess={() => {
-                  message.success(formatMessage({ id: 'downloadSuccess' }));
-                }}
-              />
-            )}
-          </IntlProvider>
-        )}
-        {openPrint && <PrintButton contentRef={ref} type="link" icon={<PrinterOutlined />} />}
+        <span>
+          {openDownload && (
+            <IntlProvider>
+              {({ formatMessage }) => (
+                <Download
+                  className="btn-no-padding"
+                  type="link"
+                  id={id}
+                  src={src}
+                  apis={apis}
+                  filename={filename || originName}
+                  onSuccess={() => {
+                    message.success(formatMessage({ id: 'downloadSuccess' }));
+                  }}
+                />
+              )}
+            </IntlProvider>
+          )}
+          {openPrint && <PrintButton contentRef={ref} type="link" icon={<PrinterOutlined />} />}
+        </span>
       </Space>
     ),
     children: (
