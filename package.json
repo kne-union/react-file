@@ -1,6 +1,6 @@
 {
   "name": "@kne/react-file",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "提供了文件上传，文件预览，文件批量管理等功能",
   "syntax": {
     "esmodules": true
