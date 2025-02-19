@@ -8,7 +8,7 @@ import { createIntl } from '@kne/react-intl';
 
 const useFileUpload = p => {
   const { locale } = useContext();
-  const { formatMessage } = createIntl({ locale });
+  const { formatMessage } = createIntl({ locale, namespace: 'react-file' });
   const { multiple, fileSize, maxLength, value, concurrentCount, onAdd, onError, onSave, onChange, onUpload } = Object.assign(
     {},
     {
