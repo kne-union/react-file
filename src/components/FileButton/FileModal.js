@@ -3,7 +3,7 @@ import { Modal, Space, App } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import Download from '../Download';
 import PrintButton from '../PrintButton';
-import FilePreview from '../FilePreview';
+import FilePreview, { typeFormat } from '../FilePreview';
 import useControlValue from '@kne/use-control-value';
 import { createIntlProvider, useIntl } from '@kne/react-intl';
 import zhCn from '../../locale/zh-CN';
@@ -56,7 +56,7 @@ export const useFileModalProps = p => {
               )}
             </IntlProvider>
           )}
-          {openPrint && <PrintButton contentRef={ref} type="link" icon={<PrinterOutlined />} />}
+          {openPrint && ['txt', 'pdf', 'image', 'html'].indexOf(typeFormat(filename || originName)) > -1 && <PrintButton contentRef={ref} type="link" icon={<PrinterOutlined />} />}
         </span>
       </Space>
     ),
