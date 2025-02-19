@@ -5,11 +5,10 @@ import useRefCallback from '@kne/use-ref-callback';
 import { App } from 'antd';
 import uniqueId from 'lodash/uniqueId';
 import { createIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
 
 const useFileUpload = p => {
   const { locale } = useContext();
-  const { formatMessage } = createIntl({ locale, message: zhCn, namespace: 'react-file' });
+  const { formatMessage } = createIntl({ locale });
   const { multiple, fileSize, maxLength, value, concurrentCount, onAdd, onError, onSave, onChange, onUpload } = Object.assign(
     {},
     {
