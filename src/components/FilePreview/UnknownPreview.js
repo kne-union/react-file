@@ -1,7 +1,7 @@
 import React from 'react';
 import { Result } from 'antd';
 import style from './style.module.scss';
-import { createWithIntlProvider } from '@kne/react-intl';
+import { createWithIntlProvider,useIntl } from '@kne/react-intl';
 import zhCn from '../../locale/zh-CN';
 
 const UnknownPreview = createWithIntlProvider(

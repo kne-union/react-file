@@ -30,8 +30,9 @@ const withOSSFile = WrappedComponent => {
     if (!id) {
       return null;
     }
-    if (!apis.file?.getUrl) {
-      throw new Error('请在Global组件设置preset.apis.file.getUrl参数');
+    if (!apis?.file?.getUrl) {
+      console.warn('请在Global组件设置preset.apis.file.getUrl参数');
+      return null;
     }
 
     const { paramsType, paramsName, ...fileApi } = Object.assign(
