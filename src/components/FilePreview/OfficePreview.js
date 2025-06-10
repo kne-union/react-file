@@ -14,7 +14,8 @@ const OfficePreview = ({ url, apis: propsApis, className, ...props }) => {
           return {
             data: [
               {
-                url: `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}&wdPrint=0&wdEmbedCode=0`,
+                //url: `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}&wdPrint=0&wdEmbedCode=0`,
+                url: `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`,
                 type: 'html'
               }
             ]

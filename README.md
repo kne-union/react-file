@@ -431,7 +431,7 @@ const BaseExample = createWithRemoteLoader({
               3: '/mock/resume.html',
               4: '/mock/resume.txt',
               5: '/mock/audio.wav',
-              6: '/mock/resume.docx'
+              6: 'http://ieee802.org:80/secmail/docIZSEwEqHFr.doc'
             };
             return new Promise(resolve => {
               setTimeout(() => {
