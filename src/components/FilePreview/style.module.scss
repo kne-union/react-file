@@ -2,6 +2,7 @@
   margin: 0 auto;
   position: relative;
   max-width: 1200px;
+  width: 100%;
 
   :global(.react-pdf__Page__canvas),
   :global(.textLayer) {
