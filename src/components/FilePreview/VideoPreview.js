@@ -1,7 +1,10 @@
 import React from 'react';
 import style from './style.module.scss';
 
-const VideoPreview = ({ url, maxWidth, ...props }) => {
+const VideoPreview = ({ url, maxWidth, origin, controls = true, ...props }) => {
+  if (origin) {
+    return <video controls={controls} {...props} src={url} />;
+  }
   return (
     <div
       className={style['container']}
@@ -10,7 +13,7 @@ const VideoPreview = ({ url, maxWidth, ...props }) => {
       }}
     >
       <div className={style['video-inner']}>
-        <video {...props} src={url} controls />
+        <video controls={controls} {...props} src={url} />
       </div>
     </div>
   );

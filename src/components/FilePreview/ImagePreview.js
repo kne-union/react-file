@@ -9,7 +9,7 @@ const ImagePreview = createWithIntlProvider(
   'zh-CN',
   zhCn,
   'react-file'
-)(({ url, scale, rotate, className, maxWidth }) => {
+)(({ url, scale, rotate, className, maxWidth, origin, ...props }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { formatMessage } = useIntl();
@@ -32,6 +32,9 @@ const ImagePreview = createWithIntlProvider(
       image.removeEventListener('error', handlerError);
     };
   }, [url, scale, rotate]);
+  if (origin) {
+    return <img alt={formatMessage({ id: 'filePreview' })} {...props} className={className} src={url} />;
+  }
   return (
     <div
       className={classnames(className, style['container'])}
@@ -44,7 +47,7 @@ const ImagePreview = createWithIntlProvider(
           <Spin />
         </div>
       ) : null}
-      {error ? <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div> : <img src={url} alt={formatMessage({ id: 'filePreview' })} />}
+      {error ? <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div> : <img alt={formatMessage({ id: 'filePreview' })} {...props} src={url} />}
     </div>
   );
 });
