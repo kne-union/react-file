@@ -105,7 +105,8 @@
   background: #ffffff;
   padding: 20px;
   word-break: break-all;
-  white-space: pre;
+  white-space: pre-wrap;
+  text-align: left;
 }
 
 .image-inner {
@@ -122,6 +123,8 @@
 .video-inner {
   video {
     width: 100%;
+    max-height: 80vh;
+    object-fit: contain;
   }
 }
 
