@@ -19,7 +19,20 @@ const downloadBlobFile = async (input, filename = 'file', locale) => {
 
   const ajax = getAjax();
 
-  const { data } = await ajax({ url: input, responseType: 'blob' });
+  const { data, headers } = await ajax({ url: input, responseType: 'blob' });
+
+  const contentDisposition = headers?.['content-disposition'];
+
+  if (contentDisposition) {
+    const fileNameMatch = contentDisposition.match(/filename\*?=(?:UTF-8'')?([^;]+)/i);
+    if (fileNameMatch && fileNameMatch[1]) {
+      filename = decodeURIComponent(fileNameMatch[1].replace(/['"]/g, ''));
+    } else {
+      const fallbackMatch = contentDisposition.match(/filename="?([^"]+)"?/i);
+      if (fallbackMatch) filename = fallbackMatch[1];
+    }
+  }
+
   download(
     URL.createObjectURL(
       new Blob([data], {
