@@ -44,7 +44,10 @@ const withOSSFile = WrappedComponent => {
     );
 
     const fetchProps = {};
-    fetchProps[paramsType] = { [paramsName]: id };
+
+    const formatId = id.split('?')[0];
+
+    fetchProps[paramsType] = { [paramsName]: formatId };
 
     return (
       <Fetch
@@ -54,7 +57,7 @@ const withOSSFile = WrappedComponent => {
         loading={loading}
         cache={cacheName}
         ttl={ttl}
-        render={({ data, ...fetchApi }) => <WrappedComponent {...props} id={id} data={data} fetchApi={fetchApi} />}
+        render={({ data, ...fetchApi }) => <WrappedComponent {...props} id={formatId} data={data} fetchApi={fetchApi} />}
       />
     );
   };
