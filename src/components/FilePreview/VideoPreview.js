@@ -1,9 +1,15 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
+import useRefCallback from '@kne/use-ref-callback';
 import style from './style.module.scss';
 
-const VideoPreview = ({ url, maxWidth, origin, controls = true, ...props }) => {
+const VideoPreview = ({ url, maxWidth, origin, controls = true, getElement, ...props }) => {
+  const ref = useRef(null);
+  const getElementCallback = useRefCallback(getElement);
+  useEffect(() => {
+    getElementCallback(ref.current);
+  }, [getElementCallback]);
   if (origin) {
-    return <video controls={controls} {...props} src={url} />;
+    return <video controls={controls} {...props} src={url} ref={ref} />;
   }
   return (
     <div
@@ -13,7 +19,7 @@ const VideoPreview = ({ url, maxWidth, origin, controls = true, ...props }) => {
       }}
     >
       <div className={style['video-inner']}>
-        <video controls={controls} {...props} src={url} />
+        <video controls={controls} {...props} src={url} ref={ref} />
       </div>
     </div>
   );
