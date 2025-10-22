@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import { Button } from 'antd';
 import { useReactToPrint } from 'react-to-print';
 
-const PrintButton = ({ content, onSuccess, onError, printProps, contentRef, ...props }) => {
+const PrintButton = ({ content, onSuccess, onError, onBeforePrint, printProps, contentRef, ...props }) => {
   const [isLoading, setIsLoading] = useState(false);
   const handler = useReactToPrint({
     contentRef,
     bodyClass: document.body.getAttribute('class'),
-    onBeforePrint: async () => {
+    onBeforePrint: async (...args) => {
       setIsLoading(true);
+      onBeforePrint && (await onBeforePrint(...args));
     },
     onPrintError: (...args) => {
       setIsLoading(false);
