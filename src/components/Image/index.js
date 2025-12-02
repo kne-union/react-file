@@ -18,28 +18,35 @@ const avatarDefault = <AvatarDefault />;
 const avatarFemale = <AvatarFemale />;
 const avatarMale = <AvatarMale />;
 
-const ImageInner = ({ data, className, alt, innerLoading, loading, error, innerError, children, onClick, staticUrl: staticUrlProps }) => {
+const ImageInner = ({
+                      data,
+                      className,
+                      alt,
+                      innerLoading,
+                      loading,
+                      error,
+                      innerError,
+                      children,
+                      onClick,
+                      staticUrl: staticUrlProps
+                    }) => {
   const { apis: baseApis } = usePreset();
   const apis = Object.assign({}, baseApis);
   const fileUrl = useStaticUrl({ staticUrl: staticUrlProps || apis.file?.staticUrl, url: data });
-  return (
-    <Fetch
-      loader={loadImage}
-      params={{ data: fileUrl }}
-      error={innerError || error}
-      loading={innerLoading || loading}
-      render={({ data }) => {
-        if (typeof children === 'function') {
-          return children({
-            alt,
-            className: classnames(className, style['img']),
-            src: data
-          });
-        }
-        return <img alt={alt} className={classnames(className, style['img'])} src={data} onClick={onClick} />;
-      }}
-    />
-  );
+  return (<Fetch
+    loader={loadImage}
+    params={{ data: fileUrl }}
+    error={innerError || error}
+    loading={innerLoading || loading}
+    render={({ data }) => {
+      if (typeof children === 'function') {
+        return children({
+          alt, className: classnames(className, style['img']), src: data
+        });
+      }
+      return <img alt={alt} className={classnames(className, style['img'])} src={data} onClick={onClick} />;
+    }}
+  />);
 };
 
 const FetchImageInner = withOSSFile(ImageInner);
@@ -52,52 +59,39 @@ const renderInner = ({ loading, error, src, id, alt, className, children, apis, 
     }
     return <TypeElement {...Object.assign({}, element.props, props)} />;
   };
-  const imageLoading =
-    loading &&
-    cloneElement(loading, {
-      className: style['loading']
-    });
-  const imageError =
-    error &&
-    cloneElement(error, {
-      className: style['error']
-    });
-  if (src) {
-    return (
-      <ImageInner alt={alt} className={className} staticUrl={staticUrl} data={src} loading={imageLoading} error={imageError} onClick={onClick}>
-        {children}
-      </ImageInner>
-    );
-  }
+  const imageLoading = loading && cloneElement(loading, {
+    className: style['loading']
+  });
+  const imageError = error && cloneElement(error, {
+    className: style['error']
+  });
 
   if (id) {
-    return (
-      <FetchImageInner alt={alt} className={className} id={id} loading={imageLoading} innerLoading={imageLoading} error={imageError} innerError={imageError} apis={apis} onClick={onClick}>
-        {children}
-      </FetchImageInner>
-    );
+    return (<FetchImageInner alt={alt} className={className} id={id} loading={imageLoading} innerLoading={imageLoading}
+                             error={imageError} innerError={imageError} apis={apis} onClick={onClick}>
+      {children}
+    </FetchImageInner>);
+  }
+
+  if (src) {
+    return (<ImageInner alt={alt} className={className} staticUrl={staticUrl} data={src} loading={imageLoading}
+                        error={imageError} onClick={onClick}>
+      {children}
+    </ImageInner>);
   }
 
   return imageError;
 };
 
 const Image = p => {
-  const { id, src, alt, onClick, loading, error, className, apis, staticUrl, ...props } = Object.assign({}, { loading: loadingElement, error: photoFail }, p);
-  return (
-    <div {...props} className={classnames(className, style['img-outer'])}>
-      {renderInner({
-        loading,
-        error,
-        src,
-        id,
-        alt,
-        className,
-        apis,
-        onClick,
-        staticUrl
-      })}
-    </div>
-  );
+  const {
+    id, src, alt, onClick, loading, error, className, apis, staticUrl, ...props
+  } = Object.assign({}, { loading: loadingElement, error: photoFail }, p);
+  return (<div {...props} className={classnames(className, style['img-outer'])}>
+    {renderInner({
+      loading, error, src, id, alt, className, apis, onClick, staticUrl
+    })}
+  </div>);
 };
 
 Image.Avatar = p => {
@@ -120,16 +114,9 @@ Image.Avatar = p => {
     apis,
     staticUrl,
     ...props
-  } = Object.assign(
-    {},
-    {
-      size: 100,
-      defaultAvatar: avatarDefault,
-      error: photoFail,
-      shape: 'circle'
-    },
-    p
-  );
+  } = Object.assign({}, {
+    size: 100, defaultAvatar: avatarDefault, error: photoFail, shape: 'circle'
+  }, p);
   const inner = (() => {
     const styleProps = width && height ? { style: { width, height } } : { size };
     let shape = propsShape;
@@ -167,25 +154,20 @@ Image.Avatar = p => {
       return <Avatar {...props} src={type} gap={gap} shape={shape} {...styleProps} />;
     }
 
-    return (
-      <Avatar {...props} gap={gap} icon={icon} shape={shape} size={size} src={defaultAvatar} {...styleProps}>
-        {children}
-      </Avatar>
-    );
+    return (<Avatar {...props} gap={gap} icon={icon} shape={shape} size={size} src={defaultAvatar} {...styleProps}>
+      {children}
+    </Avatar>);
   })();
 
-  return (
-    <div
-      {...props}
-      className={classnames(className, style['img-outer'])}
-      style={{
-        width: width && height ? width : size,
-        height: width && height ? height : size
-      }}
-    >
-      {inner}
-    </div>
-  );
+  return (<div
+    {...props}
+    className={classnames(className, style['img-outer'])}
+    style={{
+      width: width && height ? width : size, height: width && height ? height : size
+    }}
+  >
+    {inner}
+  </div>);
 };
 
 export default Image;
