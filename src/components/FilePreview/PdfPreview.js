@@ -1,7 +1,8 @@
 import React, { memo, useMemo, useState } from 'react';
 import { Flex, Spin } from 'antd';
 import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
 import style from './style.module.scss';
 import useResize from '@kne/use-resize';
 import classnames from 'classnames';
@@ -39,8 +40,8 @@ const PdfPreview = memo(
     const [numPages, setNumPages] = useState(0);
     const { apis: baseApis } = usePreset();
     const apis = Object.assign({}, baseApis, propsApis);
-    //  https://uc.fatalent.cn/packages/pdfjs-dist/4.4.168 https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168
-    const pdfjsUrl = pdfjsUrlProps || apis.file?.pdfjsUrl || 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168';
+    //  https://uc.fatalent.cn/packages/pdfjs-dist/5.4.296 https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.296
+    const pdfjsUrl = pdfjsUrlProps || apis.file?.pdfjsUrl || 'https://cdn.jsdelivr.net/npm/pdfjs-dist@5.4.296';
     pdfjs.GlobalWorkerOptions.workerSrc = pdfjsUrl + '/build/pdf.worker.min.mjs';
     const documentProps = useMemo(() => {
       return {
