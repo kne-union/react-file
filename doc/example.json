@@ -157,6 +157,25 @@
           "packageName": "@kne/remote-loader"
         }
       ]
+    },
+    {
+      "title": "MarkdownPreview",
+      "description": "Markdown文件预览",
+      "code": "./markdown-preview.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
     }
   ]
 }
