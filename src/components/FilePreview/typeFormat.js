@@ -6,12 +6,16 @@ import UnknownPreview from './UnknownPreview';
 import ImagePreview from './ImagePreview';
 import AudioPreview from './AudioPreview';
 import VideoPreview from './VideoPreview';
+import MarkdownPreview from './MarkdownPreview';
 
 const typeFormat = url => {
   const path = (url || '').split('?')[0];
   const _path = path.toLowerCase();
   if (/.txt$/.test(_path)) {
     return 'txt';
+  }
+  if (/.md$/.test(_path)) {
+    return 'markdown';
   }
   if (/.pdf$/.test(_path)) {
     return 'pdf';
@@ -38,6 +42,7 @@ export default typeFormat;
 
 export const typeComponentMapping = {
   txt: TextPreview,
+  markdown: MarkdownPreview,
   pdf: PdfPreview,
   image: ImagePreview,
   html: HtmlPreview,

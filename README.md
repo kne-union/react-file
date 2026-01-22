@@ -471,6 +471,31 @@ render(<BaseExample />);
 
 ```
 
+- MarkdownPreview
+- Markdown文件预览
+- _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { MarkdownPreview } = _ReactFile;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:InfoPage']
+})(({ remoteModules }) => {
+  const [InfoPage] = remoteModules;
+  return (
+    <InfoPage>
+      <InfoPage.Part title="基础用法">
+        <MarkdownPreview url="/mock/example.md" />
+      </InfoPage.Part>
+    </InfoPage>
+  );
+});
+
+render(<BaseExample />);
+
+```
+
 
 ### API
 
@@ -488,6 +513,18 @@ render(<BaseExample />);
 | disabled | boolean   | false     | 是否禁用上传功能                   |
 | maxSize  | number    | -         | 单个文件最大尺寸（字节）               |
 | children | ReactNode | -         | 自定义上传按钮内容                  |
+
+### MarkdownPreview
+
+Markdown文件预览组件，支持渲染Markdown格式的文档。
+
+#### 属性
+
+| 属性 | 类型 | 默认值 | 描述 |
+|------|------|-------|------|
+| url | string | - | Markdown文件的URL地址 |
+| className | string | - | 自定义容器类名 |
+| maxWidth | string/number | - | 容器最大宽度 |
 
 ### FilePreview
 

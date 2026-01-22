@@ -13,6 +13,18 @@
 | maxSize  | number    | -         | 单个文件最大尺寸（字节）               |
 | children | ReactNode | -         | 自定义上传按钮内容                  |
 
+### MarkdownPreview
+
+Markdown文件预览组件，支持渲染Markdown格式的文档。
+
+#### 属性
+
+| 属性 | 类型 | 默认值 | 描述 |
+|------|------|-------|------|
+| url | string | - | Markdown文件的URL地址 |
+| className | string | - | 自定义容器类名 |
+| maxWidth | string/number | - | 容器最大宽度 |
+
 ### FilePreview
 
 文件预览组件，支持多种文件格式的预览。
