@@ -9,6 +9,9 @@ import VideoPreview from './VideoPreview';
 import MarkdownPreview from './MarkdownPreview';
 
 const typeFormat = url => {
+  if (typeof url !== 'string') {
+    return 'unknown';
+  }
   const path = (url || '').split('?')[0];
   const _path = path.toLowerCase();
   if (/.txt$/.test(_path)) {
