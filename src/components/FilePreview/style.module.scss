@@ -109,61 +109,6 @@
   text-align: left;
 }
 
-.md-inner {
-  background: #ffffff;
-  padding: 20px;
-
-  table {
-    width: 100%;
-    margin: 8px 0 16px;
-    empty-cells: show;
-    border: 1px solid #ebedf0;
-    border-collapse: collapse;
-    border-spacing: 0;
-
-    th {
-      color: #5c6b77;
-      font-weight: 500;
-      white-space: nowrap;
-      background: rgba(0, 0, 0, 0.02);
-    }
-
-    th,
-    td {
-      padding: 16px 24px;
-      text-align: left;
-      border: 1px solid #ebedf0;
-    }
-
-    td:first-child {
-      color: #595959;
-      font-weight: 600;
-    }
-
-    td:nth-child(3) {
-      color: #c41d7f;
-    }
-  }
-
-  pre {
-    background: #f2f4f5;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    padding: 0.2em 0.4em;
-    font-size: 0.9em;
-    border: 1px solid #eee;
-    border-radius: 3px;
-  }
-
-  code {
-    background: #f2f4f5;
-  }
-
-  p {
-    margin: 0.5em 0;
-  }
-}
-
 .image-inner {
   background: #ffffff;
   display: block;

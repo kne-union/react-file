@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import { createWithIntlProvider, useIntl } from '@kne/react-intl';
 import MarkdownRender from '@kne/markdown-components-render';
 import zhCn from '../../locale/zh-CN';
+import '@kne/markdown-components-render/dist/index.css';
 
 const MarkdownPreview = createWithIntlProvider(
   'zh-CN',
@@ -42,15 +43,7 @@ const MarkdownPreview = createWithIntlProvider(
           <Spin />
         </div>
       ) : null}
-      <div className={style['text-outer']}>
-        {error ? (
-          <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div>
-        ) : (
-          <div className={style['md-inner']}>
-            <MarkdownRender {...props}>{text}</MarkdownRender>
-          </div>
-        )}
-      </div>
+      <div className={style['text-outer']}>{error ? <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div> : <MarkdownRender {...props}>{text}</MarkdownRender>}</div>
     </div>
   );
 });
