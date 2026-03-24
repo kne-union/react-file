@@ -16,7 +16,10 @@ const locale = {
   notFoundFile: 'The downloaded file information was not obtained',
   downloadSuccess: 'Downloads successful',
   pleaseSetApi: 'Please set the preset.apis.file.getUrl parameter in the Global component',
-  filePreview: 'File preview'
+  filePreview: 'File preview',
+  fileName: 'File Name',
+  fileSize: 'File Size',
+  compressedSize: 'Compressed Size'
 };
 
 export default locale;
