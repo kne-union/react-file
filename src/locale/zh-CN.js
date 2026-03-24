@@ -16,7 +16,10 @@ const locale = {
   notFoundFile: '未获取到下载的文件信息',
   downloadSuccess: '下载成功',
   pleaseSetApi: '请在Global组件设置preset.apis.file.getUrl参数',
-  filePreview: '文件预览'
+  filePreview: '文件预览',
+  fileName: '文件名',
+  fileSize: '文件大小',
+  compressedSize: '压缩后大小'
 };
 
 export default locale;

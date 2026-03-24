@@ -7,6 +7,7 @@ import ImagePreview from './ImagePreview';
 import AudioPreview from './AudioPreview';
 import VideoPreview from './VideoPreview';
 import MarkdownPreview from './MarkdownPreview';
+import ZipPreview from './ZipPreview';
 
 const typeFormat = url => {
   if (typeof url !== 'string') {
@@ -38,6 +39,9 @@ const typeFormat = url => {
   if (/.(mp4|avi|mov|mkv|flv)$/.test(_path)) {
     return 'video';
   }
+  if (/.(zip|rar|7z|tar|gz)$/.test(_path)) {
+    return 'zip';
+  }
   return 'unknown';
 };
 
@@ -52,6 +56,7 @@ export const typeComponentMapping = {
   office: OfficePreview,
   audio: AudioPreview,
   video: VideoPreview,
+  zip: ZipPreview,
   unknown: UnknownPreview
 };
 
