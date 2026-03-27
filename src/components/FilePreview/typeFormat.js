@@ -8,6 +8,7 @@ import AudioPreview from './AudioPreview';
 import VideoPreview from './VideoPreview';
 import MarkdownPreview from './MarkdownPreview';
 import ZipPreview from './ZipPreview';
+import JsonPreview from './JsonPreview';
 
 const typeFormat = url => {
   if (typeof url !== 'string') {
@@ -24,7 +25,7 @@ const typeFormat = url => {
   if (/.pdf$/.test(_path)) {
     return 'pdf';
   }
-  if (/.(png|jpg|jpeg)$/.test(_path)) {
+  if (/.(png|jpg|jpeg|gif|bmp|webp|svg)$/.test(_path)) {
     return 'image';
   }
   if (/.(html|htm)$/.test(_path)) {
@@ -42,6 +43,9 @@ const typeFormat = url => {
   if (/.(zip|rar|7z|tar|gz)$/.test(_path)) {
     return 'zip';
   }
+  if (/.json$/.test(_path)) {
+    return 'json';
+  }
   return 'unknown';
 };
 
@@ -57,6 +61,7 @@ export const typeComponentMapping = {
   audio: AudioPreview,
   video: VideoPreview,
   zip: ZipPreview,
+  json: JsonPreview,
   unknown: UnknownPreview
 };
 

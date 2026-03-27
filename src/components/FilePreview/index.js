@@ -10,4 +10,5 @@ export { default as AudioPreview } from './AudioPreview';
 export { default as VideoPreview } from './VideoPreview';
 export { default as MarkdownPreview } from './MarkdownPreview';
 export { default as ZipPreview } from './ZipPreview';
+export { default as JsonPreview } from './JsonPreview';
 export { default as typeFormat, typeComponentMapping } from './typeFormat';
