@@ -1,14 +1,17 @@
 export { default } from './FilePreview';
+export { FilePreviewInner } from './FilePreview';
 export { default as HtmlPreview } from './HtmlPreview';
 export { default as PdfPreview } from './PdfPreview';
 export { default as TextPreview } from './TextPreview';
 export { default as ImagePreview } from './ImagePreview';
 export { default as UnknownPreview } from './UnknownPreview';
 export { default as OfficePreview } from './OfficePreview';
+export { default as DocxPreview } from './DocxPreview';
+export { default as XlsxPreview } from './XlsxPreview';
 export { default as OSSFilePreview } from './OSSFilePreview';
 export { default as AudioPreview } from './AudioPreview';
 export { default as VideoPreview } from './VideoPreview';
 export { default as MarkdownPreview } from './MarkdownPreview';
 export { default as ZipPreview } from './ZipPreview';
 export { default as JsonPreview } from './JsonPreview';
-export { default as typeFormat, typeComponentMapping } from './typeFormat';
+export { default as typeFormat, typeComponentMapping, typeFormatComponent } from './typeFormat';

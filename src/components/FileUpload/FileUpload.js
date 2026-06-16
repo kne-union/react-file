@@ -1,20 +1,15 @@
-import React from 'react';
 import useControlValue from '@kne/use-control-value';
 import useFileUpload from './useFileUpload';
-import FileInput from './FileInput';
-import FileList from '../FileList';
+import { FileInputInner } from './FileInput';
+import { ListInner } from '../FileList';
 import defaultAccept from './defaultAccept';
 import { Flex, Modal } from 'antd';
 import omit from 'lodash/omit';
 import style from './style.module.scss';
-import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const FileUpload = createWithIntlProvider(
-  'zh-CN',
-  zhCn,
-  'react-file'
-)(p => {
+const FileUploadInner = p => {
   const { formatMessage } = useIntl();
   const { className, fileSize, maxLength, multiple, size, accept, children, renderTips, showUploadList, onSave, ossUpload, getPermission, concurrentCount, apis, renderModal, ...props } = Object.assign(
     {},
@@ -24,11 +19,11 @@ const FileUpload = createWithIntlProvider(
       renderTips: defaultTips => {
         return defaultTips;
       },
-      children: formatMessage({ id: 'fileUpload' }),
+      children: formatMessage({ id: 'FileUpload.fileUpload' }),
       multiple: true,
       showUploadList: true,
       maxLength: 10,
-      fileSize: 30,
+      fileSize: 100,
       concurrentCount: 10,
       renderModal: modalProps => <Modal {...Object.assign({}, modalProps)} />
     },
@@ -48,15 +43,14 @@ const FileUpload = createWithIntlProvider(
     onChange,
     concurrentCount
   });
-  const values = [accept.map(str => str.replace(/^\./, '')).join('、'), fileSize, maxLength];
   const previewFileList = [...value, ...uploadingList];
   const tipsText = renderTips(
     formatMessage(
-      { id: 'uploadTips' },
+      { id: 'FileUpload.uploadTips' },
       {
         fileSize,
         maxLength,
-        accept: accept.map(str => str.replace(/^\./, '')).join(',')
+        accept: accept.map(str => str.replace(/^\./, '')).join(formatMessage({ id: 'FileUpload.separator' }))
       }
     ),
     {
@@ -69,11 +63,11 @@ const FileUpload = createWithIntlProvider(
   return (
     <Flex vertical gap={8}>
       <Flex gap={8}>
-        <FileInput {...omit(props, ['value', 'onChange'])} size={size} multiple={multiple} accept={accept} className={className} buttonText={children} onChange={onFileSelected} />
+        <FileInputInner {...omit(props, ['value', 'onChange'])} size={size} multiple={multiple} accept={accept} className={className} buttonText={children} onChange={onFileSelected} />
         {tipsText && <div className={style['tips']}>{tipsText}</div>}
       </Flex>
       {showUploadList && previewFileList.length > 0 && (
-        <FileList
+        <ListInner
           className={style['upload-list']}
           dataSource={previewFileList}
           infoItemRenders={[]}
@@ -96,6 +90,8 @@ const FileUpload = createWithIntlProvider(
       )}
     </Flex>
   );
-});
+};
+
+const FileUpload = withLocale(FileUploadInner);
 
 export default FileUpload;

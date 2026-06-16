@@ -48,7 +48,7 @@ const useDownload = ({ id, src, filename, staticUrl: staticUrlProps, apis: curre
     downloadHandler(data).then(() => {
       setDownLoading(false);
     });
-  }, [isLoading, error, data, showError]);
+  }, [isLoading, error, data, showError, downloadHandler]);
 
   return {
     ...otherProps,

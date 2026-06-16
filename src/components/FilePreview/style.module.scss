@@ -129,7 +129,131 @@
   }
 }
 
-.html-preview-iframe {
-  min-height: 800px;
+.modal-preview {
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.modal-preview.container {
+  max-width: none;
+}
+
+.modal-preview.office-preview {
   border: none;
+  border-radius: 0;
+  height: 100%;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .office-viewer-body {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+.office-preview {
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  color: rgba(0, 0, 0, 0.88);
+  display: flex;
+  flex-direction: column;
+
+  .office-toolbar,
+  .office-toolbar-stack {
+    border-bottom: 1px solid #f0f0f0;
+    background: #fafafa;
+  }
+
+  .office-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+
+  .office-toolbar-stack {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .office-toolbar-left {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .office-toolbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .office-toolbar-meta {
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 13px;
+  }
+
+  .office-file-name {
+    color: rgba(0, 0, 0, 0.88);
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .office-sheet-tabs {
+    padding: 0 12px 4px;
+    background: #fafafa;
+
+    :global(.ant-tabs-nav) {
+      margin-bottom: 0;
+    }
+  }
+
+  .office-viewer-body {
+    background: #f5f5f5;
+    overflow: auto;
+    width: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    min-height: 0;
+
+    :global(.react-pdf__Page) {
+      max-width: 100%;
+    }
+  }
+
+  .office-viewer-body-remote {
+    min-height: 600px;
+    background: #fff;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .office-iframe-preview {
+    flex: 1;
+    min-height: 600px;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+
+    iframe,
+    .html-preview-iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 600px;
+      border: none;
+    }
+  }
 }

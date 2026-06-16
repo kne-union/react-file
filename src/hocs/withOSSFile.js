@@ -1,4 +1,3 @@
-import React from 'react';
 import { usePreset } from '@kne/global-context';
 import Fetch from '@kne/react-fetch';
 import merge from 'lodash/merge';

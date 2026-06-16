@@ -1,15 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import style from './style.module.scss';
 import { Spin } from 'antd';
 import classnames from 'classnames';
-import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const ImagePreview = createWithIntlProvider(
-  'zh-CN',
-  zhCn,
-  'react-file'
-)(({ url, scale, rotate, className, maxWidth, origin, ...props }) => {
+const ImagePreviewInner = ({ url, scale, rotate, className, maxWidth, origin, ...props }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const { formatMessage } = useIntl();
@@ -33,7 +29,7 @@ const ImagePreview = createWithIntlProvider(
     };
   }, [url, scale, rotate]);
   if (origin) {
-    return <img alt={formatMessage({ id: 'filePreview' })} {...props} className={className} src={url} />;
+    return <img alt={formatMessage({ id: 'FilePreview.filePreview' })} {...props} className={className} src={url} />;
   }
   return (
     <div
@@ -47,9 +43,12 @@ const ImagePreview = createWithIntlProvider(
           <Spin />
         </div>
       ) : null}
-      {error ? <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div> : <img alt={formatMessage({ id: 'filePreview' })} {...props} src={url} />}
+      {error ? <div className={style['error']}>{formatMessage({ id: 'FilePreview.fileLoadedError' })}</div> : <img alt={formatMessage({ id: 'FilePreview.filePreview' })} {...props} src={url} />}
     </div>
   );
-});
+};
 
+const ImagePreview = withLocale(ImagePreviewInner);
+
+export { ImagePreviewInner };
 export default ImagePreview;

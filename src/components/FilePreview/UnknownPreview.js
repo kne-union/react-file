@@ -1,14 +1,9 @@
-import React from 'react';
 import { Result } from 'antd';
 import style from './style.module.scss';
-import { createWithIntlProvider,useIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const UnknownPreview = createWithIntlProvider(
-  'zh-CN',
-  zhCn,
-  'react-file'
-)(({ maxWidth }) => {
+const UnknownPreviewInner = ({ maxWidth }) => {
   const { formatMessage } = useIntl();
   return (
     <div
@@ -18,10 +13,13 @@ const UnknownPreview = createWithIntlProvider(
       }}
     >
       <div className={style['text-outer']}>
-        <Result status="500" title={formatMessage({ id: 'unSupportFileType' })} subTitle={formatMessage({ id: 'unSupportFileTypeDescription' })} />
+        <Result status="500" title={formatMessage({ id: 'FilePreview.unSupportFileType' })} subTitle={formatMessage({ id: 'FilePreview.unSupportFileTypeDescription' })} />
       </div>
     </div>
   );
-});
+};
 
+const UnknownPreview = withLocale(UnknownPreviewInner);
+
+export { UnknownPreviewInner };
 export default UnknownPreview;

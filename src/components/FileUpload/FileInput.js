@@ -1,24 +1,20 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { Button } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
 import style from './style.module.scss';
 import defaultAccept from './defaultAccept';
-import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const FileInput = createWithIntlProvider(
-  'zh-CN',
-  zhCn,
-  'react-file'
-)(p => {
+const FileInputInner = p => {
   const { formatMessage } = useIntl();
   const ref = useRef(null);
   const { children, className, buttonText, accept, multiple, onChange, ...props } = Object.assign(
     {},
     {
       accept: defaultAccept,
-      buttonText: formatMessage({ id: 'fileUpload' }),
+      buttonText: formatMessage({ id: 'FileUpload.fileUpload' }),
       children: ({ children, ...props }) => {
         return (
           <Button icon={<UploadOutlined />} {...props}>
@@ -57,6 +53,9 @@ const FileInput = createWithIntlProvider(
       />
     )
   });
-});
+};
 
+const FileInput = withLocale(FileInputInner);
+
+export { FileInputInner };
 export default FileInput;

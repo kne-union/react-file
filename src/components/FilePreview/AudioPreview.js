@@ -1,7 +1,7 @@
-import React from 'react';
 import style from './style.module.scss';
+import withLocale from '../../withLocale';
 
-const AudioPreview = ({ url, maxWidth, ...props }) => {
+const AudioPreviewInner = ({ url, maxWidth, ...props }) => {
   return (
     <div
       className={style['container']}
@@ -16,4 +16,7 @@ const AudioPreview = ({ url, maxWidth, ...props }) => {
   );
 };
 
+const AudioPreview = withLocale(AudioPreviewInner);
+
+export { AudioPreviewInner };
 export default AudioPreview;

@@ -1,18 +1,13 @@
-import React from 'react';
 import { Col, List as AntdList, Modal, Row, Space, Spin, Typography } from 'antd';
 import FileType from '@kne/react-file-type';
-import OptionButtons from './OptionButtons';
+import { OptionButtonsInner } from './OptionButtons';
 import last from 'lodash/last';
 import dayjs from 'dayjs';
 import style from './style.module.scss';
-import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const List = createWithIntlProvider(
-  'zh-CN',
-  zhCn,
-  'react-file'
-)(p => {
+const ListInner = p => {
   const { formatMessage } = useIntl();
   const { className, dataSource, getPermission, infoItemRenders, onDelete, onEdit, apis, renderModal } = Object.assign(
     {},
@@ -35,10 +30,7 @@ const List = createWithIntlProvider(
   return (
     <AntdList
       className={className}
-      dataSource={dataSource.map((item, index) => {
-        item.index = index;
-        return item;
-      })}
+      dataSource={dataSource.map((item, index) => ({ ...item, index }))}
       rowKey={item => `item_${(item.uuid && `uuid_${item.uuid}`) || (item.id && `id_${item.id}`) || (item.src && `src_${item.src}`)}`}
       renderItem={item => {
         const { type, filename } = item;
@@ -63,11 +55,11 @@ const List = createWithIntlProvider(
                 })}
               <Col className={style['list-options']}>
                 {type !== 'uploading' ? (
-                  <OptionButtons getPermission={getPermission} item={item} apis={apis} onDelete={onDelete} renderModal={renderModal} onEdit={onEdit} />
+                  <OptionButtonsInner getPermission={getPermission} item={item} apis={apis} onDelete={onDelete} renderModal={renderModal} onEdit={onEdit} />
                 ) : (
                   <Space className={style['loading']}>
                     <Spin size="small" />
-                    <Typography.Link>{formatMessage({ id: 'uploading' })}</Typography.Link>
+                    <Typography.Link>{formatMessage({ id: 'FileList.uploading' })}</Typography.Link>
                   </Space>
                 )}
               </Col>
@@ -78,8 +70,10 @@ const List = createWithIntlProvider(
       bordered
     />
   );
-});
+};
 
+const List = withLocale(ListInner);
+
+export { ListInner };
+export { default as OptionButtons } from './OptionButtons';
 export default List;
-
-export { OptionButtons };
