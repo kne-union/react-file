@@ -1,23 +1,18 @@
-import React from 'react';
 import { Button } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';
 import useDownload from './useDownload';
 import downloadAction from './downloadAction';
 import downloadBlobFile from './downloadBlobFile';
 import omit from 'lodash/omit';
-import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
 
-const Download = createWithIntlProvider(
-  'zh-CN',
-  zhCn,
-  'react-file'
-)(p => {
+const DownloadInner = p => {
   const { formatMessage } = useIntl();
   const { id, src, filename, api, onSuccess, onError, onClick, ...props } = Object.assign(
     {},
     {
-      filename: formatMessage({ id: 'unnamedDownloadFile' })
+      filename: formatMessage({ id: 'Download.unnamedDownloadFile' })
     },
     p
   );
@@ -42,10 +37,13 @@ const Download = createWithIntlProvider(
       }}
     />
   );
-});
+};
+
+const Download = withLocale(DownloadInner);
 
 Download.useDownload = useDownload;
 Download.download = downloadAction;
 Download.downloadBlobFile = downloadBlobFile;
 
+export { DownloadInner };
 export default Download;

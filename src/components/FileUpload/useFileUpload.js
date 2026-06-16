@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo } from 'react';
 import createDeferred from '@kne/create-deferred';
 import { useContext, usePreset } from '@kne/global-context';
 import useRefCallback from '@kne/use-ref-callback';
@@ -13,7 +13,10 @@ const useFileUpload = p => {
     {},
     {
       concurrentCount: 1,
-      value: []
+      value: [],
+      fileSize: 100,
+      maxLength: 10,
+      multiple: true
     },
     p
   );
@@ -21,21 +24,20 @@ const useFileUpload = p => {
   const { apis } = usePreset();
   const { message } = App.useApp();
   const [uploadingList, setUploadingList] = useState([]);
-  const concurrentCountRef = useRef(concurrentCount);
   const deferred = useMemo(() => {
-    return createDeferred(concurrentCountRef.current);
-  }, []);
+    return createDeferred(concurrentCount);
+  }, [concurrentCount]);
 
   const onFileSelected = useRefCallback(async fileList => {
     const allowCount = maxLength - value.length;
     if (!(maxLength === 1 || multiple !== true) && fileList.length > allowCount) {
-      message.error(formatMessage({ id: 'maxLengthError' }, { maxLength }));
+      message.error(formatMessage({ id: 'FileUpload.maxLengthError' }, { maxLength }));
       return;
     }
     await Promise.allSettled(
       fileList.map(async file => {
         if (file.size > fileSize * 1024 * 1024) {
-          message.error(formatMessage({ id: 'fileSizeError' }, { filename: file.name, fileSize }));
+          message.error(formatMessage({ id: 'FileUpload.fileSizeError' }, { filename: file.name, fileSize }));
           return;
         }
         const uuid = uniqueId();
@@ -43,7 +45,7 @@ const useFileUpload = p => {
           const errMsg =
             e.message ||
             formatMessage(
-              { id: 'uploadError' },
+              { id: 'FileUpload.uploadError' },
               {
                 filename: file.name,
                 error: e.message ? ':' + e.message : ''
@@ -87,7 +89,7 @@ const useFileUpload = p => {
             catchError(
               new Error(
                 formatMessage(
-                  { id: 'uploadError' },
+                  { id: 'FileUpload.uploadError' },
                   {
                     filename: file.name,
                     error: data.msg ? ':' + data.msg : ''

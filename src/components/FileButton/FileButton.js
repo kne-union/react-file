@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { LinkOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
-import FileModal from './FileModal';
+import { FileModalInner } from './FileModal';
+import withLocale from '../../withLocale';
 
-const FileButton = p => {
+const FileButtonInner = p => {
   const [open, onOpenChange] = useState(false);
   const { filename, originName, id, src, title, modalProps, openDownload, openPrint, children, ...props } = Object.assign(
     {},
@@ -35,9 +36,11 @@ const FileButton = p => {
       >
         {typeof children === 'function' ? children(filename || originName) : children || filename || originName}
       </Button>
-      <FileModal {...fileModalProps} open={open} onOpenChange={onOpenChange} />
+      <FileModalInner {...fileModalProps} open={open} onOpenChange={onOpenChange} />
     </>
   );
 };
+
+const FileButton = withLocale(FileButtonInner);
 
 export default FileButton;

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Button } from 'antd';
 import { useReactToPrint } from 'react-to-print';
+import withLocale from '../../withLocale';
 
-const PrintButton = ({ content, onSuccess, onError, onBeforePrint, printProps, contentRef, ...props }) => {
+const PrintButtonInner = ({ content, onSuccess, onError, onBeforePrint, printProps, contentRef, ...props }) => {
   const [isLoading, setIsLoading] = useState(false);
   const handler = useReactToPrint({
     contentRef,
@@ -33,4 +34,7 @@ const PrintButton = ({ content, onSuccess, onError, onBeforePrint, printProps, c
   );
 };
 
+const PrintButton = withLocale(PrintButtonInner);
+
+export { PrintButtonInner };
 export default PrintButton;

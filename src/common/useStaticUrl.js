@@ -1,7 +1,7 @@
 import { usePreset } from '@kne/global-context';
 
 export const formatStaticUrl = ({ url, staticUrl }) => {
-  return /^(blob:)?https?:\/\//.test(url) ? url : staticUrl + url;
+  return /^(blob:|https?:\/\/)/.test(url) ? url : staticUrl + url;
 };
 
 const useStaticUrl = ({ url, staticUrl: staticUrlProps }) => {

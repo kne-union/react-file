@@ -1,12 +1,12 @@
-import React from 'react';
 import { Flex, Button, Modal } from 'antd';
 import { ConfirmButton, LoadingButton } from '@kne/button-group';
 import '@kne/button-group/dist/index.css';
-import DownloadButton from '../Download';
+import { DownloadInner } from '../Download';
 import { useFileModal } from '../FileButton';
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import withLocale from '../../withLocale';
 
-const OptionButtons = p => {
+const OptionButtonsInner = p => {
   const {
     item,
     hasPreview,
@@ -55,7 +55,7 @@ const OptionButtons = p => {
           }}
         />
       )}
-      {getPermission('download', item) && <DownloadButton type="text" id={id} src={src} filename={filename} />}
+      {getPermission('download', item) && <DownloadInner type="text" id={id} src={src} filename={filename} />}
       {getPermission('delete', item) && (
         <ConfirmButton
           type="text"
@@ -69,4 +69,7 @@ const OptionButtons = p => {
   );
 };
 
+const OptionButtons = withLocale(OptionButtonsInner);
+
+export { OptionButtonsInner };
 export default OptionButtons;

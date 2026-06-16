@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import useRefCallback from '@kne/use-ref-callback';
 import style from './style.module.scss';
+import withLocale from '../../withLocale';
 
-const VideoPreview = ({ url, maxWidth, origin, controls = true, getElement, ...props }) => {
+const VideoPreviewInner = ({ url, maxWidth, origin, controls = true, getElement, ...props }) => {
   const ref = useRef(null);
   const getElementCallback = useRefCallback(getElement);
   useEffect(() => {
@@ -25,4 +26,7 @@ const VideoPreview = ({ url, maxWidth, origin, controls = true, getElement, ...p
   );
 };
 
+const VideoPreview = withLocale(VideoPreviewInner);
+
+export { VideoPreviewInner };
 export default VideoPreview;

@@ -1,29 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import { Tree, Spin } from 'antd';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Spin, Modal } from 'antd';
 import JSZip from 'jszip';
 import style from './style.module.scss';
 import classnames from 'classnames';
-import { createWithIntlProvider, useIntl } from '@kne/react-intl';
-import zhCn from '../../locale/zh-CN';
+import withLocale from '../../withLocale';
+import { useIntl } from '@kne/react-intl';
+import { FileSystemInner } from '../FileSystem';
+import InnerTypePreview from './innerTypePreview';
+import { PREVIEWABLE_FILE_PATTERN, getZipEntrySize, guessContentType } from './fileExtensions';
 
-const formatFileSize = bytes => {
-  if (bytes === 0) return '0 B';
-  const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+const zipToFileSystemItems = zip => {
+  const items = [];
+
+  zip.forEach((relativePath, zipEntry) => {
+    if (zipEntry.dir) {
+      items.push({
+        kind: 'folder',
+        path: relativePath.endsWith('/') ? relativePath : `${relativePath}/`
+      });
+    } else {
+      items.push({
+        kind: 'file',
+        path: relativePath,
+        key: relativePath,
+        name: relativePath.split('/').pop() || relativePath,
+        size: getZipEntrySize(zipEntry),
+        contentType: guessContentType(relativePath)
+      });
+    }
+  });
+
+  return items;
 };
 
-const ZipPreview = createWithIntlProvider(
-  'zh-CN',
-  zhCn,
-  'react-file'
-)(({ url, className, maxWidth }) => {
+const GalleryFilePreview = ({ file, extractFile, errorText }) => {
+  const [preview, setPreview] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      setLoading(true);
+      setError(false);
+
+      try {
+        const result = await extractFile(file);
+        if (!cancelled) {
+          setPreview(result);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Error extracting file from ZIP:', err);
+        if (!cancelled) {
+          setError(true);
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [file, extractFile]);
+
+  if (loading) {
+    return (
+      <div className={style['loading']}>
+        <Spin />
+      </div>
+    );
+  }
+
+  if (error || !preview) {
+    return <div className={style['error']}>{errorText}</div>;
+  }
+
+  return <InnerTypePreview key={preview.url} url={preview.url} filename={preview.filename} />;
+};
+
+const ZipPreviewInner = ({ url, className, maxWidth }) => {
   const { formatMessage } = useIntl();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [treeData, setTreeData] = useState([]);
-  const [expandedKeys, setExpandedKeys] = useState([]);
+  const [items, setItems] = useState([]);
+  const [previewFile, setPreviewFile] = useState(null);
+  const zipRef = useRef(null);
+  const blobUrlsRef = useRef([]);
+  const previewCacheRef = useRef(new Map());
+
+  useEffect(() => {
+    const blobUrls = blobUrlsRef.current;
+    const previewCache = previewCacheRef.current;
+
+    return () => {
+      blobUrls.forEach(blobUrl => URL.revokeObjectURL(blobUrl));
+      blobUrls.length = 0;
+      previewCache.clear();
+    };
+  }, []);
 
   useEffect(() => {
     const loadZip = async () => {
@@ -38,88 +116,9 @@ const ZipPreview = createWithIntlProvider(
 
         const blob = await response.blob();
         const zip = await JSZip.loadAsync(blob);
-
-        const files = [];
-        zip.forEach((relativePath, zipEntry) => {
-          files.push({
-            key: relativePath,
-            name: relativePath.split('/').pop() || relativePath,
-            path: relativePath,
-            isDir: zipEntry.dir,
-            size: zipEntry._data ? zipEntry._data.uncompressedSize : 0,
-            compressedSize: zipEntry._data ? zipEntry._data.compressedSize : 0
-          });
-        });
-
-        // 构建树形结构
-        const buildTree = items => {
-          const root = [];
-          const map = {};
-          const dirKeys = [];
-
-          // 先按路径排序
-          items.sort((a, b) => a.path.localeCompare(b.path));
-
-          items.forEach(item => {
-            const parts = item.path.split('/').filter(Boolean);
-            let currentPath = '';
-            let currentLevel = root;
-
-            parts.forEach((part, index) => {
-              currentPath += (currentPath ? '/' : '') + part;
-              const isLast = index === parts.length - 1;
-
-              if (!map[currentPath]) {
-                const isDirectory = !isLast || item.isDir;
-                const node = {
-                  key: currentPath,
-                  title: (
-                    <span
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        color: isDirectory ? 'var(--primary-color)' : 'inherit',
-                        cursor: isDirectory ? 'pointer' : 'default'
-                      }}
-                    >
-                      <span>{part}</span>
-                      {!isDirectory && (
-                        <>
-                          <span style={{ color: '#999', fontSize: '12px', whiteSpace: 'nowrap' }}>{formatFileSize(item.size)}</span>
-                          <span style={{ color: '#bbb', fontSize: '12px', whiteSpace: 'nowrap' }}>({formatFileSize(item.compressedSize)})</span>
-                        </>
-                      )}
-                    </span>
-                  ),
-                  name: part,
-                  path: currentPath,
-                  isDir: isDirectory,
-                  size: isLast ? item.size : 0,
-                  compressedSize: isLast ? item.compressedSize : 0,
-                  children: []
-                };
-
-                if (isDirectory) {
-                  dirKeys.push(currentPath);
-                }
-
-                map[currentPath] = node;
-                currentLevel.push(node);
-              }
-
-              if (!isLast || item.isDir) {
-                currentLevel = map[currentPath].children;
-              }
-            });
-          });
-
-          return { tree: root, dirKeys };
-        };
-
-        const { tree, dirKeys } = buildTree(files);
-        setTreeData(tree);
-        setExpandedKeys(dirKeys);
+        zipRef.current = zip;
+        previewCacheRef.current.clear();
+        setItems(zipToFileSystemItems(zip));
         setLoading(false);
       } catch (err) {
         console.error('Error loading ZIP file:', err);
@@ -133,20 +132,47 @@ const ZipPreview = createWithIntlProvider(
     }
   }, [url]);
 
-  const onExpand = keys => {
-    setExpandedKeys(keys);
-  };
-
-  const onSelect = (selectedKeys, info) => {
-    const selectedKey = selectedKeys[0];
-    if (selectedKey && info.node.isDir) {
-      const isExpanded = expandedKeys.includes(selectedKey);
-      if (isExpanded) {
-        setExpandedKeys(expandedKeys.filter(key => key !== selectedKey));
-      } else {
-        setExpandedKeys([...expandedKeys, selectedKey]);
-      }
+  const extractFile = useCallback(async file => {
+    const cached = previewCacheRef.current.get(file.path);
+    if (cached) {
+      return cached;
     }
+
+    const zipFile = zipRef.current?.file(file.path);
+    if (!zipFile) {
+      throw new Error('File not found in ZIP');
+    }
+
+    const blob = await zipFile.async('blob');
+    const blobUrl = URL.createObjectURL(blob);
+    blobUrlsRef.current.push(blobUrl);
+
+    const preview = {
+      url: blobUrl,
+      filename: file.name || file.path
+    };
+    previewCacheRef.current.set(file.path, preview);
+    return preview;
+  }, []);
+
+  const handleFileOpen = useCallback(
+    async file => {
+      try {
+        const preview = await extractFile(file);
+        setPreviewFile(preview);
+      } catch (err) {
+        console.error('Error extracting file from ZIP:', err);
+      }
+    },
+    [extractFile]
+  );
+
+  const canPreviewFile = useCallback(file => PREVIEWABLE_FILE_PATTERN.test((file.name || file.path || '').split('?')[0]), []);
+
+  const renderFilePreview = useCallback(file => <GalleryFilePreview file={file} extractFile={extractFile} errorText={formatMessage({ id: 'FilePreview.fileLoadedError' })} />, [extractFile, formatMessage]);
+
+  const closePreview = () => {
+    setPreviewFile(null);
   };
 
   return (
@@ -163,26 +189,19 @@ const ZipPreview = createWithIntlProvider(
       ) : null}
       {error ? (
         <div className={style['text-outer']}>
-          <div className={style['error']}>{formatMessage({ id: 'fileLoadedError' })}</div>
+          <div className={style['error']}>{formatMessage({ id: 'FilePreview.fileLoadedError' })}</div>
         </div>
       ) : (
-        <div className={style['text-inner']}>
-          <Tree
-            showIcon
-            expandedKeys={expandedKeys}
-            onExpand={onExpand}
-            onSelect={onSelect}
-            treeData={treeData}
-            style={{
-              background: '#f5f5f5',
-              padding: '16px',
-              borderRadius: '4px'
-            }}
-          />
-        </div>
+        !loading && <FileSystemInner items={items} title={formatMessage({ id: 'FilePreview.zipArchive' })} defaultView="list" onFileOpen={handleFileOpen} renderFilePreview={renderFilePreview} canPreviewFile={canPreviewFile} />
       )}
+      <Modal open={Boolean(previewFile)} onCancel={closePreview} footer={null} width="80%" destroyOnClose title={previewFile?.filename} styles={{ body: { maxHeight: '75vh', overflow: 'hidden', padding: 0 } }}>
+        {previewFile ? <InnerTypePreview key={previewFile.url} className={style['modal-preview']} url={previewFile.url} filename={previewFile.filename} height={0} /> : null}
+      </Modal>
     </div>
   );
-});
+};
 
+const ZipPreview = withLocale(ZipPreviewInner);
+
+export { ZipPreviewInner };
 export default ZipPreview;

@@ -435,8 +435,9 @@ const BaseExample = createWithRemoteLoader({
                   3: '/mock/resume.html',
                   4: '/mock/resume.txt',
                   5: '/mock/audio.wav',
-                  6: 'http://ieee802.org:80/secmail/docIZSEwEqHFr.doc',
-                  7: '/mock/example.zip'
+                  6: '/mock/resume.docx',
+                  7: '/mock/example.zip',
+                  8: '/mock/resume.xlsx'
                 };
                 return new Promise(resolve => {
                   setTimeout(() => {
@@ -465,7 +466,8 @@ const BaseExample = createWithRemoteLoader({
           <FilePreview id="5" />
         </InfoPage.Part>
         <InfoPage.Part title="预览OFFICE">
-          <FilePreview id="6" />
+          <FilePreview id="6" filename="resume.docx" />
+          <FilePreview id="8" filename="resume.xlsx" />
         </InfoPage.Part>
         <InfoPage.Part title="预览ZIP">
           <FilePreview id="7" />
