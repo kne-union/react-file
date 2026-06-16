@@ -41,7 +41,7 @@ const OfficeIframePreview = ({ url, apis: propsApis, className, ...props }) => {
   );
 };
 
-const OfficeRemotePreview = ({ url, filename, apis, className, showHeader = true, onLocalPreview, ...props }) => {
+const OfficeRemotePreview = ({ url, filename, apis, className, showHeader = true, height = 600, onLocalPreview, ...props }) => {
   const { formatMessage } = useIntl();
   const displayFileName = filename || url?.split('?')[0]?.split('/').pop() || '';
 
@@ -56,6 +56,7 @@ const OfficeRemotePreview = ({ url, filename, apis, className, showHeader = true
         </Button>
       ]}
       bodyClassName={style['office-viewer-body-remote']}
+      bodyStyle={{ minHeight: height || 600, height: '100%' }}
     >
       <OfficeIframePreview {...props} url={url} apis={apis} />
     </PreviewShell>

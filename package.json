@@ -1,7 +1,7 @@
 {
   "name": "@kne/react-file",
   "version": "0.1.37",
-  "description": "提供了文件上传，文件预览，文件批量管理等功能",
+  "description": "React文件操作组件库，提供文件上传、多格式预览、下载、列表管理及文件系统浏览，支持i18n",
   "syntax": {
     "esmodules": true
   },
@@ -41,7 +41,21 @@
     "type": "git",
     "url": "git+https://github.com/kne-union/react-file.git"
   },
-  "keywords": [],
+  "keywords": [
+    "react",
+    "file",
+    "upload",
+    "preview",
+    "download",
+    "file-system",
+    "image",
+    "avatar",
+    "antd",
+    "i18n",
+    "office",
+    "pdf",
+    "zip"
+  ],
   "author": "linzp",
   "license": "ISC",
   "bugs": {

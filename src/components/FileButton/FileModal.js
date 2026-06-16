@@ -8,6 +8,7 @@ import useControlValue from '@kne/use-control-value';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
 import style from './style.module.scss';
+import previewStyle from '../FilePreview/style.module.scss';
 
 export const useFileModalProps = p => {
   const { formatMessage } = useIntl();
@@ -57,7 +58,7 @@ export const useFileModalProps = p => {
     ),
     children: (
       <div ref={ref} className={style['file-modal-outer']}>
-        <FilePreviewInner id={id} src={src} filename={filename || originName} apis={apis} />
+        <FilePreviewInner id={id} src={src} filename={filename || originName} apis={apis} className={previewStyle['modal-preview']} />
       </div>
     )
   };
