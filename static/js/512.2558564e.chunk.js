@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_react_file_0_1_37=self.webpackChunk_react_file_0_1_37||[]).push([[512],{75512(e,_,a){e.exports=a.p+"static/media/duke_sheets_wasm_bg.2a2b0fc7958ad4a5c418.wasm"}}]);
