@@ -13,6 +13,17 @@ import { sanitizeHtmlDocument } from '../../common/sanitizeHtml';
 const SRCDOC_IFRAME_SANDBOX = 'allow-same-origin';
 const REMOTE_IFRAME_SANDBOX = 'allow-same-origin allow-scripts allow-popups';
 
+const isCrossOriginUrl = url => {
+  if (!url || typeof window === 'undefined') {
+    return false;
+  }
+  try {
+    return new URL(url, window.location.href).origin !== window.location.origin;
+  } catch {
+    return false;
+  }
+};
+
 const buildFileContentUrl = ({ id, filename, getFileContentUrl, staticUrl }) => {
   if (!id) {
     return '';
@@ -97,17 +108,19 @@ const HtmlPreviewInner = p => {
   const apis = Object.assign({}, baseApis, propsApis);
   const staticUrl = staticUrlProps || apis.file?.staticUrl || '';
   const getFileContentUrl = apis.file?.getFileContentUrl?.url || apis.file?.getFileContentUrl;
+  const crossOrigin = isCrossOriginUrl(url);
   const [html, setHtml] = useState('');
-  const [loading, setLoading] = useState(!ignoreContent);
-  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(!ignoreContent && !crossOrigin);
+  const [iframeFallback, setIframeFallback] = useState(false);
+  const useDirectIframe = ignoreContent || crossOrigin || iframeFallback;
 
   useEffect(() => {
-    if (ignoreContent || !url) {
+    if (ignoreContent || crossOrigin || !url) {
       return;
     }
     let cancelled = false;
     setLoading(true);
-    setError(false);
+    setIframeFallback(false);
     loadHtmlContent({ url, id, filename, getFileContentUrl, staticUrl }).then(
       data => {
         if (cancelled) {
@@ -121,13 +134,13 @@ const HtmlPreviewInner = p => {
           return;
         }
         setLoading(false);
-        setError(true);
+        setIframeFallback(true);
       }
     );
     return () => {
       cancelled = true;
     };
-  }, [url, id, filename, staticUrl, ignoreContent, getFileContentUrl]);
+  }, [url, id, filename, staticUrl, ignoreContent, crossOrigin, getFileContentUrl]);
 
   return (
     <div
@@ -136,14 +149,12 @@ const HtmlPreviewInner = p => {
         maxWidth
       }}
     >
-      {ignoreContent ? (
+      {useDirectIframe ? (
         <iframe title={formatMessage({ id: 'FilePreview.filePreview' })} src={url} width="100%" sandbox={REMOTE_IFRAME_SANDBOX} className={style['html-preview-iframe']} />
       ) : loading ? (
         <div className={style['loading']}>
           <Spin />
         </div>
-      ) : error ? (
-        <div className={style['error']}>{formatMessage({ id: 'FilePreview.fileLoadedError' })}</div>
       ) : (
         <HtmlInnerPreviewInner {...props} url={url} data={html} />
       )}
