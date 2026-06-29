@@ -5,18 +5,31 @@ import useRefCallback from '@kne/use-ref-callback';
 import { App } from 'antd';
 import uniqueId from 'lodash/uniqueId';
 import { createIntl } from '@kne/react-intl';
+import computedAccept from './computedAccept';
+
+const formatAcceptLabel = accept => {
+  if (!accept) {
+    return '';
+  }
+  const acceptList = Array.isArray(accept) ? accept : accept.split(',');
+  return acceptList
+    .map(item => item.trim().replace(/^\./, ''))
+    .filter(Boolean)
+    .join(', ');
+};
 
 const useFileUpload = p => {
   const { locale } = useContext();
   const { formatMessage } = createIntl({ locale, namespace: 'react-file' });
-  const { multiple, fileSize, maxLength, value, concurrentCount, onAdd, onError, onSave, onChange, onUpload } = Object.assign(
+  const { multiple, fileSize, maxLength, value, concurrentCount, accept, onAdd, onError, onSave, onChange, onUpload } = Object.assign(
     {},
     {
       concurrentCount: 1,
       value: [],
       fileSize: 100,
       maxLength: 10,
-      multiple: true
+      multiple: true,
+      accept: null
     },
     p
   );
@@ -27,6 +40,7 @@ const useFileUpload = p => {
   const deferred = useMemo(() => {
     return createDeferred(concurrentCount);
   }, [concurrentCount]);
+  const acceptLabel = useMemo(() => formatAcceptLabel(accept), [accept]);
 
   const onFileSelected = useRefCallback(async fileList => {
     const allowCount = maxLength - value.length;
@@ -36,6 +50,18 @@ const useFileUpload = p => {
     }
     await Promise.allSettled(
       fileList.map(async file => {
+        if (!computedAccept(file, accept)) {
+          message.error(
+            formatMessage(
+              { id: 'FileUpload.acceptError' },
+              {
+                filename: file.name,
+                accept: acceptLabel
+              }
+            )
+          );
+          return;
+        }
         if (file.size > fileSize * 1024 * 1024) {
           message.error(formatMessage({ id: 'FileUpload.fileSizeError' }, { filename: file.name, fileSize }));
           return;
@@ -119,6 +145,9 @@ const useFileUpload = p => {
           } else {
             onChange(list => {
               const newList = (list || []).slice(0);
+              if (newList.length >= maxLength) {
+                return newList;
+              }
               newList.push(outputData);
               return newList;
             });

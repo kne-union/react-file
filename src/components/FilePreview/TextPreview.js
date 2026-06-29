@@ -12,17 +12,27 @@ const TextPreviewInner = ({ url, className, maxWidth }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   useEffect(() => {
+    let cancelled = false;
     const ajax = getAjax();
     ajax({ url, method: 'GET' }).then(
       ({ data }) => {
+        if (cancelled) {
+          return;
+        }
         setText(data);
         setLoading(false);
       },
       () => {
+        if (cancelled) {
+          return;
+        }
         setLoading(false);
         setError(true);
       }
     );
+    return () => {
+      cancelled = true;
+    };
   }, [url]);
 
   return (

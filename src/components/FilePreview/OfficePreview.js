@@ -9,6 +9,7 @@ import { DocxPreviewInner } from './DocxPreview';
 import { XlsxPreviewInner } from './XlsxPreview';
 import PreviewShell from './PreviewShell';
 import { getOfficePreviewType } from './fileExtensions';
+import { UnknownPreviewInner } from './UnknownPreview';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
 import style from './style.module.scss';
@@ -63,20 +64,26 @@ const OfficeRemotePreview = ({ url, filename, apis, className, showHeader = true
   );
 };
 
-const OfficePreviewInner = ({ url, filename, apis, className, showHeader = true, ...props }) => {
+const OfficePreviewInner = ({ url, filename, apis, className, showHeader = true, enableRemotePreview = true, ...props }) => {
   const [previewMode, setPreviewMode] = useState('local');
   const previewType = getOfficePreviewType(url, filename);
 
   if (previewType === 'docx' || previewType === 'xlsx') {
-    if (previewMode === 'remote') {
+    if (enableRemotePreview && previewMode === 'remote') {
       return <OfficeRemotePreview {...props} url={url} filename={filename} apis={apis} className={className} showHeader={showHeader} onLocalPreview={() => setPreviewMode('local')} />;
     }
 
+    const onRemotePreview = enableRemotePreview ? () => setPreviewMode('remote') : undefined;
+
     if (previewType === 'docx') {
-      return <DocxPreviewInner {...props} url={url} filename={filename} className={className} showHeader={showHeader} onRemotePreview={() => setPreviewMode('remote')} />;
+      return <DocxPreviewInner {...props} url={url} filename={filename} className={className} showHeader={showHeader} onRemotePreview={onRemotePreview} />;
     }
 
-    return <XlsxPreviewInner {...props} url={url} filename={filename} className={className} showHeader={showHeader} onRemotePreview={() => setPreviewMode('remote')} />;
+    return <XlsxPreviewInner {...props} url={url} filename={filename} className={className} showHeader={showHeader} onRemotePreview={onRemotePreview} />;
+  }
+
+  if (!enableRemotePreview) {
+    return <UnknownPreviewInner className={className} />;
   }
 
   return <OfficeIframePreview {...props} url={url} apis={apis} className={className} />;

@@ -15,9 +15,13 @@ const JsonPreviewInner = ({ url, className, maxWidth, theme = 'dark', collapsedF
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     const ajax = getAjax();
     ajax({ url, method: 'GET' }).then(
       ({ data: responseData }) => {
+        if (cancelled) {
+          return;
+        }
         try {
           const jsonData = typeof responseData === 'string' ? JSON.parse(responseData) : responseData;
           setData(jsonData);
@@ -29,10 +33,16 @@ const JsonPreviewInner = ({ url, className, maxWidth, theme = 'dark', collapsedF
         }
       },
       () => {
+        if (cancelled) {
+          return;
+        }
         setLoading(false);
         setError(true);
       }
     );
+    return () => {
+      cancelled = true;
+    };
   }, [url]);
 
   return (

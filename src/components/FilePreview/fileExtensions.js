@@ -1,5 +1,18 @@
 export const PREVIEWABLE_FILE_PATTERN = /\.(txt|md|pdf|png|jpg|jpeg|gif|bmp|webp|svg|html|htm|doc|docx|xls|xlsx|ppt|pptx|csv|mp3|wav|ogg|aac|mp4|avi|mov|mkv|flv|zip|rar|7z|tar|gz|json)$/i;
 
+// Archive entries that can be previewed locally (excludes legacy Office formats
+// requiring Microsoft's online viewer and nested archives)
+export const ZIP_PREVIEWABLE_FILE_PATTERN = /\.(txt|md|pdf|png|jpg|jpeg|gif|bmp|webp|svg|html|htm|docx|xlsx|mp3|wav|ogg|aac|mp4|avi|mov|mkv|flv|json)$/i;
+
+export const canPreviewZipEntry = file => {
+  const name = (file?.name || file?.path || '').split('?')[0];
+  return ZIP_PREVIEWABLE_FILE_PATTERN.test(name);
+};
+
+export const ZIP_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024;
+export const ZIP_MAX_ENTRY_COUNT = 2000;
+export const ZIP_MAX_ENTRY_BYTES = 20 * 1024 * 1024;
+
 export const EXTENSION_MIME = {
   pdf: 'application/pdf',
   png: 'image/png',
