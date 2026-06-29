@@ -5,6 +5,7 @@ import { Spin } from 'antd';
 import classnames from 'classnames';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
+import { toAjaxUrl } from '../../common/useStaticUrl';
 
 const TextPreviewInner = ({ url, className, maxWidth }) => {
   const { formatMessage } = useIntl();
@@ -14,7 +15,7 @@ const TextPreviewInner = ({ url, className, maxWidth }) => {
   useEffect(() => {
     let cancelled = false;
     const ajax = getAjax();
-    ajax({ url, method: 'GET' }).then(
+    ajax({ url: toAjaxUrl(url, ajax), method: 'GET' }).then(
       ({ data }) => {
         if (cancelled) {
           return;
