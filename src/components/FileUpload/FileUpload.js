@@ -41,7 +41,8 @@ const FileUploadInner = p => {
     maxLength,
     value,
     onChange,
-    concurrentCount
+    concurrentCount,
+    accept
   });
   const previewFileList = [...value, ...uploadingList];
   const tipsText = renderTips(
@@ -80,9 +81,25 @@ const FileUploadInner = p => {
           }
           onDelete={target => {
             const newList = value.slice(0);
-            const index = newList.indexOf(target);
-            index > -1 && newList.splice(index, 1);
-            onChange(newList);
+            if (typeof target.index === 'number' && target.index >= 0 && target.index < newList.length) {
+              newList.splice(target.index, 1);
+              onChange(newList);
+              return;
+            }
+            onChange(
+              value.filter(item => {
+                if (target.uuid && item.uuid) {
+                  return item.uuid !== target.uuid;
+                }
+                if (target.id && item.id) {
+                  return item.id !== target.id;
+                }
+                if (target.src && item.src) {
+                  return item.src !== target.src;
+                }
+                return item !== target;
+              })
+            );
           }}
           apis={apis}
           renderModal={renderModal}

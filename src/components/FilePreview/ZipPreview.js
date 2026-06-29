@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Spin, Modal } from 'antd';
+import { Spin, Modal, App } from 'antd';
 import JSZip from 'jszip';
 import style from './style.module.scss';
 import classnames from 'classnames';
@@ -7,7 +7,7 @@ import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
 import { FileSystemInner } from '../FileSystem';
 import InnerTypePreview from './innerTypePreview';
-import { PREVIEWABLE_FILE_PATTERN, getZipEntrySize, guessContentType } from './fileExtensions';
+import { canPreviewZipEntry, getZipEntrySize, guessContentType, ZIP_MAX_ARCHIVE_BYTES, ZIP_MAX_ENTRY_BYTES, ZIP_MAX_ENTRY_COUNT } from './fileExtensions';
 
 const zipToFileSystemItems = zip => {
   const items = [];
@@ -79,11 +79,12 @@ const GalleryFilePreview = ({ file, extractFile, errorText }) => {
     return <div className={style['error']}>{errorText}</div>;
   }
 
-  return <InnerTypePreview key={preview.url} url={preview.url} filename={preview.filename} />;
+  return <InnerTypePreview key={preview.url} url={preview.url} filename={preview.filename} enableRemotePreview={false} />;
 };
 
 const ZipPreviewInner = ({ url, className, maxWidth }) => {
   const { formatMessage } = useIntl();
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [items, setItems] = useState([]);
@@ -104,10 +105,15 @@ const ZipPreviewInner = ({ url, className, maxWidth }) => {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadZip = async () => {
       try {
         setLoading(true);
         setError(false);
+        setItems([]);
+        zipRef.current = null;
+        previewCacheRef.current.clear();
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -115,21 +121,43 @@ const ZipPreviewInner = ({ url, className, maxWidth }) => {
         }
 
         const blob = await response.blob();
+        if (cancelled) {
+          return;
+        }
+
+        if (blob.size > ZIP_MAX_ARCHIVE_BYTES) {
+          throw new Error('ZIP archive is too large');
+        }
+
         const zip = await JSZip.loadAsync(blob);
+        if (cancelled) {
+          return;
+        }
+
+        const nextItems = zipToFileSystemItems(zip);
+        if (nextItems.filter(item => item.kind === 'file').length > ZIP_MAX_ENTRY_COUNT) {
+          throw new Error('ZIP archive contains too many files');
+        }
+
         zipRef.current = zip;
-        previewCacheRef.current.clear();
-        setItems(zipToFileSystemItems(zip));
+        setItems(nextItems);
         setLoading(false);
       } catch (err) {
         console.error('Error loading ZIP file:', err);
-        setLoading(false);
-        setError(true);
+        if (!cancelled) {
+          setLoading(false);
+          setError(true);
+        }
       }
     };
 
     if (url) {
       loadZip();
     }
+
+    return () => {
+      cancelled = true;
+    };
   }, [url]);
 
   const extractFile = useCallback(async file => {
@@ -143,7 +171,16 @@ const ZipPreviewInner = ({ url, className, maxWidth }) => {
       throw new Error('File not found in ZIP');
     }
 
+    const entrySize = file.size ?? getZipEntrySize(zipFile);
+    if (entrySize > ZIP_MAX_ENTRY_BYTES) {
+      throw new Error('ZIP entry is too large');
+    }
+
     const blob = await zipFile.async('blob');
+    if (blob.size > ZIP_MAX_ENTRY_BYTES) {
+      throw new Error('ZIP entry is too large');
+    }
+
     const blobUrl = URL.createObjectURL(blob);
     blobUrlsRef.current.push(blobUrl);
 
@@ -157,17 +194,23 @@ const ZipPreviewInner = ({ url, className, maxWidth }) => {
 
   const handleFileOpen = useCallback(
     async file => {
+      if (!canPreviewZipEntry(file)) {
+        message.warning(formatMessage({ id: 'FilePreview.unSupportFileType' }));
+        return;
+      }
+
       try {
         const preview = await extractFile(file);
         setPreviewFile(preview);
       } catch (err) {
         console.error('Error extracting file from ZIP:', err);
+        message.error(formatMessage({ id: 'FilePreview.fileLoadedError' }));
       }
     },
-    [extractFile]
+    [extractFile, formatMessage, message]
   );
 
-  const canPreviewFile = useCallback(file => PREVIEWABLE_FILE_PATTERN.test((file.name || file.path || '').split('?')[0]), []);
+  const canPreviewFile = useCallback(file => canPreviewZipEntry(file), []);
 
   const renderFilePreview = useCallback(file => <GalleryFilePreview file={file} extractFile={extractFile} errorText={formatMessage({ id: 'FilePreview.fileLoadedError' })} />, [extractFile, formatMessage]);
 
@@ -194,8 +237,8 @@ const ZipPreviewInner = ({ url, className, maxWidth }) => {
       ) : (
         !loading && <FileSystemInner items={items} title={formatMessage({ id: 'FilePreview.zipArchive' })} defaultView="list" onFileOpen={handleFileOpen} renderFilePreview={renderFilePreview} canPreviewFile={canPreviewFile} />
       )}
-      <Modal open={Boolean(previewFile)} onCancel={closePreview} footer={null} width="80%" destroyOnClose title={previewFile?.filename} styles={{ body: { maxHeight: '75vh', overflow: 'hidden', padding: 0 } }}>
-        {previewFile ? <InnerTypePreview key={previewFile.url} className={style['modal-preview']} url={previewFile.url} filename={previewFile.filename} height={0} /> : null}
+      <Modal open={Boolean(previewFile)} onCancel={closePreview} footer={null} width="80%" destroyOnClose title={previewFile?.filename} styles={{ body: { maxHeight: '75vh', overflow: 'auto', padding: 0 } }}>
+        {previewFile ? <InnerTypePreview key={previewFile.url} className={style['modal-preview']} url={previewFile.url} filename={previewFile.filename} enableRemotePreview={false} /> : null}
       </Modal>
     </div>
   );

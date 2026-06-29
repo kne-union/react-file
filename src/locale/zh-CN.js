@@ -7,6 +7,7 @@ const locale = {
   'FileUpload.uploadTips': '支持扩展名{accept}，单个文件大小不超过{fileSize}M，最多上传{maxLength}个附件',
   'FileUpload.maxLengthError': '上传文件不能超过最大允许数量{maxLength}',
   'FileUpload.fileSizeError': '文件{filename}不能超过{fileSize}MB!',
+  'FileUpload.acceptError': '文件{filename}格式不符合要求，仅支持{accept}',
   'FileUpload.uploadError': '文件{filename}上传错误{error}',
   'FileUpload.uploadAnomaly': '文件{filename}上传异常{error}',
   'FileUpload.separator': '、',

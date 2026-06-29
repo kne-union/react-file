@@ -2,6 +2,14 @@ import download from './downloadAction';
 import { getAjax } from '@kne/react-fetch';
 import { createIntl } from '@kne/react-intl';
 
+const triggerBlobDownload = (blob, filename) => {
+  const blobUrl = URL.createObjectURL(blob);
+  download(blobUrl, filename);
+  setTimeout(() => {
+    URL.revokeObjectURL(blobUrl);
+  }, 0);
+};
+
 const downloadBlobFile = async (input, filename = 'file', locale) => {
   if (!input) {
     const { formatMessage } = createIntl({ locale, namespace: 'react-file' });
@@ -12,10 +20,12 @@ const downloadBlobFile = async (input, filename = 'file', locale) => {
     return;
   }
   if (Object.prototype.toString.call(input) === '[object Blob]') {
-    const blob = new Blob([input], {
-      type: input.type
-    });
-    download(URL.createObjectURL(blob), filename);
+    triggerBlobDownload(
+      new Blob([input], {
+        type: input.type
+      }),
+      filename
+    );
     return;
   }
 
@@ -35,12 +45,10 @@ const downloadBlobFile = async (input, filename = 'file', locale) => {
     }
   }
 
-  download(
-    URL.createObjectURL(
-      new Blob([data], {
-        type: data?.type
-      })
-    ),
+  triggerBlobDownload(
+    new Blob([data], {
+      type: data?.type
+    }),
     filename
   );
 };

@@ -1,18 +1,14 @@
-
 # react-file
-
 
 ### 描述
 
 React文件操作组件库，提供文件上传、多格式预览、下载、列表管理及文件系统浏览，支持i18n
-
 
 ### 安装
 
 ```shell
 npm i --save @kne/react-file
 ```
-
 
 ### 概述
 
@@ -580,7 +576,6 @@ render(<BaseExample />);
 
 ```
 
-
 ### API
 
 ### File
@@ -1114,4 +1109,3 @@ typeFormatComponent(filename)
 | 类型 | 描述 |
 |------|------|
 | React.ComponentType | 对应的预览组件 |
-

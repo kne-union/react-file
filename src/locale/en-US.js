@@ -7,6 +7,7 @@ const locale = {
   'FileUpload.uploadTips': 'Supports the extension {accept}, with a single file size not exceeding {fileSize}M and uploading up to {maxLength} attachments',
   'FileUpload.maxLengthError': 'Upload files cannot exceed the maximum allowed number {maxLength}',
   'FileUpload.fileSizeError': 'The file {filename} cannot exceed {fileSize}MB!',
+  'FileUpload.acceptError': 'File {filename} is not allowed. Supported types: {accept}',
   'FileUpload.uploadError': 'File {filename} upload error {error}',
   'FileUpload.uploadAnomaly': 'File {filename} upload exception {error}',
   'FileUpload.separator': ',',
