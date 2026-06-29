@@ -1,6 +1,6 @@
 {
   "name": "@kne/react-file",
-  "version": "0.1.40",
+  "version": "0.1.41",
   "description": "React文件操作组件库，提供文件上传、多格式预览、下载、列表管理及文件系统浏览，支持i18n",
   "syntax": {
     "esmodules": true

@@ -1,6 +1,7 @@
 import download from './downloadAction';
 import { getAjax } from '@kne/react-fetch';
 import { createIntl } from '@kne/react-intl';
+import { toAjaxUrl } from '../../common/useStaticUrl';
 
 const triggerBlobDownload = (blob, filename) => {
   const blobUrl = URL.createObjectURL(blob);
@@ -31,7 +32,7 @@ const downloadBlobFile = async (input, filename = 'file', locale) => {
 
   const ajax = getAjax();
 
-  const { data, headers } = await ajax({ url: input, responseType: 'blob' });
+  const { data, headers } = await ajax({ url: toAjaxUrl(input, ajax), responseType: 'blob' });
 
   const contentDisposition = headers?.['content-disposition'];
 

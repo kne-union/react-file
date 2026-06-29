@@ -7,11 +7,12 @@ import { Spin } from 'antd';
 import { usePreset } from '@kne/global-context';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
-import { formatStaticUrl } from '../../common/useStaticUrl';
+import { formatStaticUrl, toAjaxUrl } from '../../common/useStaticUrl';
 import { sanitizeHtmlDocument } from '../../common/sanitizeHtml';
 
 const SRCDOC_IFRAME_SANDBOX = 'allow-same-origin';
 const REMOTE_IFRAME_SANDBOX = 'allow-same-origin allow-scripts allow-popups';
+const DOCUMENT_IFRAME_STYLE = 'html,body{height:auto!important;margin:0;}body{background:#FFFFFF;}';
 
 const buildFileContentUrl = ({ id, filename, getFileContentUrl, staticUrl }) => {
   if (!id) {
@@ -38,7 +39,7 @@ const loadHtmlContent = async ({ url, id, filename, getFileContentUrl, staticUrl
   let lastError;
   for (const candidate of uniqueCandidates) {
     try {
-      const { data } = await ajax({ url: candidate, method: 'GET', responseType: 'text' });
+      const { data } = await ajax({ url: toAjaxUrl(candidate, ajax), method: 'GET', responseType: 'text' });
       if (typeof data === 'string' && data.trim()) {
         return data;
       }
@@ -68,11 +69,11 @@ const HtmlInnerPreviewInner = ({ data, apis: propsApis, contentWindowUrl: conten
     script.src = contentWindowUrl;
     domDocument.head.appendChild(script);
     const styleNode = document.createElement('style');
-    styleNode.innerText = 'html,body{height:auto!important;}body{pointer-events: none;background: #FFFFFF;}';
+    styleNode.innerText = DOCUMENT_IFRAME_STYLE;
     domDocument.head.appendChild(styleNode);
     ref.current.srcdoc = domDocument.documentElement.outerHTML;
     try {
-      resizeRef.current = iFrameResize({ checkOrigin: false }, ref.current);
+      resizeRef.current = iFrameResize({ checkOrigin: false, minHeight: 600 }, ref.current);
     } catch (error) {
       resizeRef.current = null;
     }
@@ -100,6 +101,7 @@ const HtmlPreviewInner = p => {
   const [html, setHtml] = useState('');
   const [loading, setLoading] = useState(!ignoreContent);
   const [error, setError] = useState(false);
+  const isOfficeIframePreview = ignoreContent && classnames(className).includes(style['office-iframe-preview']);
 
   useEffect(() => {
     if (ignoreContent || !url) {
@@ -131,13 +133,19 @@ const HtmlPreviewInner = p => {
 
   return (
     <div
-      className={classnames(className, style['container'], style['container-html'])}
+      className={classnames(className, style['container'], style['container-html'], !ignoreContent && style['html-preview-document'])}
       style={{
         maxWidth
       }}
     >
       {ignoreContent ? (
-        <iframe title={formatMessage({ id: 'FilePreview.filePreview' })} src={url} width="100%" sandbox={REMOTE_IFRAME_SANDBOX} className={style['html-preview-iframe']} />
+        isOfficeIframePreview ? (
+          <iframe title={formatMessage({ id: 'FilePreview.filePreview' })} src={url} width="100%" sandbox={REMOTE_IFRAME_SANDBOX} className={style['html-preview-iframe']} />
+        ) : (
+          <div className={style['html-preview-document-body']}>
+            <iframe title={formatMessage({ id: 'FilePreview.filePreview' })} src={url} width="100%" sandbox={REMOTE_IFRAME_SANDBOX} className={style['html-preview-iframe']} />
+          </div>
+        )
       ) : loading ? (
         <div className={style['loading']}>
           <Spin />

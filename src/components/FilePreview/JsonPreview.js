@@ -6,6 +6,7 @@ import { Spin } from 'antd';
 import classnames from 'classnames';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
+import { toAjaxUrl } from '../../common/useStaticUrl';
 import '@kne/json-view/dist/index.css';
 
 const JsonPreviewInner = ({ url, className, maxWidth, theme = 'dark', collapsedFrom, searchable = true, collapsable = true, indentWidth = 20, showLineNumbers = true }) => {
@@ -17,7 +18,7 @@ const JsonPreviewInner = ({ url, className, maxWidth, theme = 'dark', collapsedF
   useEffect(() => {
     let cancelled = false;
     const ajax = getAjax();
-    ajax({ url, method: 'GET' }).then(
+    ajax({ url: toAjaxUrl(url, ajax), method: 'GET' }).then(
       ({ data: responseData }) => {
         if (cancelled) {
           return;
