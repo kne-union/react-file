@@ -8,7 +8,7 @@ const BaseExample = createWithRemoteLoader({
   return (
     <InfoPage>
       <InfoPage.Part title="基础用法">
-        <MarkdownPreview url="/mock/example.md" />
+        <MarkdownPreview url={`${getPublicPath('react-file')}/mock/example.md`} />
       </InfoPage.Part>
     </InfoPage>
   );
