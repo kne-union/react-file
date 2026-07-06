@@ -55,7 +55,7 @@ React文件操作组件库，提供文件上传、多格式预览、下载、列
 打印按钮组件，用于触发浏览器打印功能。
 
 
-### 示例(全屏)
+### 示例
 
 #### 示例代码
 
@@ -453,7 +453,7 @@ const BaseExample = createWithRemoteLoader({
   return (
     <InfoPage>
       <InfoPage.Part title="基础用法">
-        <MarkdownPreview url="/mock/example.md" />
+        <MarkdownPreview url={&#96;${getPublicPath('react-file')}/mock/example.md&#96;} />
       </InfoPage.Part>
     </InfoPage>
   );
