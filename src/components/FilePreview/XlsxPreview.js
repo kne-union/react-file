@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Alert, Button, Select, Space, Spin, Tabs } from 'antd';
 import { CloudOutlined, DownloadOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { useIsMobile } from '@kne/responsive-utils';
 import { XlsxViewer } from '@extend-ai/react-xlsx';
 import classnames from 'classnames';
 import withLocale from '../../withLocale';
@@ -30,6 +31,7 @@ const buildZoomOptions = controller => {
 const formatZoomLabel = ({ label, value }) => label ?? `${value}%`;
 
 const XlsxToolbar = ({ controller, fileName, onRemotePreview, remotePreviewLabel }) => {
+  const isMobile = useIsMobile();
   const zoomOptions = useMemo(() => buildZoomOptions(controller), [controller]);
 
   const sheetTabs =
@@ -48,9 +50,9 @@ const XlsxToolbar = ({ controller, fileName, onRemotePreview, remotePreviewLabel
 
   const headerActions = useMemo(() => {
     const items = [
-      <Space key="zoom" size={8} align="center">
+      <Space key="zoom" size={4} align="center">
         <Button size="small" type="text" icon={<MinusOutlined />} disabled={!controller.canZoomOut} onClick={() => controller.zoomOut()} />
-        <Select size="small" value={controller.zoomScale} style={{ width: 88 }} options={zoomOptions} labelRender={formatZoomLabel} onChange={value => controller.setZoomScale(Number(value))} />
+        <Select size="small" value={controller.zoomScale} style={{ width: isMobile ? 72 : 88 }} options={zoomOptions} labelRender={formatZoomLabel} onChange={value => controller.setZoomScale(Number(value))} />
         <Button size="small" type="text" icon={<PlusOutlined />} disabled={!controller.canZoomIn} onClick={() => controller.zoomIn()} />
         <Button size="small" type="text" icon={<DownloadOutlined />} disabled={!controller.canDownload} onClick={() => controller.download()} />
       </Space>
@@ -58,14 +60,14 @@ const XlsxToolbar = ({ controller, fileName, onRemotePreview, remotePreviewLabel
 
     if (onRemotePreview) {
       items.push(
-        <Button key="remote" size="small" icon={<CloudOutlined />} onClick={onRemotePreview}>
-          {remotePreviewLabel}
+        <Button key="remote" size="small" icon={<CloudOutlined />} onClick={onRemotePreview} title={remotePreviewLabel}>
+          {isMobile ? null : remotePreviewLabel}
         </Button>
       );
     }
 
     return items;
-  }, [controller, onRemotePreview, remotePreviewLabel, zoomOptions]);
+  }, [controller, isMobile, onRemotePreview, remotePreviewLabel, zoomOptions]);
 
   return (
     <div className={style['office-toolbar-stack']}>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Spin } from 'antd';
 import { CloudOutlined } from '@ant-design/icons';
+import { useIsMobile } from '@kne/responsive-utils';
 import { DocxEditorViewer, useDocxEditor, useDocxPagination } from '@extend-ai/react-docx';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
@@ -12,6 +13,7 @@ const DOCX_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingm
 
 const DocxPreviewInner = ({ url, filename, className, height = 600, showHeader = true, onRemotePreview }) => {
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [zoom, setZoom] = useState(100);
@@ -103,15 +105,16 @@ const DocxPreviewInner = ({ url, filename, className, height = 600, showHeader =
     const items = [<PreviewZoomControls key="zoom" zoom={zoom} onZoomChange={setZoom} disabled={loading || Boolean(error)} />];
 
     if (onRemotePreview) {
+      const remoteLabel = formatMessage({ id: 'FilePreview.remotePreview' });
       items.push(
-        <Button key="remote" size="small" icon={<CloudOutlined />} onClick={onRemotePreview}>
-          {formatMessage({ id: 'FilePreview.remotePreview' })}
+        <Button key="remote" size="small" icon={<CloudOutlined />} onClick={onRemotePreview} title={remoteLabel}>
+          {isMobile ? null : remoteLabel}
         </Button>
       );
     }
 
     return items;
-  }, [zoom, loading, error, onRemotePreview, formatMessage]);
+  }, [zoom, loading, error, onRemotePreview, formatMessage, isMobile]);
 
   return (
     <PreviewShell showHeader={showHeader} className={className} filename={displayFileName} extra={toolbarExtra} actions={headerActions} bodyRef={setViewportRef} bodyStyle={{ minHeight: height }}>

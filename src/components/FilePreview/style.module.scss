@@ -1,3 +1,5 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
 .container {
   margin: 0 auto;
   position: relative;
@@ -206,6 +208,7 @@
 }
 
 .office-preview {
+  @include resp.responsive-container;
   border: 1px solid #e8e8e8;
   border-radius: 8px;
   overflow: hidden;
@@ -233,8 +236,14 @@
     flex-direction: column;
   }
 
-  .office-toolbar-left {
-    flex: 1;
+  .office-toolbar-bar {
+    display: contents;
+  }
+
+  .office-toolbar-extra {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     min-width: 0;
   }
 
@@ -288,5 +297,51 @@
     display: flex;
     flex-direction: column;
     padding: 0;
+  }
+}
+
+@include resp.mobile-container {
+  .office-preview {
+    .office-toolbar {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 10px 12px;
+      gap: 10px;
+    }
+
+    .office-file-name {
+      max-width: 100%;
+      width: 100%;
+      text-align: center;
+      font-size: 15px;
+      line-height: 22px;
+    }
+
+    .office-toolbar-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      width: 100%;
+      min-width: 0;
+    }
+
+    .office-toolbar-extra {
+      flex: 1;
+      min-width: 0;
+      justify-content: flex-start;
+    }
+
+    .office-toolbar-actions {
+      margin-left: 0;
+      flex-shrink: 0;
+      justify-content: flex-end;
+    }
+
+    .office-sheet-tabs {
+      padding: 0 8px 4px;
+      overflow-x: auto;
+    }
   }
 }

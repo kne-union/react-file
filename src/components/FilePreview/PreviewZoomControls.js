@@ -1,10 +1,12 @@
 import { useCallback } from 'react';
 import { Button, Select, Space } from 'antd';
 import { MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { useIsMobile } from '@kne/responsive-utils';
 
 export const PREVIEW_ZOOM_OPTIONS = [50, 75, 100, 125, 150, 200];
 
 const PreviewZoomControls = ({ zoom, onZoomChange, disabled }) => {
+  const isMobile = useIsMobile();
   const handleZoomStep = useCallback(
     direction => {
       onZoomChange(currentZoom => {
@@ -17,12 +19,12 @@ const PreviewZoomControls = ({ zoom, onZoomChange, disabled }) => {
   );
 
   return (
-    <Space size={8} align="center">
+    <Space size={isMobile ? 4 : 8} align="center">
       <Button size="small" type="text" icon={<MinusOutlined />} disabled={disabled || zoom <= PREVIEW_ZOOM_OPTIONS[0]} onClick={() => handleZoomStep(-1)} />
       <Select
         size="small"
         value={zoom}
-        style={{ width: 88 }}
+        style={{ width: isMobile ? 72 : 88 }}
         disabled={disabled}
         options={PREVIEW_ZOOM_OPTIONS.map(value => ({
           value,

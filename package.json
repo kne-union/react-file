@@ -1,6 +1,6 @@
 {
   "name": "@kne/react-file",
-  "version": "0.1.43",
+  "version": "0.1.44",
   "description": "React文件操作组件库，提供文件上传、多格式预览、下载、列表管理及文件系统浏览，支持i18n",
   "syntax": {
     "esmodules": true
@@ -108,6 +108,7 @@
     "@kne/react-fetch": "^1.5.5",
     "@kne/react-file-type": "^1.0.9",
     "@kne/react-intl": "^0.1.12",
+    "@kne/responsive-utils": "^0.1.15",
     "@kne/use-control-value": "^0.1.8",
     "@kne/use-ref-callback": "^0.1.2",
     "@kne/use-resize": "^0.1.1",

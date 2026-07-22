@@ -1,8 +1,9 @@
-import { Col, List as AntdList, Modal, Row, Space, Spin, Typography } from 'antd';
+import { List as AntdList, Modal, Space, Spin, Typography } from 'antd';
 import FileType from '@kne/react-file-type';
 import { OptionButtonsInner } from './OptionButtons';
 import last from 'lodash/last';
 import dayjs from 'dayjs';
+import classnames from 'classnames';
 import style from './style.module.scss';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
@@ -27,33 +28,46 @@ const ListInner = p => {
     },
     p
   );
+
   return (
     <AntdList
-      className={className}
+      className={classnames(className, style['file-list'])}
       dataSource={dataSource.map((item, index) => ({ ...item, index }))}
       rowKey={item => `item_${(item.uuid && `uuid_${item.uuid}`) || (item.id && `id_${item.id}`) || (item.src && `src_${item.src}`)}`}
       renderItem={item => {
         const { type, filename } = item;
+        const metaNodes =
+          infoItemRenders &&
+          infoItemRenders
+            .map((render, index) => {
+              if (type === 'uploading') {
+                return null;
+              }
+              const content = (typeof render === 'function' ? render : render.render)(item);
+              if (!content) {
+                return null;
+              }
+              return (
+                <div className={style['item-meta-cell']} key={index} style={render.span ? { flex: `0 0 ${(render.span / 24) * 100}%` } : undefined}>
+                  {content}
+                </div>
+              );
+            })
+            .filter(Boolean);
+
         return (
           <AntdList.Item className={style['list-item-outer']}>
-            <Row justify="space-between" wrap={false} className={style['list-item']}>
-              <Col flex={1}>
-                <div className={style['split']} />
-                <Space className="is-block" align="start" size={4}>
-                  <FileType type={last(filename?.split('.'))} size={14} />
+            <div className={style['list-item']}>
+              <div className={style['item-icon']}>
+                <FileType type={last(filename?.split('.'))} size={28} />
+              </div>
+              <div className={style['item-content']}>
+                <div className={style['item-filename']} title={filename || ''}>
                   {filename || ''}
-                </Space>
-              </Col>
-              {infoItemRenders &&
-                infoItemRenders.map((render, index) => {
-                  return (
-                    <Col span={render.span || 4} key={index}>
-                      {type !== 'uploading' && (typeof render === 'function' ? render : render.render)(item)}
-                      <div className={style['split']} />
-                    </Col>
-                  );
-                })}
-              <Col className={style['list-options']}>
+                </div>
+                {metaNodes?.length > 0 ? <div className={style['item-meta']}>{metaNodes}</div> : null}
+              </div>
+              <div className={style['list-options']}>
                 {type !== 'uploading' ? (
                   <OptionButtonsInner getPermission={getPermission} item={item} apis={apis} onDelete={onDelete} renderModal={renderModal} onEdit={onEdit} />
                 ) : (
@@ -62,8 +76,8 @@ const ListInner = p => {
                     <Typography.Link>{formatMessage({ id: 'FileList.uploading' })}</Typography.Link>
                   </Space>
                 )}
-              </Col>
-            </Row>
+              </div>
+            </div>
           </AntdList.Item>
         );
       }}
