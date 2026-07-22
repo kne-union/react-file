@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from 'antd';
 import { DesktopOutlined } from '@ant-design/icons';
 import { usePreset } from '@kne/global-context';
+import { useIsMobile } from '@kne/responsive-utils';
 import Fetch from '@kne/react-fetch';
 import classnames from 'classnames';
 import { HtmlPreviewInner } from './HtmlPreview';
@@ -44,7 +45,9 @@ const OfficeIframePreview = ({ url, apis: propsApis, className, ...props }) => {
 
 const OfficeRemotePreview = ({ url, filename, apis, className, showHeader = true, height = 600, onLocalPreview, ...props }) => {
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
   const displayFileName = filename || url?.split('?')[0]?.split('/').pop() || '';
+  const localLabel = formatMessage({ id: 'FilePreview.localPreview' });
 
   return (
     <PreviewShell
@@ -52,8 +55,8 @@ const OfficeRemotePreview = ({ url, filename, apis, className, showHeader = true
       className={className}
       filename={displayFileName}
       actions={[
-        <Button key="local" size="small" icon={<DesktopOutlined />} onClick={onLocalPreview}>
-          {formatMessage({ id: 'FilePreview.localPreview' })}
+        <Button key="local" size="small" icon={<DesktopOutlined />} onClick={onLocalPreview} title={localLabel}>
+          {isMobile ? null : localLabel}
         </Button>
       ]}
       bodyClassName={style['office-viewer-body-remote']}

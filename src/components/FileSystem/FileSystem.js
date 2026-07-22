@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import { Button, Empty, Input, Segmented, Table, Tree } from 'antd';
 import { AppstoreOutlined, ArrowLeftOutlined, ArrowRightOutlined, ColumnWidthOutlined, PictureOutlined, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { useIsMobile } from '@kne/responsive-utils';
 import classnames from 'classnames';
 import style from './FileSystem.module.scss';
 import EntryIcon from './EntryIcon';
@@ -10,6 +11,7 @@ import { useIntl } from '@kne/react-intl';
 
 const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'list', defaultPath = '', onSelectionChange, onFileOpen, renderFilePreview, canPreviewFile }) => {
   const { formatMessage } = useIntl();
+  const isMobile = useIsMobile();
   const [view, setView] = useState(defaultView);
   const [history, setHistory] = useState(() => ({
     index: 0,
@@ -132,12 +134,33 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
   const canGoBack = history.index > 0;
   const canGoForward = history.index < history.stack.length - 1;
 
-  const VIEW_OPTIONS = [
-    { label: formatMessage({ id: 'FileSystem.viewGrid' }), value: 'icons', icon: <AppstoreOutlined /> },
-    { label: formatMessage({ id: 'FileSystem.viewList' }), value: 'list', icon: <UnorderedListOutlined /> },
-    { label: formatMessage({ id: 'FileSystem.viewColumns' }), value: 'columns', icon: <ColumnWidthOutlined /> },
-    { label: formatMessage({ id: 'FileSystem.viewGallery' }), value: 'gallery', icon: <PictureOutlined /> }
-  ];
+  const viewOptions = useMemo(
+    () => [
+      { label: formatMessage({ id: 'FileSystem.viewGrid' }), value: 'icons', icon: <AppstoreOutlined /> },
+      { label: formatMessage({ id: 'FileSystem.viewList' }), value: 'list', icon: <UnorderedListOutlined /> },
+      { label: formatMessage({ id: 'FileSystem.viewColumns' }), value: 'columns', icon: <ColumnWidthOutlined /> },
+      { label: formatMessage({ id: 'FileSystem.viewGallery' }), value: 'gallery', icon: <PictureOutlined /> }
+    ],
+    [formatMessage]
+  );
+
+  const segmentedOptions = useMemo(
+    () =>
+      viewOptions.map(option =>
+        isMobile
+          ? {
+              value: option.value,
+              icon: option.icon,
+              title: option.label
+            }
+          : {
+              label: option.label,
+              value: option.value,
+              icon: option.icon
+            }
+      ),
+    [isMobile, viewOptions]
+  );
 
   const columns = [
     {
@@ -202,6 +225,7 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
   return (
     <div className={classnames(style.root, className)}>
       <div className={style.toolbar}>
+        <Input allowClear size="small" className={style['search-input']} placeholder={formatMessage({ id: 'FileSystem.search' })} prefix={<SearchOutlined />} value={searchInput} onChange={event => setSearchInput(event.target.value)} />
         <div className={style['toolbar-nav']}>
           <Button type="text" size="small" icon={<ArrowLeftOutlined />} disabled={!canGoBack} onClick={goBack} />
           <Button type="text" size="small" icon={<ArrowRightOutlined />} disabled={!canGoForward} onClick={goForward} />
@@ -209,19 +233,7 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
         <div className={style['toolbar-title']} title={currentFolderName}>
           {currentFolderName}
         </div>
-        <div className={style['toolbar-actions']}>
-          <Input allowClear size="small" className={style['search-input']} placeholder={formatMessage({ id: 'FileSystem.search' })} prefix={<SearchOutlined />} value={searchInput} onChange={event => setSearchInput(event.target.value)} />
-          <Segmented
-            size="small"
-            value={view}
-            onChange={setView}
-            options={VIEW_OPTIONS.map(option => ({
-              label: option.label,
-              value: option.value,
-              icon: option.icon
-            }))}
-          />
-        </div>
+        <Segmented size="small" className={style['view-switch']} value={view} onChange={setView} options={segmentedOptions} />
       </div>
       <div className={style.content}>{renderContent()}</div>
       <div className={style.footer}>

@@ -1,19 +1,25 @@
-import { Flex, Space } from 'antd';
+import { Space } from 'antd';
 import style from './style.module.scss';
 
 const PreviewHeader = ({ filename, extra, actions = [] }) => {
+  const hasBar = Boolean(extra) || actions.length > 0;
+
   return (
-    <Flex className={style['office-toolbar']} justify="space-between" align="center" wrap="wrap" gap={8}>
-      <Flex align="center" gap={12} wrap="wrap" className={style['office-toolbar-left']}>
-        <span className={style['office-file-name']}>{filename}</span>
-        {extra}
-      </Flex>
-      {actions.length > 0 ? (
-        <Space wrap size={8} align="center" className={style['office-toolbar-actions']}>
-          {actions}
-        </Space>
+    <div className={style['office-toolbar']}>
+      <span className={style['office-file-name']} title={filename}>
+        {filename}
+      </span>
+      {hasBar ? (
+        <div className={style['office-toolbar-bar']}>
+          <div className={style['office-toolbar-extra']}>{extra}</div>
+          {actions.length > 0 ? (
+            <Space wrap size={8} align="center" className={style['office-toolbar-actions']}>
+              {actions}
+            </Space>
+          ) : null}
+        </div>
       ) : null}
-    </Flex>
+    </div>
   );
 };
 

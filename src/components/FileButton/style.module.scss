@@ -1,8 +1,21 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
+.file-modal-host {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 .file-modal-outer {
   min-height: 100px;
   height: 70vh;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .file-title {
@@ -16,4 +29,122 @@
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   word-break: break-all;
+}
+
+// 移动端全屏：与 components-core Modal 一致，boundary/viewport 两套挂载
+.file-modal-wrap-fullscreen:global(.ant-modal-wrap) {
+  display: block;
+  inset: 0 !important;
+  width: var(--kne-viewport-width, 100vw) !important;
+  height: var(--kne-viewport-height, 100vh) !important;
+  max-height: var(--kne-viewport-height, 100vh) !important;
+  padding: 0 !important;
+  box-sizing: border-box;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+  touch-action: none;
+  text-align: start;
+
+  &::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  :global(.ant-modal) {
+    top: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    padding-bottom: 0 !important;
+    margin: 0 !important;
+    vertical-align: initial;
+    touch-action: auto;
+  }
+
+  :global(.ant-modal-container),
+  :global(.ant-modal-content) {
+    border-radius: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  :global(.ant-modal-header) {
+    flex: none;
+    margin: 0;
+    padding: 12px 16px;
+  }
+
+  :global(.ant-modal-body) {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+    overscroll-behavior: none;
+  }
+
+  :global(.kne-is-boundary) &,
+  &:global(.kne-is-boundary) {
+    position: absolute !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+
+  &:global(.kne-is-viewport) {
+    position: fixed !important;
+  }
+}
+
+.file-modal-mask-fullscreen {
+  &:global(.ant-modal-mask.kne-is-boundary) {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  &:global(.ant-modal-mask.kne-is-viewport) {
+    position: fixed !important;
+  }
+}
+
+// JS 判定移动端（portal 到 body / viewport 时容器查询可能不命中）
+.file-modal-outer-mobile {
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+
+  // 至少铺满，内容更高时由 outer 滚动；office 等内部滚动仍可用 height:100%
+  > * {
+    min-height: 100%;
+    min-width: 0;
+  }
+}
+
+@include resp.mobile-container {
+  .file-modal-outer {
+    // example 手机预览：全屏弹窗内铺满 body，由 outer 自身滚动
+    height: 100%;
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .file-title {
+    margin-right: 24px;
+    width: 100%;
+  }
 }

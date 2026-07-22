@@ -11,7 +11,7 @@ import { formatStaticUrl, toAjaxUrl } from '../../common/useStaticUrl';
 import { sanitizeHtmlDocument } from '../../common/sanitizeHtml';
 
 const SRCDOC_IFRAME_SANDBOX = 'allow-scripts allow-same-origin';
-const REMOTE_IFRAME_SANDBOX = 'allow-same-origin allow-scripts allow-popups';
+const REMOTE_IFRAME_SANDBOX = 'allow-same-origin allow-scripts allow-popups allow-forms';
 const DOCUMENT_IFRAME_STYLE = 'html,body{height:auto!important;margin:0;}body{background:#FFFFFF;}';
 
 const buildFileContentUrl = ({ id, filename, getFileContentUrl, staticUrl }) => {

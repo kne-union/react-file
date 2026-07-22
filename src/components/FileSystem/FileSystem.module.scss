@@ -1,4 +1,7 @@
+@use '~@kne/responsive-utils/scss' as resp;
+
 .root {
+  @include resp.responsive-container;
   display: flex;
   flex-direction: column;
   height: 560px;
@@ -25,6 +28,8 @@
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
+  order: 1;
 }
 
 .toolbar-title {
@@ -35,17 +40,17 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.toolbar-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
+  order: 2;
 }
 
 .search-input {
   width: 180px;
+  order: 3;
+}
+
+.view-switch {
+  flex-shrink: 0;
+  order: 4;
 }
 
 .content {
@@ -66,6 +71,13 @@
   background: #fafafa;
   color: rgba(0, 0, 0, 0.45);
   font-size: 12px;
+  min-width: 0;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .empty-wrap {
@@ -385,9 +397,38 @@
   }
 }
 
-@media (max-width: 640px) {
+@include resp.mobile-container {
+  .toolbar {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'search search search'
+      'nav title views';
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+  }
+
   .search-input {
-    width: 140px;
+    grid-area: search;
+    order: unset;
+    width: 100% !important;
+  }
+
+  .toolbar-nav {
+    grid-area: nav;
+    order: unset;
+  }
+
+  .toolbar-title {
+    grid-area: title;
+    order: unset;
+  }
+
+  .view-switch {
+    grid-area: views;
+    order: unset;
+    justify-self: end;
   }
 
   .gallery {
@@ -399,5 +440,19 @@
     max-height: 180px;
     border-left: none;
     border-top: 1px solid #f0f0f0;
+  }
+
+  .gallery-stage {
+    padding: 12px;
+  }
+
+  .column {
+    flex: 0 0 180px;
+    min-width: 180px;
+  }
+
+  .footer {
+    justify-content: flex-start;
+    padding: 4px 8px;
   }
 }
