@@ -1,10 +1,12 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Empty, Input, Segmented, Table, Tree } from 'antd';
 import { AppstoreOutlined, ArrowLeftOutlined, ArrowRightOutlined, ColumnWidthOutlined, PictureOutlined, SearchOutlined, UnorderedListOutlined } from '@ant-design/icons';
 import { useIsMobile } from '@kne/responsive-utils';
 import classnames from 'classnames';
 import style from './FileSystem.module.scss';
 import EntryIcon from './EntryIcon';
+import PropertiesPanel from './PropertiesPanel';
+import MarqueeSelect from './MarqueeSelect';
 import { buildFileSystemIndex, buildNestedEntries, formatByteSize, normalizeFolderPath, normalizeSearchQuery, pathName, pathParent } from './utils';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
@@ -12,7 +14,22 @@ import { useIntl } from '@kne/react-intl';
 const isToggleModifier = event => !!(event && (event.metaKey || event.ctrlKey));
 const isRangeModifier = event => !!(event && event.shiftKey);
 
-const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'list', defaultPath = '', toolbarExtra, onSelectionChange, onPathChange, onFileOpen, renderFilePreview, canPreviewFile }) => {
+const FileSystemInner = ({
+  items,
+  className,
+  title = 'Files',
+  defaultView = 'list',
+  defaultPath = '',
+  toolbarExtra,
+  propertiesPanel = true,
+  propertiesActions,
+  onPropertiesAction,
+  onSelectionChange,
+  onPathChange,
+  onFileOpen,
+  renderFilePreview,
+  canPreviewFile
+}) => {
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
   const [view, setView] = useState(defaultView);
@@ -25,6 +42,11 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
   const [searchInput, setSearchInput] = useState('');
   const [expandedKeys, setExpandedKeys] = useState([]);
   const [columnAnchorPath, setColumnAnchorPath] = useState('');
+  const [propertiesPanelClosed, setPropertiesPanelClosed] = useState(false);
+  const [marqueeDragging, setMarqueeDragging] = useState(false);
+  const marqueeSessionRef = useRef(null);
+  const selectedPathsRef = useRef(selectedPaths);
+  selectedPathsRef.current = selectedPaths;
 
   const index = useMemo(() => buildFileSystemIndex(items), [items]);
   const currentPath = history.stack[history.index] ?? '';
@@ -74,6 +96,19 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
     onSelectionChange?.([]);
   }, [onSelectionChange]);
 
+  const handlePropertiesAction = useCallback(
+    (key, ctx) => {
+      onPropertiesAction?.(key, Object.assign({}, ctx, { clearSelection, currentPath }));
+    },
+    [clearSelection, currentPath, onPropertiesAction]
+  );
+
+  useEffect(() => {
+    if (selectedPaths.length > 0) {
+      setPropertiesPanelClosed(false);
+    }
+  }, [selectedPaths]);
+
   const selectEntry = useCallback(
     (entry, event) => {
       const path = entry?.path ?? null;
@@ -111,6 +146,40 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
     },
     [currentEntries, emitSelectionChange, selectedPaths, selectionAnchorPath]
   );
+
+  const handleMarqueeSelect = useCallback(
+    (paths, { additive, preview, dragging } = {}) => {
+      if (dragging != null) {
+        setMarqueeDragging(!!dragging);
+      }
+
+      if (!marqueeSessionRef.current) {
+        marqueeSessionRef.current = {
+          base: additive ? selectedPathsRef.current.slice() : []
+        };
+      }
+
+      const nextPaths = additive ? [...new Set([...marqueeSessionRef.current.base, ...paths])] : paths;
+      setSelectedPaths(nextPaths);
+      if (nextPaths.length > 0) {
+        setSelectionAnchorPath(nextPaths[nextPaths.length - 1]);
+      } else if (!additive) {
+        setSelectionAnchorPath(null);
+      }
+
+      if (!preview) {
+        setMarqueeDragging(false);
+        emitSelectionChange(nextPaths);
+        marqueeSessionRef.current = null;
+      }
+    },
+    [emitSelectionChange]
+  );
+
+  const handleEmptyClick = useCallback(() => {
+    marqueeSessionRef.current = null;
+    clearSelection();
+  }, [clearSelection]);
 
   const navigateTo = useCallback(
     folderPath => {
@@ -172,9 +241,11 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
 
   const treeData = useMemo(() => {
     const renderTitle = entry => (
-      <span className={classnames(entry.kind === 'folder' && style['list-name-folder'])}>
-        {entry.name}
-        {entry.kind === 'file' ? ` · ${formatByteSize(entry.size)}` : ''}
+      <span className={classnames(style['list-name'], entry.kind === 'folder' && style['list-name-folder'])} title={entry.name}>
+        <span className={style['name-clamp']}>
+          {entry.name}
+          {entry.kind === 'file' ? ` · ${formatByteSize(entry.size)}` : ''}
+        </span>
       </span>
     );
 
@@ -228,9 +299,9 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
       dataIndex: 'name',
       key: 'name',
       render: (_, record) => (
-        <span className={classnames(style['list-name'], record.kind === 'folder' && style['list-name-folder'])}>
+        <span className={classnames(style['list-name'], record.kind === 'folder' && style['list-name-folder'])} title={record.name}>
           <EntryIcon entry={record} size="sm" />
-          {record.name}
+          <span className={style['name-clamp']}>{record.name}</span>
         </span>
       )
     },
@@ -268,18 +339,7 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
       return <ColumnsView columnPaths={columnPaths} index={index} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} onNavigateColumn={setColumnAnchorPath} />;
     }
 
-    return (
-      <GalleryView
-        entries={currentEntries}
-        selectedPaths={selectedPaths}
-        onSelect={selectEntry}
-        onOpen={openEntry}
-        onNavigate={entry => navigateTo(entry.path)}
-        renderFilePreview={renderFilePreview}
-        canPreviewFile={canPreviewFile}
-        formatMessage={formatMessage}
-      />
-    );
+    return <GalleryView entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} renderFilePreview={renderFilePreview} canPreviewFile={canPreviewFile} formatMessage={formatMessage} />;
   };
 
   const footerSelection =
@@ -288,6 +348,9 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
     ) : selectedEntries.length === 1 ? (
       <span>· {formatMessage({ id: 'FileSystem.selected' }, { name: selectedEntries[0].name })}</span>
     ) : null;
+
+  const showPropertiesPanel = propertiesPanel !== false && selectedEntries.length > 0 && !propertiesPanelClosed && !marqueeDragging;
+  const marqueeEnabled = !isMobile && (view === 'icons' || view === 'columns' || view === 'gallery' || (view === 'list' && isSearching));
 
   return (
     <div className={classnames(style.root, className)}>
@@ -300,10 +363,27 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
         <div className={style['toolbar-title']} title={currentFolderName}>
           {currentFolderName}
         </div>
-        {toolbarExtra ? <div className={style['toolbar-extra']}>{toolbarExtra}</div> : null}
+        {toolbarExtra ? <div className={style['toolbar-extra']}>{typeof toolbarExtra === 'function' ? toolbarExtra({ selectedEntries, clearSelection, currentPath }) : toolbarExtra}</div> : null}
         <Segmented size="small" className={style['view-switch']} value={view} onChange={setView} options={segmentedOptions} />
       </div>
-      <div className={style.content}>{renderContent()}</div>
+      <div className={style.main}>
+        <div className={style.content}>
+          <MarqueeSelect enabled={marqueeEnabled} className={view === 'gallery' || view === 'columns' ? style['marquee-fill'] : undefined} onMarqueeSelect={handleMarqueeSelect} onEmptyClick={handleEmptyClick}>
+            {renderContent()}
+          </MarqueeSelect>
+        </div>
+        {showPropertiesPanel ? (
+          <PropertiesPanel
+            selectedEntries={selectedEntries}
+            index={index}
+            currentPath={currentPath}
+            propertiesPanel={propertiesPanel}
+            propertiesActions={propertiesActions}
+            onPropertiesAction={handlePropertiesAction}
+            onClose={() => setPropertiesPanelClosed(true)}
+          />
+        ) : null}
+      </div>
       <div className={style.footer}>
         <span>
           {currentEntries.length} {isSearching ? formatMessage({ id: 'FileSystem.resultCount' }) : formatMessage({ id: 'FileSystem.itemCount' })}
@@ -318,9 +398,11 @@ const IconsView = ({ entries, selectedPaths, onSelect, onOpen }) => {
   return (
     <div className={style['icons-grid']}>
       {entries.map(entry => (
-        <div key={entry.path} className={classnames(style['icon-item'], selectedPaths.includes(entry.path) && style.selected)} onClick={event => onSelect(entry, event)} onDoubleClick={() => onOpen(entry)}>
+        <div key={entry.path} data-fs-path={entry.path} className={classnames(style['icon-item'], selectedPaths.includes(entry.path) && style.selected)} onClick={event => onSelect(entry, event)} onDoubleClick={() => onOpen(entry)}>
           <EntryIcon entry={entry} size="lg" />
-          <span className={style['icon-label']}>{entry.name}</span>
+          <span className={style['icon-label']} title={entry.name}>
+            {entry.name}
+          </span>
         </div>
       ))}
     </div>
@@ -379,6 +461,7 @@ const ListTableView = ({ columns, entries, selectedPaths, onSelect, onOpen }) =>
       dataSource={entries}
       rowClassName={record => (selectedPaths.includes(record.path) ? 'ant-table-row-selected' : '')}
       onRow={record => ({
+        'data-fs-path': record.path,
         onClick: event => onSelect(record, event),
         onDoubleClick: () => onOpen(record)
       })}
@@ -397,6 +480,7 @@ const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNa
             {entries.map(entry => (
               <div
                 key={entry.path}
+                data-fs-path={entry.path}
                 className={classnames(style['column-item'], selectedPaths.includes(entry.path) && style.selected)}
                 onClick={event => {
                   onSelect(entry, event);
@@ -407,7 +491,9 @@ const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNa
                 onDoubleClick={() => onOpen(entry)}
               >
                 <EntryIcon entry={entry} size="sm" />
-                <span className={style['column-name']}>{entry.name}</span>
+                <span className={style['column-name']} title={entry.name}>
+                  {entry.name}
+                </span>
                 {entry.kind === 'file' ? <span className={style['column-meta']}>{formatByteSize(entry.size)}</span> : null}
               </div>
             ))}
@@ -418,21 +504,16 @@ const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNa
   );
 };
 
-const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, onNavigate, renderFilePreview, canPreviewFile, formatMessage }) => {
+const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, renderFilePreview, canPreviewFile, formatMessage }) => {
   const primaryPath = selectedPaths[selectedPaths.length - 1];
   const selectedEntry = entries.find(entry => entry.path === primaryPath) || entries[0] || null;
-
-  const handleItemClick = (entry, event) => {
-    onSelect(entry, event);
-    if (entry.kind === 'folder' && !isToggleModifier(event) && !isRangeModifier(event)) {
-      onNavigate?.(entry);
-    }
-  };
 
   const renderPlaceholder = entry => (
     <div className={style['gallery-preview']}>
       <EntryIcon entry={entry} size="xl" />
-      <div className={style['gallery-name']}>{entry.name}</div>
+      <div className={style['gallery-name']} title={entry.name}>
+        {entry.name}
+      </div>
       <div className={style['gallery-meta']}>{entry.kind === 'file' ? formatByteSize(entry.size) : formatMessage({ id: 'FileSystem.folder' })}</div>
     </div>
   );
@@ -469,16 +550,15 @@ const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, onNavigate, ren
           {entries.map(entry => (
             <div
               key={entry.path}
+              data-fs-path={entry.path}
               className={classnames(style['gallery-film-item'], selectedPaths.includes(entry.path) && style.selected)}
-              onClick={event => handleItemClick(entry, event)}
-              onDoubleClick={() => {
-                if (entry.kind === 'folder') {
-                  onOpen(entry);
-                }
-              }}
+              onClick={event => onSelect(entry, event)}
+              onDoubleClick={() => onOpen(entry)}
             >
               <EntryIcon entry={entry} size="sm" />
-              <span className={style['column-name']}>{entry.name}</span>
+              <span className={style['column-name']} title={entry.name}>
+                {entry.name}
+              </span>
             </div>
           ))}
         </div>
@@ -489,5 +569,7 @@ const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, onNavigate, ren
 
 const FileSystem = withLocale(FileSystemInner);
 
-export { FileSystemInner };
+FileSystem.PropertiesPanel = PropertiesPanel;
+
+export { FileSystemInner, PropertiesPanel };
 export default FileSystem;

@@ -562,13 +562,12 @@ render(<BaseExample />);
 ```
 
 - FileSystem
-- 文件系统浏览
+- 文件系统浏览；选中后右侧属性面板（可关闭），也可传 function 自定义内容
 - _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),antd(antd),remoteLoader(@kne/remote-loader)
 
 ```jsx
 const { FileSystem } = _ReactFile;
 const { createWithRemoteLoader, getPublicPath } = remoteLoader;
-const { Segmented } = antd;
 const { useState } = React;
 
 const BaseExample = createWithRemoteLoader({
@@ -581,6 +580,23 @@ const BaseExample = createWithRemoteLoader({
     { kind: 'file', path: 'documents/reports/Q3-report.pdf', name: 'Q3-report.pdf', size: 1024000 },
     { kind: 'file', path: 'documents/reports/Q4-report.xlsx', name: 'Q4-report.xlsx', size: 512000 },
     { kind: 'file', path: 'documents/meeting-notes.docx', name: 'meeting-notes.docx', size: 256000 },
+    {
+      kind: 'file',
+      path: 'documents/超长文件名-2024年度第一季度产品规划评审会会议纪要与行动项跟踪清单-最终版-v3.2.1-已确认.pdf',
+      name: '超长文件名-2024年度第一季度产品规划评审会会议纪要与行动项跟踪清单-最终版-v3.2.1-已确认.pdf',
+      size: 1048576
+    },
+    {
+      kind: 'folder',
+      path: '超长文件夹名称-客户交付资料归档-华东区-2024Q1-Q2合并备份/',
+      name: '超长文件夹名称-客户交付资料归档-华东区-2024Q1-Q2合并备份'
+    },
+    {
+      kind: 'file',
+      path: 'very-very-long-english-filename-without-spaces-product-requirements-document-final-review-copy-v12.docx',
+      name: 'very-very-long-english-filename-without-spaces-product-requirements-document-final-review-copy-v12.docx',
+      size: 256000
+    },
     { kind: 'folder', path: 'images/', name: 'Images' },
     { kind: 'file', path: 'images/logo.png', name: 'logo.png', size: 45000 },
     { kind: 'file', path: 'images/banner.jpg', name: 'banner.jpg', size: 89000 },
@@ -591,28 +607,39 @@ const BaseExample = createWithRemoteLoader({
   ]);
 
   return (
-    <PureGlobal preset={{
-      ajax: async api => {
-        return { data: { code: 0, data: api.loader() } };
-      },
-      apis: {
-        file: {
-          staticUrl: getPublicPath('react-file') || window.PUBLIC_URL
+    <PureGlobal
+      preset={{
+        ajax: async api => {
+          return { data: { code: 0, data: api.loader() } };
+        },
+        apis: {
+          file: {
+            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL
+          }
         }
-      }
-    }}>
+      }}
+    >
       <InfoPage>
-        <InfoPage.Part title="文件系统浏览">
+        <InfoPage.Part title="文件系统浏览（含属性面板）">
           <FileSystem
             items={items}
             title="My Files"
-            defaultView="list"
+            defaultView="icons"
             onFileOpen={entry => {
               console.log('Open file:', entry);
             }}
-            onSelectionChange={entry => {
-              console.log('Selection changed:', entry);
+            onSelectionChange={entries => {
+              console.log('Selection changed:', entries);
             }}
+            propertiesPanel={({ selectedEntries, index }) => (
+              <FileSystem.PropertiesPanel.Default
+                selectedEntries={selectedEntries}
+                index={index}
+                extraInfo={({ entry }) =>
+                  entry ? <FileSystem.PropertiesPanel.InfoRow label="扩展字段" value={entry.id || entry.path} /> : null
+                }
+              />
+            )}
           />
         </InfoPage.Part>
       </InfoPage>
@@ -771,6 +798,96 @@ const BaseExample = createWithRemoteLoader({
             onFileOpen={entry => {
               console.log('Open file:', entry);
             }}
+          />
+        </InfoPage.Part>
+      </InfoPage>
+    </PureGlobal>
+  );
+});
+
+render(<BaseExample />);
+
+```
+
+- FileSystem.PropertiesPanel
+- 使用 FileSystem.PropertiesPanel.Default / InfoRow / Section 扩展属性面板显示字段
+- _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),antd(antd),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { FileSystem } = _ReactFile;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
+})(({ remoteModules }) => {
+  const [PureGlobal, InfoPage] = remoteModules;
+  const { PropertiesPanel } = FileSystem;
+  const items = [
+    { kind: 'folder', path: 'documents/', name: 'Documents', createdAt: '2024-10-09T11:44:00' },
+    { kind: 'folder', path: 'documents/reports/', name: 'Reports' },
+    { kind: 'file', path: 'documents/reports/Q3-report.pdf', name: 'Q3-report.pdf', size: 1024000, author: 'Alice' },
+    { kind: 'file', path: 'documents/meeting-notes.docx', name: 'meeting-notes.docx', size: 256000, author: 'Bob' },
+    {
+      kind: 'file',
+      path: '超长文件名-2024年度第一季度产品规划评审会会议纪要与行动项跟踪清单-最终版-v3.2.1-已确认.pdf',
+      name: '超长文件名-2024年度第一季度产品规划评审会会议纪要与行动项跟踪清单-最终版-v3.2.1-已确认.pdf',
+      size: 1048576,
+      author: 'Alice'
+    },
+    {
+      kind: 'folder',
+      path: '超长文件夹名称-客户交付资料归档-华东区-2024Q1-Q2合并备份/',
+      name: '超长文件夹名称-客户交付资料归档-华东区-2024Q1-Q2合并备份'
+    },
+    {
+      kind: 'file',
+      path: 'very-very-long-english-filename-without-spaces-product-requirements-document-final-review-copy-v12.docx',
+      name: 'very-very-long-english-filename-without-spaces-product-requirements-document-final-review-copy-v12.docx',
+      size: 256000,
+      author: 'Bob'
+    },
+    { kind: 'file', path: 'readme.md', name: 'readme.md', size: 3200, author: 'Alice' },
+    { kind: 'file', path: 'config.json', name: 'config.json', size: 1200 }
+  ];
+
+  return (
+    <PureGlobal
+      preset={{
+        ajax: async api => {
+          return { data: { code: 0, data: api.loader() } };
+        },
+        apis: {
+          file: {
+            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL
+          }
+        }
+      }}
+    >
+      <InfoPage>
+        <InfoPage.Part title="默认 PropertiesPanel">
+          <FileSystem items={items} title="My Files" defaultView="icons" propertiesPanel />
+        </InfoPage.Part>
+        <InfoPage.Part title="扩展 PropertiesPanel.Default / InfoRow / Section">
+          <FileSystem
+            items={items}
+            title="My Files"
+            defaultView="icons"
+            propertiesPanel={({ selectedEntries, index }) => (
+              <PropertiesPanel.Default
+                selectedEntries={selectedEntries}
+                index={index}
+                extraInfo={({ entry }) =>
+                  entry?.kind === 'file' ? <PropertiesPanel.InfoRow label="作者" value={entry.author} /> : null
+                }
+                extraSections={({ entry }) =>
+                  entry ? (
+                    <PropertiesPanel.Section title="更多">
+                      <PropertiesPanel.InfoRow label="路径" value={entry.path} />
+                    </PropertiesPanel.Section>
+                  ) : null
+                }
+              />
+            )}
           />
         </InfoPage.Part>
       </InfoPage>
@@ -1105,14 +1222,29 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | defaultView | 'icons' \| 'list' \| 'columns' \| 'gallery' | 'list' | 默认视图模式 |
 | defaultPath | string | '' | 默认路径 |
 | className | string | - | 自定义类名 |
-| toolbarExtra | ReactNode | - | 工具栏扩展区域（标题与视图切换之间） |
+| toolbarExtra | ReactNode \| (ctx) => ReactNode | - | 工具栏扩展；函数时接收 `{ selectedEntries, clearSelection, currentPath }` |
+| propertiesPanel | boolean \| ReactNode \| (ctx) => ReactNode | true | 右侧属性面板；`false` 关闭；函数时接收 `{ selectedEntries, index, currentPath, close, actions, onAction, defaultActions }` |
+| propertiesActions | false \| ActionItem[] \| (ctx) => ActionItem[] \| object | 内置默认 | 属性面板操作；`false` 关闭；数组按 key 合并；函数完全自定义；`{ list, replace?, ...ButtonGroupProps }` 可替换或合并 |
+| onPropertiesAction | (key, ctx) => void | - | 操作点击回调；`ctx` 含 `entry` / `selectedEntries` / `clearSelection` / `currentPath` |
 | onSelectionChange | function(entries) | - | 选中项变化回调，参数为选中条目数组 |
 | onPathChange | function(path) | - | 当前文件夹路径变化回调 |
 | onFileOpen | function(entry) | - | 打开文件回调 |
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
 
-多选逻辑与 Windows / macOS 文件管理器一致：普通点击单选；Ctrl（Windows）/ Command（macOS）+ 点击切换选中；Shift + 点击按当前目录顺序区间选中。
+#### FileSystem.PropertiesPanel
+
+| 成员 | 说明 |
+|------|------|
+| Default | 默认属性内容；支持 `extraInfo` / `extraSections`（节点或 `({ entry, selectedEntries, index }) => node`）追加信息行/区块；支持 `actions` / `onAction` |
+| InfoRow | 信息行（`label` / `value`，value 为空不渲染） |
+| Section | 信息区块（`title` / `children`） |
+| Actions | 操作按钮组（接收 `actions` / `onAction`，语义同 `propertiesActions`） |
+| getDefaultActions | 生成默认操作列表 |
+
+可用 `FileSystem.PropertiesPanel.Default / InfoRow / Section / Actions` 扩展属性显示。
+
+多选逻辑与 Windows / macOS 文件管理器一致：普通点击单选；Ctrl（Windows）/ Command（macOS）+ 点击切换选中；Shift + 点击按当前目录顺序区间选中；在空白处拖拽可框选（Ctrl/Command + 框选为追加）；点击空白取消选中。树形列表视图暂不支持框选。
 
 #### items 数据项
 

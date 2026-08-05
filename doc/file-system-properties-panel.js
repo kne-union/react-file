@@ -1,22 +1,22 @@
 const { FileSystem } = _ReactFile;
 const { createWithRemoteLoader, getPublicPath } = remoteLoader;
-const { useState } = React;
 
 const BaseExample = createWithRemoteLoader({
   modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
 })(({ remoteModules }) => {
   const [PureGlobal, InfoPage] = remoteModules;
-  const [items] = useState([
-    { kind: 'folder', path: 'documents/', name: 'Documents' },
+  const { PropertiesPanel } = FileSystem;
+  const items = [
+    { kind: 'folder', path: 'documents/', name: 'Documents', createdAt: '2024-10-09T11:44:00' },
     { kind: 'folder', path: 'documents/reports/', name: 'Reports' },
-    { kind: 'file', path: 'documents/reports/Q3-report.pdf', name: 'Q3-report.pdf', size: 1024000 },
-    { kind: 'file', path: 'documents/reports/Q4-report.xlsx', name: 'Q4-report.xlsx', size: 512000 },
-    { kind: 'file', path: 'documents/meeting-notes.docx', name: 'meeting-notes.docx', size: 256000 },
+    { kind: 'file', path: 'documents/reports/Q3-report.pdf', name: 'Q3-report.pdf', size: 1024000, author: 'Alice' },
+    { kind: 'file', path: 'documents/meeting-notes.docx', name: 'meeting-notes.docx', size: 256000, author: 'Bob' },
     {
       kind: 'file',
-      path: 'documents/超长文件名-2024年度第一季度产品规划评审会会议纪要与行动项跟踪清单-最终版-v3.2.1-已确认.pdf',
+      path: '超长文件名-2024年度第一季度产品规划评审会会议纪要与行动项跟踪清单-最终版-v3.2.1-已确认.pdf',
       name: '超长文件名-2024年度第一季度产品规划评审会会议纪要与行动项跟踪清单-最终版-v3.2.1-已确认.pdf',
-      size: 1048576
+      size: 1048576,
+      author: 'Alice'
     },
     {
       kind: 'folder',
@@ -27,16 +27,12 @@ const BaseExample = createWithRemoteLoader({
       kind: 'file',
       path: 'very-very-long-english-filename-without-spaces-product-requirements-document-final-review-copy-v12.docx',
       name: 'very-very-long-english-filename-without-spaces-product-requirements-document-final-review-copy-v12.docx',
-      size: 256000
+      size: 256000,
+      author: 'Bob'
     },
-    { kind: 'folder', path: 'images/', name: 'Images' },
-    { kind: 'file', path: 'images/logo.png', name: 'logo.png', size: 45000 },
-    { kind: 'file', path: 'images/banner.jpg', name: 'banner.jpg', size: 89000 },
-    { kind: 'folder', path: 'archives/', name: 'Archives' },
-    { kind: 'file', path: 'archives/project-backup.zip', name: 'project-backup.zip', size: 15728640 },
-    { kind: 'file', path: 'readme.md', name: 'readme.md', size: 3200 },
+    { kind: 'file', path: 'readme.md', name: 'readme.md', size: 3200, author: 'Alice' },
     { kind: 'file', path: 'config.json', name: 'config.json', size: 1200 }
-  ]);
+  ];
 
   return (
     <PureGlobal
@@ -52,23 +48,27 @@ const BaseExample = createWithRemoteLoader({
       }}
     >
       <InfoPage>
-        <InfoPage.Part title="文件系统浏览（含属性面板）">
+        <InfoPage.Part title="默认 PropertiesPanel">
+          <FileSystem items={items} title="My Files" defaultView="icons" propertiesPanel />
+        </InfoPage.Part>
+        <InfoPage.Part title="扩展 PropertiesPanel.Default / InfoRow / Section">
           <FileSystem
             items={items}
             title="My Files"
             defaultView="icons"
-            onFileOpen={entry => {
-              console.log('Open file:', entry);
-            }}
-            onSelectionChange={entries => {
-              console.log('Selection changed:', entries);
-            }}
             propertiesPanel={({ selectedEntries, index }) => (
-              <FileSystem.PropertiesPanel.Default
+              <PropertiesPanel.Default
                 selectedEntries={selectedEntries}
                 index={index}
                 extraInfo={({ entry }) =>
-                  entry ? <FileSystem.PropertiesPanel.InfoRow label="扩展字段" value={entry.id || entry.path} /> : null
+                  entry?.kind === 'file' ? <PropertiesPanel.InfoRow label="作者" value={entry.author} /> : null
+                }
+                extraSections={({ entry }) =>
+                  entry ? (
+                    <PropertiesPanel.Section title="更多">
+                      <PropertiesPanel.InfoRow label="路径" value={entry.path} />
+                    </PropertiesPanel.Section>
+                  ) : null
                 }
               />
             )}
