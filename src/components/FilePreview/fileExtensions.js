@@ -1,12 +1,28 @@
+import { globalParams } from '../../globalParams';
+
 export const PREVIEWABLE_FILE_PATTERN = /\.(txt|md|pdf|png|jpg|jpeg|gif|bmp|webp|svg|html|htm|doc|docx|xls|xlsx|ppt|pptx|csv|mp3|wav|ogg|aac|mp4|avi|mov|mkv|flv|zip|rar|7z|tar|gz|json)$/i;
 
 // Archive entries that can be previewed locally (excludes legacy Office formats
 // requiring Microsoft's online viewer and nested archives)
 export const ZIP_PREVIEWABLE_FILE_PATTERN = /\.(txt|md|pdf|png|jpg|jpeg|gif|bmp|webp|svg|html|htm|docx|xlsx|mp3|wav|ogg|aac|mp4|avi|mov|mkv|flv|json)$/i;
 
+const getExtension = source => {
+  if (typeof source !== 'string') {
+    return '';
+  }
+  const path = source.split('?')[0];
+  const match = path.toLowerCase().match(/\.([a-z0-9]+)$/);
+  return match ? match[1] : '';
+};
+
 export const canPreviewZipEntry = file => {
   const name = (file?.name || file?.path || '').split('?')[0];
-  return ZIP_PREVIEWABLE_FILE_PATTERN.test(name);
+  if (ZIP_PREVIEWABLE_FILE_PATTERN.test(name)) {
+    return true;
+  }
+  const ext = getExtension(name);
+  const previewType = ext && globalParams.previewExtensions?.[ext];
+  return !!(previewType && globalParams.previewMapping?.[previewType]);
 };
 
 export const ZIP_MAX_ARCHIVE_BYTES = 50 * 1024 * 1024;
@@ -58,7 +74,7 @@ export const getZipEntrySize = zipEntry => {
   return zipEntry._data?.uncompressedSize ?? 0;
 };
 
-const typeFormat = url => {
+const builtinTypeFormat = url => {
   if (typeof url !== 'string') {
     return 'unknown';
   }
@@ -95,6 +111,15 @@ const typeFormat = url => {
     return 'json';
   }
   return 'unknown';
+};
+
+const typeFormat = url => {
+  const builtin = builtinTypeFormat(url);
+  if (builtin !== 'unknown') {
+    return builtin;
+  }
+  const ext = getExtension(url);
+  return (ext && globalParams.previewExtensions?.[ext]) || 'unknown';
 };
 
 export default typeFormat;

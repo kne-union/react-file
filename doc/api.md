@@ -319,10 +319,14 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | defaultView | 'icons' \| 'list' \| 'columns' \| 'gallery' | 'list' | 默认视图模式 |
 | defaultPath | string | '' | 默认路径 |
 | className | string | - | 自定义类名 |
-| onSelectionChange | function(entry) | - | 选中项变化回调 |
+| toolbarExtra | ReactNode | - | 工具栏扩展区域（标题与视图切换之间） |
+| onSelectionChange | function(entries) | - | 选中项变化回调，参数为选中条目数组 |
+| onPathChange | function(path) | - | 当前文件夹路径变化回调 |
 | onFileOpen | function(entry) | - | 打开文件回调 |
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
+
+多选逻辑与 Windows / macOS 文件管理器一致：普通点击单选；Ctrl（Windows）/ Command（macOS）+ 点击切换选中；Shift + 点击按当前目录顺序区间选中。
 
 #### items 数据项
 
@@ -507,6 +511,35 @@ typeFormat(filename)
 | 类型 | 描述 |
 |------|------|
 | string | 文件类型标识，如'image'/'pdf'/'docx'等 |
+
+---
+
+### preset / globalParams
+
+全局参数预设（对齐 `@kne/table-view`），用于扩展或覆盖文件预览类型。
+
+```jsx
+import { preset, TextPreview } from '@kne/react-file';
+
+preset({
+  // 扩展名 -> 预览类型 key（内置识别不到时生效）
+  previewExtensions: {
+    log: 'txt',
+    dwg: 'cad'
+  },
+  // 预览类型 key -> 预览组件（可新增或覆盖内置）
+  previewMapping: {
+    cad: CadPreview // 自定义组件，props 含 url / filename 等
+  }
+});
+```
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| previewMapping | object | 合并到内置 `typeComponentMapping`，如 `{ pdf, image, cad: Comp }` |
+| previewExtensions | object | 扩展名（不含点）到类型 key 的映射，如 `{ dwg: 'cad' }` |
+
+也可通过 `components-core:File@preset` 在宿主初始化时调用。
 
 ---
 

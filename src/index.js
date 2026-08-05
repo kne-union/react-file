@@ -17,7 +17,8 @@ export {
   AudioPreview,
   VideoPreview,
   typeFormat,
-  typeFormatComponent
+  typeFormatComponent,
+  getPreviewMapping
 } from './components/FilePreview';
 export { default as FileButton, useFileModalProps, useFileModal, FileModal } from './components/FileButton';
 export { default as Image } from './components/Image';
@@ -26,3 +27,4 @@ export { default as FileList, OptionButtons as FileListOptionButtons } from './c
 export { default as FileUpload, FileInput, useFileUpload, defaultAccept, computedAccept } from './components/FileUpload';
 export { default as FileSystem } from './components/FileSystem';
 export { default as withOSSFile } from './hocs/withOSSFile';
+export { default as preset, globalParams } from './preset';

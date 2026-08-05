@@ -536,12 +536,14 @@ const BaseExample = createWithRemoteLoader({
         <InfoPage.Part title="JSON文件预览 - 默认黑色主题">
           <JsonPreview 
             url="https://jsonplaceholder.typicode.com/users"
+            collapsedFrom={0}
           />
         </InfoPage.Part>
         <InfoPage.Part title="JSON文件预览 - 白色主题">
           <JsonPreview 
             url="https://jsonplaceholder.typicode.com/users"
             theme="light"
+            collapsedFrom={0}
           />
         </InfoPage.Part>
         <InfoPage.Part title="JSON文件预览 - 从第2级开始收起">
@@ -610,6 +612,164 @@ const BaseExample = createWithRemoteLoader({
             }}
             onSelectionChange={entry => {
               console.log('Selection changed:', entry);
+            }}
+          />
+        </InfoPage.Part>
+      </InfoPage>
+    </PureGlobal>
+  );
+});
+
+render(<BaseExample />);
+
+```
+
+- FileSystem 扩展顶部菜单
+- 通过 toolbarExtra 在导航栏追加上传、新建文件夹、刷新、删除选中等自定义操作
+- _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),antd(antd),icons(@ant-design/icons),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { FileSystem } = _ReactFile;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
+const { Button, message, Space } = antd;
+const { DeleteOutlined, ReloadOutlined, UploadOutlined, FolderAddOutlined } = icons;
+const { useState } = React;
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
+})(({ remoteModules }) => {
+  const [PureGlobal, InfoPage] = remoteModules;
+  const [selectedEntries, setSelectedEntries] = useState([]);
+  const [items] = useState([
+    { kind: 'folder', path: 'documents/', name: 'Documents' },
+    { kind: 'file', path: 'documents/Q3-report.pdf', name: 'Q3-report.pdf', size: 1024000 },
+    { kind: 'file', path: 'documents/notes.md', name: 'notes.md', size: 3200 },
+    { kind: 'file', path: 'readme.txt', name: 'readme.txt', size: 1200 }
+  ]);
+
+  return (
+    <PureGlobal
+      preset={{
+        ajax: async api => ({ data: { code: 0, data: api.loader?.() } }),
+        apis: {
+          file: {
+            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL
+          }
+        }
+      }}
+    >
+      <InfoPage>
+        <InfoPage.Part title="扩展顶部菜单（toolbarExtra）">
+          <FileSystem
+            items={items}
+            title="My Files"
+            defaultView="list"
+            toolbarExtra={
+              <Space size={8}>
+                <Button size="small" icon={<UploadOutlined />} onClick={() => message.info('自定义上传')}>
+                  上传
+                </Button>
+                <Button size="small" icon={<FolderAddOutlined />} onClick={() => message.info('自定义新建文件夹')}>
+                  新建文件夹
+                </Button>
+                <Button
+                  size="small"
+                  icon={<ReloadOutlined />}
+                  onClick={() => message.success('已刷新')}
+                >
+                  刷新
+                </Button>
+                <Button
+                  size="small"
+                  danger
+                  icon={<DeleteOutlined />}
+                  disabled={!selectedEntries.length}
+                  onClick={() => message.info(&#96;已选择 ${selectedEntries.length} 项&#96;)}
+                >
+                  删除选中
+                </Button>
+              </Space>
+            }
+            onSelectionChange={entries => {
+              setSelectedEntries(entries || []);
+            }}
+            onFileOpen={entry => {
+              console.log('Open file:', entry);
+            }}
+          />
+        </InfoPage.Part>
+      </InfoPage>
+    </PureGlobal>
+  );
+});
+
+render(<BaseExample />);
+
+```
+
+- FileSystem 扩展预览类型
+- 通过 preset({ previewExtensions, previewMapping }) 扩展 .log / .dwg 等预览类型（对齐 table-view）
+- _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { FileSystem, FilePreview, preset } = _ReactFile;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
+const { useState } = React;
+
+const CadPreview = ({ filename, url }) => {
+  return (
+    <div style={{ padding: 24, background: '#fafafa', height: '100%' }}>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>自定义 CAD 预览</div>
+      <div>文件名：{filename || '-'}</div>
+      <div style={{ color: 'rgba(0,0,0,0.45)', marginTop: 4 }}>地址：{url || '-'}</div>
+    </div>
+  );
+};
+
+// 对齐 @kne/table-view：通过 preset 扩展预览类型
+preset({
+  previewExtensions: {
+    log: 'txt',
+    dwg: 'cad'
+  },
+  previewMapping: {
+    cad: CadPreview
+  }
+});
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
+})(({ remoteModules }) => {
+  const [PureGlobal, InfoPage] = remoteModules;
+  const [items] = useState([
+    { kind: 'folder', path: 'docs/', name: 'docs' },
+    { kind: 'file', path: 'docs/readme.txt', name: 'readme.txt', size: 128 },
+    { kind: 'file', path: 'docs/app.log', name: 'app.log', size: 256 },
+    { kind: 'file', path: 'docs/plan.dwg', name: 'plan.dwg', size: 1024 },
+    { kind: 'file', path: 'docs/report.pdf', name: 'report.pdf', size: 2048 }
+  ]);
+
+  return (
+    <PureGlobal
+      preset={{
+        ajax: async api => ({ data: { code: 0, data: api.loader?.() } }),
+        apis: {
+          file: {
+            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL
+          }
+        }
+      }}
+    >
+      <InfoPage>
+        <InfoPage.Part title="扩展预览类型（preset）">
+          <FileSystem
+            items={items}
+            title="Preview Ext"
+            defaultView="gallery"
+            canPreviewFile={entry => /\.(log|dwg|txt|pdf)$/i.test(entry.name || '')}
+            renderFilePreview={entry => <FilePreview src={entry.path} filename={entry.name} originName={entry.name} />}
+            onFileOpen={entry => {
+              console.log('Open file:', entry);
             }}
           />
         </InfoPage.Part>
@@ -945,10 +1105,14 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | defaultView | 'icons' \| 'list' \| 'columns' \| 'gallery' | 'list' | 默认视图模式 |
 | defaultPath | string | '' | 默认路径 |
 | className | string | - | 自定义类名 |
-| onSelectionChange | function(entry) | - | 选中项变化回调 |
+| toolbarExtra | ReactNode | - | 工具栏扩展区域（标题与视图切换之间） |
+| onSelectionChange | function(entries) | - | 选中项变化回调，参数为选中条目数组 |
+| onPathChange | function(path) | - | 当前文件夹路径变化回调 |
 | onFileOpen | function(entry) | - | 打开文件回调 |
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
+
+多选逻辑与 Windows / macOS 文件管理器一致：普通点击单选；Ctrl（Windows）/ Command（macOS）+ 点击切换选中；Shift + 点击按当前目录顺序区间选中。
 
 #### items 数据项
 
@@ -1133,6 +1297,35 @@ typeFormat(filename)
 | 类型 | 描述 |
 |------|------|
 | string | 文件类型标识，如'image'/'pdf'/'docx'等 |
+
+---
+
+### preset / globalParams
+
+全局参数预设（对齐 `@kne/table-view`），用于扩展或覆盖文件预览类型。
+
+```jsx
+import { preset, TextPreview } from '@kne/react-file';
+
+preset({
+  // 扩展名 -> 预览类型 key（内置识别不到时生效）
+  previewExtensions: {
+    log: 'txt',
+    dwg: 'cad'
+  },
+  // 预览类型 key -> 预览组件（可新增或覆盖内置）
+  previewMapping: {
+    cad: CadPreview // 自定义组件，props 含 url / filename 等
+  }
+});
+```
+
+| 属性 | 类型 | 说明 |
+|------|------|------|
+| previewMapping | object | 合并到内置 `typeComponentMapping`，如 `{ pdf, image, cad: Comp }` |
+| previewExtensions | object | 扩展名（不含点）到类型 key 的映射，如 `{ dwg: 'cad' }` |
+
+也可通过 `components-core:File@preset` 在宿主初始化时调用。
 
 ---
 

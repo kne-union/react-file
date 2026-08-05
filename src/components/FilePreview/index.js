@@ -14,4 +14,4 @@ export { default as VideoPreview } from './VideoPreview';
 export { default as MarkdownPreview } from './MarkdownPreview';
 export { default as ZipPreview } from './ZipPreview';
 export { default as JsonPreview } from './JsonPreview';
-export { default as typeFormat, typeComponentMapping, typeFormatComponent } from './typeFormat';
+export { default as typeFormat, typeComponentMapping, typeFormatComponent, getPreviewMapping } from './typeFormat';

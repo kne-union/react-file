@@ -61,9 +61,9 @@ const JsonPreviewInner = ({ url, className, maxWidth, theme = 'dark', collapsedF
       <div className={style['text-outer']}>
         {error ? (
           <div className={style['error']}>{formatMessage({ id: 'FilePreview.fileLoadedError' })}</div>
-        ) : (
+        ) : !loading ? (
           <JsonView data={data} theme={theme} collapsedFrom={collapsedFrom} searchable={searchable} collapsable={collapsable} indentWidth={indentWidth} showLineNumbers={showLineNumbers} />
-        )}
+        ) : null}
       </div>
     </div>
   );

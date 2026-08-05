@@ -38,7 +38,8 @@ const locale = {
   'FileSystem.search': '搜索',
   'FileSystem.resultCount': '个结果',
   'FileSystem.itemCount': '个项目',
-  'FileSystem.selected': '已选择 "{name}"'
+  'FileSystem.selected': '已选择 "{name}"',
+  'FileSystem.selectedCount': '已选择 {count} 项'
 };
 
 export default locale;

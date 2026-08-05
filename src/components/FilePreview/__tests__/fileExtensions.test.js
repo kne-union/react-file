@@ -67,3 +67,33 @@ describe('createPreviewMapping', () => {
     expect(inner.typeFormatComponent('a.zip')).toBe(inner.typeComponentMapping.unknown);
   });
 });
+
+describe('preset previewMapping / previewExtensions', () => {
+  let preset;
+  let typeFormat;
+  let typeFormatComponent;
+  let getPreviewMapping;
+  let canPreviewZipEntry;
+  let globalParams;
+
+  beforeEach(() => {
+    jest.resetModules();
+    ({ default: preset, globalParams } = require('../../../preset'));
+    ({ default: typeFormat, canPreviewZipEntry } = require('../fileExtensions'));
+    ({ typeFormatComponent, getPreviewMapping } = require('../previewMapping'));
+  });
+
+  test('registers custom preview type via preset', () => {
+    const CustomPreview = () => null;
+    preset({
+      previewExtensions: { dwg: 'cad' },
+      previewMapping: { cad: CustomPreview }
+    });
+
+    expect(typeFormat('plan.dwg')).toBe('cad');
+    expect(typeFormatComponent('plan.dwg')).toBe(CustomPreview);
+    expect(getPreviewMapping().cad).toBe(CustomPreview);
+    expect(canPreviewZipEntry({ name: 'plan.dwg' })).toBe(true);
+    expect(globalParams.previewExtensions.dwg).toBe('cad');
+  });
+});

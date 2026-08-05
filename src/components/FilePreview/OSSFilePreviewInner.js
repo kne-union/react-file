@@ -1,5 +1,5 @@
 import withOSSFile from '../../hocs/withOSSFile';
-import { typeComponentMapping } from './typeFormat';
+import { getPreviewMapping } from './previewMapping';
 import resolvePreviewType from './resolvePreviewType';
 import useStaticUrl from '../../common/useStaticUrl';
 import PreviewSuspense from './PreviewSuspense';
@@ -7,7 +7,8 @@ import PreviewSuspense from './PreviewSuspense';
 const OSSFilePreviewInner = withOSSFile(({ data, id, staticUrl: staticUrlProps, className, fetchApi, filename, render, ...props }) => {
   const fileUrl = useStaticUrl({ staticUrl: staticUrlProps, url: data });
   const previewType = resolvePreviewType(data, filename);
-  const PreviewComponent = typeComponentMapping[previewType] || typeComponentMapping.unknown;
+  const mapping = getPreviewMapping();
+  const PreviewComponent = mapping[previewType] || mapping.unknown;
 
   if (typeof render === 'function') {
     return render({

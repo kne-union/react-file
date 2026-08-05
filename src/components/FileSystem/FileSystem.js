@@ -9,7 +9,10 @@ import { buildFileSystemIndex, buildNestedEntries, formatByteSize, normalizeFold
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
 
-const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'list', defaultPath = '', onSelectionChange, onFileOpen, renderFilePreview, canPreviewFile }) => {
+const isToggleModifier = event => !!(event && (event.metaKey || event.ctrlKey));
+const isRangeModifier = event => !!(event && event.shiftKey);
+
+const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'list', defaultPath = '', toolbarExtra, onSelectionChange, onPathChange, onFileOpen, renderFilePreview, canPreviewFile }) => {
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
   const [view, setView] = useState(defaultView);
@@ -17,7 +20,8 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
     index: 0,
     stack: [normalizeFolderPath(defaultPath)]
   }));
-  const [selectedPath, setSelectedPath] = useState(null);
+  const [selectedPaths, setSelectedPaths] = useState([]);
+  const [selectionAnchorPath, setSelectionAnchorPath] = useState(null);
   const [searchInput, setSearchInput] = useState('');
   const [expandedKeys, setExpandedKeys] = useState([]);
   const [columnAnchorPath, setColumnAnchorPath] = useState('');
@@ -27,10 +31,9 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
   const searchQuery = normalizeSearchQuery(searchInput);
   const isSearching = searchQuery.length > 0;
 
-  const selectedEntry = useMemo(() => {
-    if (!selectedPath) return null;
-    return index.files.get(selectedPath) || index.folders.get(selectedPath) || null;
-  }, [index, selectedPath]);
+  const selectedEntries = useMemo(() => {
+    return selectedPaths.map(path => index.files.get(path) || index.folders.get(path)).filter(Boolean);
+  }, [index, selectedPaths]);
 
   const currentEntries = useMemo(() => {
     const entries = index.children.get(currentPath) || [];
@@ -57,44 +60,101 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
     return ['', ...chain];
   }, [columnAnchorPath, currentPath]);
 
-  const selectEntry = useCallback(
-    entry => {
-      const path = entry?.path ?? null;
-      setSelectedPath(path);
-      onSelectionChange?.(entry);
+  const emitSelectionChange = useCallback(
+    paths => {
+      const entries = paths.map(path => index.files.get(path) || index.folders.get(path)).filter(Boolean);
+      onSelectionChange?.(entries);
     },
-    [onSelectionChange]
+    [index, onSelectionChange]
   );
 
-  const navigateTo = useCallback(folderPath => {
-    const path = normalizeFolderPath(folderPath);
-    setHistory(previous => {
-      if (previous.stack[previous.index] === path) return previous;
-      const stack = [...previous.stack.slice(0, previous.index + 1), path];
-      return { index: stack.length - 1, stack };
-    });
-    setSearchInput('');
-    setSelectedPath(null);
-    setColumnAnchorPath(path);
-  }, []);
+  const clearSelection = useCallback(() => {
+    setSelectedPaths([]);
+    setSelectionAnchorPath(null);
+    onSelectionChange?.([]);
+  }, [onSelectionChange]);
+
+  const selectEntry = useCallback(
+    (entry, event) => {
+      const path = entry?.path ?? null;
+      if (!path) {
+        return;
+      }
+
+      let nextPaths;
+      let nextAnchor = path;
+
+      if (isRangeModifier(event) && selectionAnchorPath) {
+        const anchorIndex = currentEntries.findIndex(item => item.path === selectionAnchorPath);
+        const targetIndex = currentEntries.findIndex(item => item.path === path);
+
+        if (anchorIndex >= 0 && targetIndex >= 0) {
+          const [start, end] = anchorIndex < targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex];
+          nextPaths = currentEntries.slice(start, end + 1).map(item => item.path);
+          nextAnchor = selectionAnchorPath;
+        } else {
+          nextPaths = [path];
+        }
+      } else if (isToggleModifier(event)) {
+        if (selectedPaths.includes(path)) {
+          nextPaths = selectedPaths.filter(item => item !== path);
+        } else {
+          nextPaths = [...selectedPaths, path];
+        }
+      } else {
+        nextPaths = [path];
+      }
+
+      setSelectedPaths(nextPaths);
+      setSelectionAnchorPath(nextAnchor);
+      emitSelectionChange(nextPaths);
+    },
+    [currentEntries, emitSelectionChange, selectedPaths, selectionAnchorPath]
+  );
+
+  const navigateTo = useCallback(
+    folderPath => {
+      const path = normalizeFolderPath(folderPath);
+      setHistory(previous => {
+        if (previous.stack[previous.index] === path) return previous;
+        const stack = [...previous.stack.slice(0, previous.index + 1), path];
+        return { index: stack.length - 1, stack };
+      });
+      setSearchInput('');
+      clearSelection();
+      setColumnAnchorPath(path);
+      onPathChange?.(path);
+    },
+    [clearSelection, onPathChange]
+  );
 
   const goBack = useCallback(() => {
-    setHistory(previous => ({
-      ...previous,
-      index: Math.max(0, previous.index - 1)
-    }));
+    setHistory(previous => {
+      const index = Math.max(0, previous.index - 1);
+      const path = previous.stack[index] ?? '';
+      queueMicrotask(() => onPathChange?.(path));
+      return {
+        ...previous,
+        index
+      };
+    });
     setSearchInput('');
-    setSelectedPath(null);
-  }, []);
+    clearSelection();
+  }, [clearSelection, onPathChange]);
 
   const goForward = useCallback(() => {
-    setHistory(previous => ({
-      ...previous,
-      index: Math.min(previous.stack.length - 1, previous.index + 1)
-    }));
+    setHistory(previous => {
+      const index = Math.min(previous.stack.length - 1, previous.index + 1);
+      const path = previous.stack[index] ?? '';
+      queueMicrotask(() => onPathChange?.(path));
+      return {
+        ...previous,
+        index
+      };
+    });
     setSearchInput('');
-    setSelectedPath(null);
-  }, []);
+    clearSelection();
+  }, [clearSelection, onPathChange]);
 
   const openEntry = useCallback(
     entry => {
@@ -193,25 +253,25 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
     }
 
     if (view === 'icons') {
-      return <IconsView entries={currentEntries} selectedPath={selectedPath} onSelect={selectEntry} onOpen={openEntry} />;
+      return <IconsView entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} />;
     }
 
     if (view === 'list') {
       if (isSearching) {
-        return <ListTableView columns={columns} entries={currentEntries} selectedPath={selectedPath} onSelect={selectEntry} onOpen={openEntry} />;
+        return <ListTableView columns={columns} entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} />;
       }
 
-      return <ListView treeData={treeData} expandedKeys={expandedKeys} onExpand={setExpandedKeys} selectedPath={selectedPath} onSelect={selectEntry} onOpen={openEntry} />;
+      return <ListView treeData={treeData} expandedKeys={expandedKeys} onExpand={setExpandedKeys} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} />;
     }
 
     if (view === 'columns') {
-      return <ColumnsView columnPaths={columnPaths} index={index} selectedPath={selectedPath} onSelect={selectEntry} onOpen={openEntry} onNavigateColumn={setColumnAnchorPath} />;
+      return <ColumnsView columnPaths={columnPaths} index={index} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} onNavigateColumn={setColumnAnchorPath} />;
     }
 
     return (
       <GalleryView
         entries={currentEntries}
-        selectedPath={selectedPath}
+        selectedPaths={selectedPaths}
         onSelect={selectEntry}
         onOpen={openEntry}
         onNavigate={entry => navigateTo(entry.path)}
@@ -221,6 +281,13 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
       />
     );
   };
+
+  const footerSelection =
+    selectedEntries.length > 1 ? (
+      <span>· {formatMessage({ id: 'FileSystem.selectedCount' }, { count: selectedEntries.length })}</span>
+    ) : selectedEntries.length === 1 ? (
+      <span>· {formatMessage({ id: 'FileSystem.selected' }, { name: selectedEntries[0].name })}</span>
+    ) : null;
 
   return (
     <div className={classnames(style.root, className)}>
@@ -233,6 +300,7 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
         <div className={style['toolbar-title']} title={currentFolderName}>
           {currentFolderName}
         </div>
+        {toolbarExtra ? <div className={style['toolbar-extra']}>{toolbarExtra}</div> : null}
         <Segmented size="small" className={style['view-switch']} value={view} onChange={setView} options={segmentedOptions} />
       </div>
       <div className={style.content}>{renderContent()}</div>
@@ -240,17 +308,17 @@ const FileSystemInner = ({ items, className, title = 'Files', defaultView = 'lis
         <span>
           {currentEntries.length} {isSearching ? formatMessage({ id: 'FileSystem.resultCount' }) : formatMessage({ id: 'FileSystem.itemCount' })}
         </span>
-        {selectedEntry ? <span>· {formatMessage({ id: 'FileSystem.selected' }, { name: selectedEntry.name })}</span> : null}
+        {footerSelection}
       </div>
     </div>
   );
 };
 
-const IconsView = ({ entries, selectedPath, onSelect, onOpen }) => {
+const IconsView = ({ entries, selectedPaths, onSelect, onOpen }) => {
   return (
     <div className={style['icons-grid']}>
       {entries.map(entry => (
-        <div key={entry.path} className={classnames(style['icon-item'], selectedPath === entry.path && style.selected)} onClick={() => onSelect(entry)} onDoubleClick={() => onOpen(entry)}>
+        <div key={entry.path} className={classnames(style['icon-item'], selectedPaths.includes(entry.path) && style.selected)} onClick={event => onSelect(entry, event)} onDoubleClick={() => onOpen(entry)}>
           <EntryIcon entry={entry} size="lg" />
           <span className={style['icon-label']}>{entry.name}</span>
         </div>
@@ -259,7 +327,7 @@ const IconsView = ({ entries, selectedPath, onSelect, onOpen }) => {
   );
 };
 
-const ListView = ({ treeData, expandedKeys, onExpand, selectedPath, onSelect, onOpen }) => {
+const ListView = ({ treeData, expandedKeys, onExpand, selectedPaths, onSelect, onOpen }) => {
   const handleDoubleClick = useCallback(
     (_, node) => {
       const entry = node.entry;
@@ -285,12 +353,22 @@ const ListView = ({ treeData, expandedKeys, onExpand, selectedPath, onSelect, on
 
   return (
     <div className={style['tree-wrap']}>
-      <Tree showIcon blockNode treeData={treeData} expandedKeys={expandedKeys} selectedKeys={selectedPath ? [selectedPath] : []} onExpand={onExpand} onSelect={(_, info) => onSelect(info.node.entry)} onDoubleClick={handleDoubleClick} />
+      <Tree
+        showIcon
+        blockNode
+        multiple
+        treeData={treeData}
+        expandedKeys={expandedKeys}
+        selectedKeys={selectedPaths}
+        onExpand={onExpand}
+        onSelect={(_, info) => onSelect(info.node.entry, info.nativeEvent)}
+        onDoubleClick={handleDoubleClick}
+      />
     </div>
   );
 };
 
-const ListTableView = ({ columns, entries, selectedPath, onSelect, onOpen }) => {
+const ListTableView = ({ columns, entries, selectedPaths, onSelect, onOpen }) => {
   return (
     <Table
       className={style['list-table']}
@@ -299,16 +377,16 @@ const ListTableView = ({ columns, entries, selectedPath, onSelect, onOpen }) => 
       rowKey="path"
       columns={columns}
       dataSource={entries}
-      rowClassName={record => (record.path === selectedPath ? 'ant-table-row-selected' : '')}
+      rowClassName={record => (selectedPaths.includes(record.path) ? 'ant-table-row-selected' : '')}
       onRow={record => ({
-        onClick: () => onSelect(record),
+        onClick: event => onSelect(record, event),
         onDoubleClick: () => onOpen(record)
       })}
     />
   );
 };
 
-const ColumnsView = ({ columnPaths, index, selectedPath, onSelect, onOpen, onNavigateColumn }) => {
+const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNavigateColumn }) => {
   return (
     <div className={style['columns-wrap']}>
       {columnPaths.map(path => {
@@ -319,9 +397,9 @@ const ColumnsView = ({ columnPaths, index, selectedPath, onSelect, onOpen, onNav
             {entries.map(entry => (
               <div
                 key={entry.path}
-                className={classnames(style['column-item'], selectedPath === entry.path && style.selected)}
-                onClick={() => {
-                  onSelect(entry);
+                className={classnames(style['column-item'], selectedPaths.includes(entry.path) && style.selected)}
+                onClick={event => {
+                  onSelect(entry, event);
                   if (entry.kind === 'folder') {
                     onNavigateColumn(entry.path);
                   }
@@ -340,12 +418,13 @@ const ColumnsView = ({ columnPaths, index, selectedPath, onSelect, onOpen, onNav
   );
 };
 
-const GalleryView = ({ entries, selectedPath, onSelect, onOpen, onNavigate, renderFilePreview, canPreviewFile, formatMessage }) => {
-  const selectedEntry = entries.find(entry => entry.path === selectedPath) || entries[0] || null;
+const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, onNavigate, renderFilePreview, canPreviewFile, formatMessage }) => {
+  const primaryPath = selectedPaths[selectedPaths.length - 1];
+  const selectedEntry = entries.find(entry => entry.path === primaryPath) || entries[0] || null;
 
-  const handleItemClick = entry => {
-    onSelect(entry);
-    if (entry.kind === 'folder') {
+  const handleItemClick = (entry, event) => {
+    onSelect(entry, event);
+    if (entry.kind === 'folder' && !isToggleModifier(event) && !isRangeModifier(event)) {
       onNavigate?.(entry);
     }
   };
@@ -390,8 +469,8 @@ const GalleryView = ({ entries, selectedPath, onSelect, onOpen, onNavigate, rend
           {entries.map(entry => (
             <div
               key={entry.path}
-              className={classnames(style['gallery-film-item'], selectedEntry?.path === entry.path && style.selected)}
-              onClick={() => handleItemClick(entry)}
+              className={classnames(style['gallery-film-item'], selectedPaths.includes(entry.path) && style.selected)}
+              onClick={event => handleItemClick(entry, event)}
               onDoubleClick={() => {
                 if (entry.kind === 'folder') {
                   onOpen(entry);
