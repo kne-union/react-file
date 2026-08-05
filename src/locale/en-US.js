@@ -38,7 +38,8 @@ const locale = {
   'FileSystem.search': 'Search',
   'FileSystem.resultCount': 'results',
   'FileSystem.itemCount': 'items',
-  'FileSystem.selected': 'Selected "{name}"'
+  'FileSystem.selected': 'Selected "{name}"',
+  'FileSystem.selectedCount': 'Selected {count} items'
 };
 
 export default locale;

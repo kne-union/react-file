@@ -1,2 +1,2 @@
 export { default } from './fileExtensions';
-export { typeComponentMapping, typeFormatComponent } from './previewMapping';
+export { typeComponentMapping, typeFormatComponent, getPreviewMapping } from './previewMapping';

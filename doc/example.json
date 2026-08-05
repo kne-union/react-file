@@ -237,6 +237,52 @@
           "packageName": "@kne/remote-loader"
         }
       ]
+    },
+    {
+      "title": "FileSystem 扩展顶部菜单",
+      "description": "通过 toolbarExtra 在导航栏追加上传、新建文件夹、刷新、删除选中等自定义操作",
+      "code": "./file-system-toolbar-extra.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "icons",
+          "packageName": "@ant-design/icons"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "FileSystem 扩展预览类型",
+      "description": "通过 preset({ previewExtensions, previewMapping }) 扩展 .log / .dwg 等预览类型（对齐 table-view）",
+      "code": "./file-system-preview-preset.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
     }
   ]
 }
