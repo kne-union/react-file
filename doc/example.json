@@ -217,7 +217,7 @@
     },
     {
       "title": "FileSystem",
-      "description": "文件系统浏览",
+      "description": "文件系统浏览；选中后右侧属性面板（可关闭），也可传 function 自定义内容",
       "code": "./file-system.js",
       "scope": [
         {
@@ -277,6 +277,29 @@
         },
         {
           "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
+      "title": "FileSystem.PropertiesPanel",
+      "description": "使用 FileSystem.PropertiesPanel.Default / InfoRow / Section 扩展属性面板显示字段",
+      "code": "./file-system-properties-panel.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
         },
         {
           "name": "remoteLoader",

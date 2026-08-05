@@ -39,7 +39,31 @@ const locale = {
   'FileSystem.resultCount': 'results',
   'FileSystem.itemCount': 'items',
   'FileSystem.selected': 'Selected "{name}"',
-  'FileSystem.selectedCount': 'Selected {count} items'
+  'FileSystem.selectedCount': 'Selected {count} items',
+  'FileSystem.properties': 'Info',
+  'FileSystem.propertiesClose': 'Close',
+  'FileSystem.propertiesInfo': 'Information',
+  'FileSystem.propertiesKind': 'Kind',
+  'FileSystem.propertiesType': 'Type',
+  'FileSystem.propertiesArchiveLabel': '{type} Document',
+  'FileSystem.propertiesFolderSubtitle': '{folders} folders, {files} files',
+  'FileSystem.propertiesFolderCountPart': '{count} folders',
+  'FileSystem.propertiesFileCountPart': '{count} files',
+  'FileSystem.propertiesCountSeparator': ', ',
+  'FileSystem.propertiesFolderCount': 'Folders',
+  'FileSystem.propertiesFileCount': 'Files',
+  'FileSystem.propertiesCountValue': '{count}',
+  'FileSystem.propertiesCreatedAt': 'Created',
+  'FileSystem.propertiesUpdatedAt': 'Modified',
+  'FileSystem.propertiesLastOpenedAt': 'Last opened',
+  'FileSystem.propertiesPath': 'Where',
+  'FileSystem.propertiesMultiSummary': '{total} selected ({detail})',
+  'FileSystem.actionView': 'View',
+  'FileSystem.actionReplace': 'Replace',
+  'FileSystem.actionRename': 'Rename',
+  'FileSystem.actionDownload': 'Download',
+  'FileSystem.actionMove': 'Move to',
+  'FileSystem.actionDelete': 'Delete'
 };
 
 export default locale;

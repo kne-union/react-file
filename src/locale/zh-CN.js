@@ -39,7 +39,31 @@ const locale = {
   'FileSystem.resultCount': '个结果',
   'FileSystem.itemCount': '个项目',
   'FileSystem.selected': '已选择 "{name}"',
-  'FileSystem.selectedCount': '已选择 {count} 项'
+  'FileSystem.selectedCount': '已选择 {count} 项',
+  'FileSystem.properties': '详细信息',
+  'FileSystem.propertiesClose': '关闭',
+  'FileSystem.propertiesInfo': '信息',
+  'FileSystem.propertiesKind': '种类',
+  'FileSystem.propertiesType': '类型',
+  'FileSystem.propertiesArchiveLabel': '{type} 文档',
+  'FileSystem.propertiesFolderSubtitle': '{folders} 个文件夹，{files} 个文件',
+  'FileSystem.propertiesFolderCountPart': '{count} 个文件夹',
+  'FileSystem.propertiesFileCountPart': '{count} 个文件',
+  'FileSystem.propertiesCountSeparator': '，',
+  'FileSystem.propertiesFolderCount': '文件夹',
+  'FileSystem.propertiesFileCount': '文件',
+  'FileSystem.propertiesCountValue': '{count} 个',
+  'FileSystem.propertiesCreatedAt': '创建时间',
+  'FileSystem.propertiesUpdatedAt': '修改时间',
+  'FileSystem.propertiesLastOpenedAt': '上次打开时间',
+  'FileSystem.propertiesPath': '位置',
+  'FileSystem.propertiesMultiSummary': '已选择 {total} 项（{detail}）',
+  'FileSystem.actionView': '查看',
+  'FileSystem.actionReplace': '替换',
+  'FileSystem.actionRename': '重命名',
+  'FileSystem.actionDownload': '下载',
+  'FileSystem.actionMove': '移动到',
+  'FileSystem.actionDelete': '删除'
 };
 
 export default locale;
