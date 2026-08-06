@@ -6,6 +6,7 @@ import { App } from 'antd';
 import uniqueId from 'lodash/uniqueId';
 import { createIntl } from '@kne/react-intl';
 import computedAccept from './computedAccept';
+import { uploadFile } from './uploadFile';
 
 const formatAcceptLabel = accept => {
   if (!accept) {
@@ -21,7 +22,7 @@ const formatAcceptLabel = accept => {
 const useFileUpload = p => {
   const { locale } = useContext();
   const { formatMessage } = createIntl({ locale, namespace: 'react-file' });
-  const { multiple, fileSize, maxLength, value, concurrentCount, accept, onAdd, onError, onSave, onChange, onUpload } = Object.assign(
+  const { multiple, fileSize, maxLength, value, concurrentCount, accept, onAdd, onError, onSave, onChange, onUpload, directory } = Object.assign(
     {},
     {
       concurrentCount: 1,
@@ -108,8 +109,14 @@ const useFileUpload = p => {
             });
           }
           onAdd && (await Promise.resolve(onAdd(file)));
-          const uploadFun = onUpload ? onUpload : apis.file?.upload;
-          const { data } = await deferred(() => uploadFun({ file }));
+          const { data } = await deferred(() =>
+            uploadFile({
+              file,
+              directory,
+              onUpload,
+              apis
+            })
+          );
 
           if (data.code !== 0) {
             catchError(
