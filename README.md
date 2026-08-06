@@ -49,7 +49,7 @@ React文件操作组件库，提供文件上传、多格式预览、下载、列
 图片组件，支持默认头像、性别区分的头像显示，以及加载失败时的占位图。
 
 #### FileSystem
-文件系统浏览组件，提供图标、列表、分栏、画廊四种视图，支持导航历史和搜索。
+文件系统浏览组件，提供图标、列表、分栏、画廊四种视图，支持导航历史、搜索与异步分页虚拟滚动（大数据目录）。
 
 #### PrintButton
 打印按钮组件，用于触发浏览器打印功能。
@@ -641,6 +641,490 @@ const BaseExample = createWithRemoteLoader({
               />
             )}
           />
+        </InfoPage.Part>
+      </InfoPage>
+    </PureGlobal>
+  );
+});
+
+render(<BaseExample />);
+
+```
+
+- FileSystem 虚拟滚动
+- 开启异步分页虚拟滚动：模拟 40 个文件夹 + 960 个文件，按可视区域延迟加载并占位
+- _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { FileSystem, calcPageSize } = _ReactFile;
+const { createWithRemoteLoader } = remoteLoader;
+const { useCallback, useRef, useState } = React;
+
+const FOLDER_COUNT = 40;
+const FILE_COUNT = 960;
+const NEST_FILE_COUNT = 12;
+
+const pad = (n, width = 4) => String(n).padStart(width, '0');
+
+/** 按 parentPath 索引的子节点（含多层） */
+const childrenByPath = new Map();
+
+const addChild = (parentPath, entry) => {
+  const key = parentPath || '';
+  if (!childrenByPath.has(key)) {
+    childrenByPath.set(key, []);
+  }
+  childrenByPath.get(key).push(entry);
+};
+
+const folderItems = [];
+
+const registerFolder = ({ id, path, name, parentId, parentPath }) => {
+  const item = { kind: 'folder', path, name, id, parentId, parentPath };
+  folderItems.push(item);
+  addChild(parentPath || '', { ...item });
+  return item;
+};
+
+registerFolder({ id: 'folder-bulk', path: 'bulk/', name: 'bulk', parentPath: '' });
+
+for (let i = 0; i < FOLDER_COUNT; i += 1) {
+  const n = pad(i + 1, 2);
+  const folderId = &#96;folder-${n}&#96;;
+  const folderPath = &#96;bulk/folder-${n}/&#96;;
+  registerFolder({
+    id: folderId,
+    path: folderPath,
+    name: &#96;folder-${n}&#96;,
+    parentId: 'folder-bulk',
+    parentPath: 'bulk/'
+  });
+
+  // 前 5 个文件夹挂二级 / 三级，方便测分栏
+  if (i < 5) {
+    for (let j = 1; j <= 3; j += 1) {
+      const midId = &#96;folder-${n}-mid-${j}&#96;;
+      const midPath = &#96;${folderPath}mid-${j}/&#96;;
+      registerFolder({
+        id: midId,
+        path: midPath,
+        name: &#96;mid-${j}&#96;,
+        parentId: folderId,
+        parentPath: folderPath
+      });
+      for (let k = 1; k <= 4; k += 1) {
+        addChild(midPath, {
+          kind: 'file',
+          path: &#96;${midPath}file-${k}.txt&#96;,
+          name: &#96;file-${k}.txt&#96;,
+          id: &#96;file-${n}-mid-${j}-${k}&#96;,
+          parentId: midId,
+          parentPath: midPath,
+          size: 2048 + k,
+          mimetype: 'text/plain'
+        });
+      }
+      if (j === 1) {
+        const deepId = &#96;folder-${n}-deep&#96;;
+        const deepPath = &#96;${midPath}deep/&#96;;
+        registerFolder({
+          id: deepId,
+          path: deepPath,
+          name: 'deep',
+          parentId: midId,
+          parentPath: midPath
+        });
+        for (let k = 1; k <= NEST_FILE_COUNT; k += 1) {
+          addChild(deepPath, {
+            kind: 'file',
+            path: &#96;${deepPath}deep-${pad(k, 2)}.txt&#96;,
+            name: &#96;deep-${pad(k, 2)}.txt&#96;,
+            id: &#96;file-${n}-deep-${k}&#96;,
+            parentId: deepId,
+            parentPath: deepPath,
+            size: 4096 + k,
+            mimetype: 'text/plain'
+          });
+        }
+      }
+    }
+    for (let k = 1; k <= 6; k += 1) {
+      addChild(folderPath, {
+        kind: 'file',
+        path: &#96;${folderPath}local-${k}.txt&#96;,
+        name: &#96;local-${k}.txt&#96;,
+        id: &#96;file-${n}-local-${k}&#96;,
+        parentId: folderId,
+        parentPath: folderPath,
+        size: 1536 + k,
+        mimetype: 'text/plain'
+      });
+    }
+  }
+}
+
+for (let i = 0; i < FILE_COUNT; i += 1) {
+  const n = pad(i + 1);
+  addChild('bulk/', {
+    kind: 'file',
+    path: &#96;bulk/file-${n}.txt&#96;,
+    name: &#96;file-${n}.txt&#96;,
+    id: &#96;file-${n}&#96;,
+    parentId: 'folder-bulk',
+    parentPath: 'bulk/',
+    size: 1024 + i,
+    mimetype: 'text/plain'
+  });
+}
+
+/** 独立多层树：设计稿 / 交付物 */
+registerFolder({ id: 'folder-nest', path: 'nest/', name: 'nest', parentPath: '' });
+['design', 'delivery', 'archive'].forEach((level1, li) => {
+  const level1Id = &#96;folder-nest-${level1}&#96;;
+  const level1Path = &#96;nest/${level1}/&#96;;
+  registerFolder({
+    id: level1Id,
+    path: level1Path,
+    name: level1,
+    parentId: 'folder-nest',
+    parentPath: 'nest/'
+  });
+  addChild(level1Path, {
+    kind: 'file',
+    path: &#96;${level1Path}readme.md&#96;,
+    name: 'readme.md',
+    id: &#96;file-nest-${level1}-readme&#96;,
+    parentId: level1Id,
+    parentPath: level1Path,
+    size: 256,
+    mimetype: 'text/markdown'
+  });
+  const level2Names = li === 0 ? ['mobile', 'desktop'] : li === 1 ? ['client-a', 'client-b'] : ['2024', '2025'];
+  level2Names.forEach((level2, lj) => {
+    const level2Id = &#96;folder-nest-${level1}-${level2}&#96;;
+    const level2Path = &#96;${level1Path}${level2}/&#96;;
+    registerFolder({
+      id: level2Id,
+      path: level2Path,
+      name: level2,
+      parentId: level1Id,
+      parentPath: level1Path
+    });
+    for (let k = 1; k <= 5; k += 1) {
+      addChild(level2Path, {
+        kind: 'file',
+        path: &#96;${level2Path}shot-${k}.png&#96;,
+        name: &#96;shot-${k}.png&#96;,
+        id: &#96;file-nest-${level1}-${level2}-${k}&#96;,
+        parentId: level2Id,
+        parentPath: level2Path,
+        size: 8192 + k,
+        mimetype: 'image/png'
+      });
+    }
+    if (li === 0 && lj === 0) {
+      const level3Id = 'folder-nest-design-mobile-icons';
+      const level3Path = &#96;${level2Path}icons/&#96;;
+      registerFolder({
+        id: level3Id,
+        path: level3Path,
+        name: 'icons',
+        parentId: level2Id,
+        parentPath: level2Path
+      });
+      for (let k = 1; k <= NEST_FILE_COUNT; k += 1) {
+        addChild(level3Path, {
+          kind: 'file',
+          path: &#96;${level3Path}icon-${pad(k, 2)}.svg&#96;,
+          name: &#96;icon-${pad(k, 2)}.svg&#96;,
+          id: &#96;file-nest-icon-${k}&#96;,
+          parentId: level3Id,
+          parentPath: level3Path,
+          size: 512 + k,
+          mimetype: 'image/svg+xml'
+        });
+      }
+    }
+  });
+});
+
+const getSourceByPath = path => {
+  const list = childrenByPath.get(path || '') || [];
+  return list.slice().sort((left, right) => {
+    const leftFolder = left.kind === 'folder' ? 0 : 1;
+    const rightFolder = right.kind === 'folder' ? 0 : 1;
+    if (leftFolder !== rightFolder) {
+      return leftFolder - rightFolder;
+    }
+    return String(left.name).localeCompare(String(right.name), undefined, { numeric: true, sensitivity: 'base' });
+  });
+};
+
+const emptyListing = total => ({
+  entries: new Array(Math.max(0, total || 0)),
+  totalCount: Math.max(0, total || 0),
+  loadingIndexes: new Set(),
+  ready: false
+});
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
+})(({ remoteModules }) => {
+  const [PureGlobal, InfoPage] = remoteModules;
+  const [currentPath, setCurrentPath] = useState('bulk/');
+  /** 按目录 path 隔离的稀疏分页；分栏展开列靠 columnPath 写入这里 */
+  const [columnListings, setColumnListings] = useState(() => {
+    const source = getSourceByPath('bulk/');
+    return { 'bulk/': emptyListing(source.length) };
+  });
+  const cacheRef = useRef(new Map());
+  const inflightRef = useRef(new Map());
+  const perPageRef = useRef(new Map());
+  const pathRef = useRef('bulk/');
+
+  const currentListing = columnListings[currentPath] || emptyListing(0);
+  const entries = currentListing.entries;
+  const totalCount = currentListing.totalCount;
+  const loadingIndexes = currentListing.loadingIndexes;
+  const ready = currentListing.ready;
+
+  const updateListing = useCallback((path, patch) => {
+    const key = path || '';
+    setColumnListings(previous => {
+      const current = previous[key] || emptyListing(0);
+      // 禁止把已有数据的列写成空（展开其它列时绝不能误伤）
+      const nextTotal = patch.totalCount !== undefined ? patch.totalCount : current.totalCount;
+      const nextEntries = patch.entries !== undefined ? patch.entries : current.entries;
+      if (current.ready && current.totalCount > 0 && nextTotal === 0) {
+        return previous;
+      }
+      return {
+        ...previous,
+        [key]: {
+          entries: nextEntries,
+          totalCount: nextTotal,
+          loadingIndexes: patch.loadingIndexes !== undefined ? patch.loadingIndexes : current.loadingIndexes,
+          ready: patch.ready !== undefined ? patch.ready : current.ready
+        }
+      };
+    });
+  }, []);
+
+  const rebuildSparse = useCallback(
+    (path, source, perPage) => {
+      const key = path || '';
+      const pageMap = cacheRef.current.get(key) || new Map();
+      const next = new Array(source.length);
+      pageMap.forEach((pageData, page) => {
+        const start = (page - 1) * perPage;
+        pageData.forEach((entry, offset) => {
+          next[start + offset] = entry;
+        });
+      });
+      updateListing(key, { entries: next, totalCount: source.length, ready: true });
+    },
+    [updateListing]
+  );
+
+  const clearLoadingForPages = useCallback(
+    (path, pages, perPage, total) => {
+      const key = path || '';
+      setColumnListings(previous => {
+        const current = previous[key] || emptyListing(total);
+        const nextLoading = new Set(current.loadingIndexes || []);
+        pages.forEach(page => {
+          const start = (page - 1) * perPage;
+          for (let i = 0; i < perPage; i += 1) {
+            if (total <= 0 || start + i < total) {
+              nextLoading.delete(start + i);
+            }
+          }
+        });
+        return {
+          ...previous,
+          [key]: { ...current, loadingIndexes: nextLoading }
+        };
+      });
+    },
+    []
+  );
+
+  const loadPages = useCallback(
+    ({ path, pages, perPage }) => {
+      const key = path || '';
+      const source = getSourceByPath(key);
+      const total = source.length;
+
+      if (!cacheRef.current.has(key)) {
+        cacheRef.current.set(key, new Map());
+      }
+      if (!inflightRef.current.has(key)) {
+        inflightRef.current.set(key, new Set());
+      }
+      const pageMap = cacheRef.current.get(key);
+      const inflight = inflightRef.current.get(key);
+
+      const maxPage = Math.max(1, Math.ceil(total / perPage) || 1);
+      const needed = [...new Set(pages)].filter(
+        page => page >= 1 && page <= maxPage && !pageMap.has(page) && !inflight.has(page)
+      );
+
+      if (!needed.length) {
+        // 仍有请求在途：不要把未完成缓存标成 ready
+        if (inflight.size > 0) {
+          return;
+        }
+        // 缓存已命中：仅在尚未 ready 时回填，避免每次 emit 都 setState 死循环
+        setColumnListings(previous => {
+          const listing = previous[key];
+          if (listing?.ready && listing.totalCount === total && listing.entries?.length === total) {
+            return previous;
+          }
+          if (pageMap.size === 0) {
+            return previous;
+          }
+          const next = new Array(total);
+          pageMap.forEach((pageData, page) => {
+            const start = (page - 1) * perPage;
+            pageData.forEach((entry, offset) => {
+              next[start + offset] = entry;
+            });
+          });
+          return {
+            ...previous,
+            [key]: {
+              entries: next,
+              totalCount: total,
+              loadingIndexes: listing?.loadingIndexes || new Set(),
+              ready: true
+            }
+          };
+        });
+        return;
+      }
+
+      setColumnListings(previous => {
+        const current = previous[key] || emptyListing(total);
+        // 只更新当前 path，其它列原样保留
+        if (current.ready && current.totalCount > 0 && total === 0) {
+          return previous;
+        }
+        const nextLoading = new Set(current.loadingIndexes || []);
+        needed.forEach(page => {
+          const start = (page - 1) * perPage;
+          for (let i = 0; i < perPage; i += 1) {
+            if (start + i < total) {
+              nextLoading.add(start + i);
+            }
+          }
+        });
+        return {
+          ...previous,
+          [key]: {
+            ...current,
+            totalCount: total,
+            loadingIndexes: nextLoading,
+            entries: current.entries?.length === total ? current.entries : new Array(total)
+          }
+        };
+      });
+
+      needed.forEach(page => {
+        inflight.add(page);
+        window.setTimeout(() => {
+          if (perPageRef.current.get(key) !== perPage) {
+            inflight.delete(page);
+            clearLoadingForPages(key, [page], perPage, total);
+            return;
+          }
+          const start = (page - 1) * perPage;
+          pageMap.set(page, source.slice(start, start + perPage));
+          inflight.delete(page);
+          rebuildSparse(key, source, perPage);
+          clearLoadingForPages(key, [page], perPage, total);
+        }, 100 + Math.random() * 200);
+      });
+    },
+    [clearLoadingForPages, rebuildSparse]
+  );
+
+  const resetForPath = useCallback(path => {
+    const key = path || '';
+    pathRef.current = key;
+    setCurrentPath(key);
+    // 切目录时保留其它列缓存，只重置当前目录拉取状态
+    if (!cacheRef.current.has(key)) {
+      cacheRef.current.set(key, new Map());
+    }
+    inflightRef.current.set(key, new Set());
+    perPageRef.current.delete(key);
+    const source = getSourceByPath(key);
+    updateListing(key, emptyListing(source.length));
+  }, [updateListing]);
+
+  const handleVisibleRangeChange = useCallback(
+    ({ startIndex, endIndex, pageSize, path, columnPath, currentPath: rangePath, view }) => {
+      // 分栏展开列：用 columnPath / path；其它视图用当前目录
+      const listPath =
+        path != null ? path : columnPath != null ? columnPath : rangePath != null ? rangePath : pathRef.current;
+
+      if (view !== 'columns' && listPath !== pathRef.current) {
+        return;
+      }
+
+      let perPage = perPageRef.current.get(listPath);
+      if (!perPage) {
+        perPage = Math.max(20, Number(pageSize) || calcPageSize({ view: view || 'icons', width: 800, height: 500 }) || 60);
+        perPageRef.current.set(listPath, perPage);
+      }
+
+      const start = Math.max(0, Number(startIndex) || 0);
+      const end = Math.max(start, Number(endIndex) || 0);
+      const startPage = Math.floor(start / perPage) + 1;
+      const endPage = Math.floor(end / perPage) + 1;
+      const pages = [];
+      for (let page = startPage; page <= endPage; page += 1) {
+        pages.push(page);
+      }
+      if (startPage > 1) {
+        pages.push(startPage - 1);
+      }
+      pages.push(endPage + 1);
+      loadPages({ path: listPath, pages, perPage });
+    },
+    [loadPages]
+  );
+
+  return (
+    <PureGlobal
+      preset={{
+        ajax: async api => ({ data: { code: 0, data: api.loader?.() } }),
+        apis: { file: { staticUrl: '' } }
+      }}
+    >
+      <InfoPage>
+        <InfoPage.Part title={&#96;虚拟滚动（bulk 大目录 + nest 多层目录，共 ${folderItems.length} 个文件夹节点）&#96;}>
+          <p style={{ marginBottom: 12, color: 'rgba(0,0,0,0.45)' }}>
+            进入 <code>bulk/folder-01</code> 可测二级/三级。分栏：单击文件夹展开下一列，双击进入目录；每列纵向虚拟滚动。
+          </p>
+          <div style={{ height: 560 }}>
+            <FileSystem
+              title="Virtual Scroll Demo"
+              defaultView="columns"
+              defaultPath="bulk/"
+              items={folderItems}
+              entries={entries}
+              totalCount={totalCount}
+              loadingIndexes={loadingIndexes}
+              ready={ready}
+              columnListings={columnListings}
+              onVisibleRangeChange={handleVisibleRangeChange}
+              onPathChange={resetForPath}
+              onFileOpen={entry => console.log('Open file:', entry)}
+              onSelectionChange={selected => console.log('Selection:', selected.length)}
+              propertiesPanel
+            />
+          </div>
         </InfoPage.Part>
       </InfoPage>
     </PureGlobal>
@@ -1320,6 +1804,12 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
 | getEntryStatus | function(entry) => string \| ReactNode | - | 返回右上角状态徽标；优先于 `entry.status` / `entry.options.status` |
+| entries | array | - | 异步分页：当前目录稀疏数组（`length === totalCount`，未加载为 empty） |
+| totalCount | number | - | 异步分页：当前目录总数量；与 `onVisibleRangeChange` 同时传入即开启虚拟滚动 |
+| loadingIndexes | Set \| array | - | 异步分页：正在加载的下标，显示骨架占位 |
+| onVisibleRangeChange | function(range) | - | 异步分页：可视范围变化；`range` 含 `startIndex` / `endIndex` / `view` / `viewport` / `pageSize` / `currentPath` / `keyword` |
+
+`FileSystem.calcPageSize({ view, width, height })` 可按视口估算建议 `perPage`。
 
 #### FileSystem.PropertiesPanel
 

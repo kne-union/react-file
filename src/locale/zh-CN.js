@@ -33,6 +33,7 @@ const locale = {
   'FileSystem.columnSize': '大小',
   'FileSystem.folder': '文件夹',
   'FileSystem.emptyFolder': '此文件夹为空',
+  'FileSystem.goUp': '上一级',
   'FileSystem.currentFolder': '当前文件夹',
   'FileSystem.notFound': '未找到"{keyword}"',
   'FileSystem.search': '搜索',

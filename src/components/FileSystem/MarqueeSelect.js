@@ -22,6 +22,48 @@ const isItemTarget = target => {
   return !!target.closest('[data-fs-path]');
 };
 
+/** 点击落在某可滚动元素的滚动条区域时，不触发框选/清空选中（含 macOS overlay 滚动条） */
+const isScrollbarInteraction = (event, container) => {
+  if (!event || !container) {
+    return false;
+  }
+  let el = event.target;
+  if (el && el.nodeType !== 1) {
+    el = el.parentElement;
+  }
+  while (el) {
+    if (!(el instanceof HTMLElement)) {
+      break;
+    }
+    const style = typeof window !== 'undefined' ? window.getComputedStyle(el) : null;
+    const overflowY = style?.overflowY || '';
+    const overflowX = style?.overflowX || '';
+    const yScrollable = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && el.scrollHeight > el.clientHeight;
+    const xScrollable = (overflowX === 'auto' || overflowX === 'scroll' || overflowX === 'overlay') && el.scrollWidth > el.clientWidth;
+
+    if (yScrollable || xScrollable) {
+      const rect = el.getBoundingClientRect();
+      // classic：offset - client；overlay：差值为 0，用最小命中宽度兜底
+      const classicY = el.offsetHeight - el.clientHeight;
+      const classicX = el.offsetWidth - el.clientWidth;
+      const hitY = Math.max(classicY, yScrollable ? 14 : 0);
+      const hitX = Math.max(classicX, xScrollable ? 14 : 0);
+
+      if (yScrollable && event.clientX >= rect.right - hitY && event.clientX <= rect.right + 2 && event.clientY >= rect.top && event.clientY <= rect.bottom) {
+        return true;
+      }
+      if (xScrollable && event.clientY >= rect.bottom - hitX && event.clientY <= rect.bottom + 2 && event.clientX >= rect.left && event.clientX <= rect.right) {
+        return true;
+      }
+    }
+    if (el === container) {
+      break;
+    }
+    el = el.parentElement;
+  }
+  return false;
+};
+
 const toLocalRect = (container, clientRect) => {
   const box = container.getBoundingClientRect();
   return {
@@ -32,8 +74,9 @@ const toLocalRect = (container, clientRect) => {
   };
 };
 
-const MarqueeSelect = ({ enabled = true, className, children, onMarqueeSelect, onEmptyClick }) => {
-  const containerRef = useRef(null);
+const MarqueeSelect = ({ enabled = true, className, children, onMarqueeSelect, onEmptyClick, containerRef: containerRefProp }) => {
+  const innerRef = useRef(null);
+  const containerRef = containerRefProp || innerRef;
   const dragRef = useRef(null);
   const [rect, setRect] = useState(null);
 
@@ -110,7 +153,7 @@ const MarqueeSelect = ({ enabled = true, className, children, onMarqueeSelect, o
         return;
       }
 
-      if (!isItemTarget(event.target)) {
+      if (!isItemTarget(event.target) && !isScrollbarInteraction(event, containerRef.current)) {
         onEmptyClick?.(event);
       }
     };
@@ -130,6 +173,9 @@ const MarqueeSelect = ({ enabled = true, className, children, onMarqueeSelect, o
       return;
     }
     if (isItemTarget(event.target)) {
+      return;
+    }
+    if (isScrollbarInteraction(event, containerRef.current)) {
       return;
     }
 

@@ -329,6 +329,12 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
 | getEntryStatus | function(entry) => string \| ReactNode | - | 返回右上角状态徽标；优先于 `entry.status` / `entry.options.status` |
+| entries | array | - | 异步分页：当前目录稀疏数组（`length === totalCount`，未加载为 empty） |
+| totalCount | number | - | 异步分页：当前目录总数量；与 `onVisibleRangeChange` 同时传入即开启虚拟滚动 |
+| loadingIndexes | Set \| array | - | 异步分页：正在加载的下标，显示骨架占位 |
+| onVisibleRangeChange | function(range) | - | 异步分页：可视范围变化；`range` 含 `startIndex` / `endIndex` / `view` / `viewport` / `pageSize` / `currentPath` / `keyword` |
+
+`FileSystem.calcPageSize({ view, width, height })` 可按视口估算建议 `perPage`。
 
 #### FileSystem.PropertiesPanel
 

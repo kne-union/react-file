@@ -239,6 +239,25 @@
       ]
     },
     {
+      "title": "FileSystem 虚拟滚动",
+      "description": "开启异步分页虚拟滚动：模拟 40 个文件夹 + 960 个文件，按可视区域延迟加载并占位",
+      "code": "./file-system-virtual-scroll.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
       "title": "FileSystem 扩展顶部菜单",
       "description": "通过 toolbarExtra 在导航栏追加上传、新建文件夹、刷新、删除选中等自定义操作",
       "code": "./file-system-toolbar-extra.js",

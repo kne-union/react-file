@@ -1,4 +1,4 @@
-export { default, FileSystemInner, PropertiesPanel } from './FileSystem';
+export { default, FileSystemInner, PropertiesPanel, calcPageSize } from './FileSystem';
 export { default as EntryIcon } from './EntryIcon';
 export {
   Default as PropertiesPanelDefault,
@@ -12,3 +12,4 @@ export {
   formatFolderSubtitle
 } from './PropertiesPanel';
 export * from './utils';
+export * from './calcPageSize';
