@@ -11,7 +11,7 @@ import { useIntl } from '@kne/react-intl';
 
 const FileUploadInner = p => {
   const { formatMessage } = useIntl();
-  const { className, fileSize, maxLength, multiple, size, accept, children, renderTips, showUploadList, onSave, ossUpload, getPermission, concurrentCount, apis, renderModal, ...props } = Object.assign(
+  const { className, fileSize, maxLength, multiple, size, accept, children, renderTips, showUploadList, onSave, onUpload, ossUpload, directory, getPermission, concurrentCount, apis, renderModal, ...props } = Object.assign(
     {},
     {
       defaultValue: [],
@@ -36,7 +36,8 @@ const FileUploadInner = p => {
   const { fileList: uploadingList, onFileSelected } = useFileUpload({
     multiple,
     onSave,
-    ossUpload,
+    onUpload: onUpload || ossUpload,
+    directory,
     fileSize,
     maxLength,
     value,
