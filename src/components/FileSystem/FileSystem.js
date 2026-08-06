@@ -13,6 +13,22 @@ import { useIntl } from '@kne/react-intl';
 
 const isToggleModifier = event => !!(event && (event.metaKey || event.ctrlKey));
 const isRangeModifier = event => !!(event && event.shiftKey);
+/** 移动端不触发 dblclick，用两次点击间隔模拟双击打开 */
+const DOUBLE_TAP_MS = 350;
+
+const isMobileDoubleTap = (lastTapRef, path) => {
+  if (!path) {
+    return false;
+  }
+  const now = Date.now();
+  const last = lastTapRef.current;
+  if (last.path === path && now - last.at <= DOUBLE_TAP_MS) {
+    lastTapRef.current = { path: null, at: 0 };
+    return true;
+  }
+  lastTapRef.current = { path, at: now };
+  return false;
+};
 
 const FileSystemInner = ({
   items,
@@ -46,6 +62,7 @@ const FileSystemInner = ({
   const [propertiesPanelClosed, setPropertiesPanelClosed] = useState(false);
   const [marqueeDragging, setMarqueeDragging] = useState(false);
   const marqueeSessionRef = useRef(null);
+  const lastTapRef = useRef({ path: null, at: 0 });
   const selectedPathsRef = useRef(selectedPaths);
   selectedPathsRef.current = selectedPaths;
 
@@ -255,6 +272,27 @@ const FileSystemInner = ({
     [navigateTo, onFileOpen]
   );
 
+  const handleEntryClick = useCallback(
+    (entry, event) => {
+      if (isMobile && isMobileDoubleTap(lastTapRef, entry?.path)) {
+        openEntry(entry);
+        return;
+      }
+      selectEntry(entry, event);
+    },
+    [isMobile, openEntry, selectEntry]
+  );
+
+  const handleEntryDoubleClick = useCallback(
+    entry => {
+      if (isMobile) {
+        return;
+      }
+      openEntry(entry);
+    },
+    [isMobile, openEntry]
+  );
+
   const resolveStatus = useCallback(entry => (typeof getEntryStatus === 'function' ? getEntryStatus(entry) : undefined), [getEntryStatus]);
 
   const treeData = useMemo(() => {
@@ -342,27 +380,39 @@ const FileSystemInner = ({
     }
 
     if (view === 'icons') {
-      return <IconsView entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} resolveStatus={resolveStatus} />;
+      return <IconsView entries={currentEntries} selectedPaths={selectedPaths} onSelect={handleEntryClick} onOpen={handleEntryDoubleClick} resolveStatus={resolveStatus} />;
     }
 
     if (view === 'list') {
       if (isSearching) {
-        return <ListTableView columns={columns} entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} />;
+        return <ListTableView columns={columns} entries={currentEntries} selectedPaths={selectedPaths} onSelect={handleEntryClick} onOpen={handleEntryDoubleClick} />;
       }
 
-      return <ListView treeData={treeData} expandedKeys={expandedKeys} onExpand={setExpandedKeys} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} />;
+      return <ListView treeData={treeData} expandedKeys={expandedKeys} onExpand={setExpandedKeys} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} isMobile={isMobile} lastTapRef={lastTapRef} />;
     }
 
     if (view === 'columns') {
-      return <ColumnsView columnPaths={columnPaths} index={index} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} onNavigateColumn={setColumnAnchorPath} resolveStatus={resolveStatus} />;
+      return (
+        <ColumnsView
+          columnPaths={columnPaths}
+          index={index}
+          selectedPaths={selectedPaths}
+          onSelect={selectEntry}
+          onOpen={openEntry}
+          onNavigateColumn={setColumnAnchorPath}
+          resolveStatus={resolveStatus}
+          isMobile={isMobile}
+          lastTapRef={lastTapRef}
+        />
+      );
     }
 
     return (
       <GalleryView
         entries={currentEntries}
         selectedPaths={selectedPaths}
-        onSelect={selectEntry}
-        onOpen={openEntry}
+        onSelect={handleEntryClick}
+        onOpen={handleEntryDoubleClick}
         renderFilePreview={renderFilePreview}
         canPreviewFile={canPreviewFile}
         formatMessage={formatMessage}
@@ -438,10 +488,9 @@ const IconsView = ({ entries, selectedPaths, onSelect, onOpen, resolveStatus }) 
   );
 };
 
-const ListView = ({ treeData, expandedKeys, onExpand, selectedPaths, onSelect, onOpen }) => {
-  const handleDoubleClick = useCallback(
-    (_, node) => {
-      const entry = node.entry;
+const ListView = ({ treeData, expandedKeys, onExpand, selectedPaths, onSelect, onOpen, isMobile, lastTapRef }) => {
+  const activateEntry = useCallback(
+    entry => {
       if (!entry) {
         return;
       }
@@ -462,19 +511,31 @@ const ListView = ({ treeData, expandedKeys, onExpand, selectedPaths, onSelect, o
     [expandedKeys, onExpand, onOpen]
   );
 
+  const handleSelect = useCallback(
+    (_, info) => {
+      const entry = info.node.entry;
+      if (isMobile && isMobileDoubleTap(lastTapRef, entry?.path)) {
+        activateEntry(entry);
+        return;
+      }
+      onSelect(entry, info.nativeEvent);
+    },
+    [activateEntry, isMobile, lastTapRef, onSelect]
+  );
+
+  const handleDoubleClick = useCallback(
+    (_, node) => {
+      if (isMobile) {
+        return;
+      }
+      activateEntry(node.entry);
+    },
+    [activateEntry, isMobile]
+  );
+
   return (
     <div className={style['tree-wrap']}>
-      <Tree
-        showIcon
-        blockNode
-        multiple
-        treeData={treeData}
-        expandedKeys={expandedKeys}
-        selectedKeys={selectedPaths}
-        onExpand={onExpand}
-        onSelect={(_, info) => onSelect(info.node.entry, info.nativeEvent)}
-        onDoubleClick={handleDoubleClick}
-      />
+      <Tree showIcon blockNode multiple treeData={treeData} expandedKeys={expandedKeys} selectedKeys={selectedPaths} onExpand={onExpand} onSelect={handleSelect} onDoubleClick={handleDoubleClick} />
     </div>
   );
 };
@@ -498,7 +559,7 @@ const ListTableView = ({ columns, entries, selectedPaths, onSelect, onOpen }) =>
   );
 };
 
-const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNavigateColumn, resolveStatus }) => {
+const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNavigateColumn, resolveStatus, isMobile, lastTapRef }) => {
   return (
     <div className={style['columns-wrap']}>
       {columnPaths.map(path => {
@@ -512,12 +573,20 @@ const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNa
                 data-fs-path={entry.path}
                 className={classnames(style['column-item'], selectedPaths.includes(entry.path) && style.selected)}
                 onClick={event => {
+                  if (isMobile && isMobileDoubleTap(lastTapRef, entry.path)) {
+                    onOpen(entry);
+                    return;
+                  }
                   onSelect(entry, event);
                   if (entry.kind === 'folder') {
                     onNavigateColumn(entry.path);
                   }
                 }}
-                onDoubleClick={() => onOpen(entry)}
+                onDoubleClick={() => {
+                  if (!isMobile) {
+                    onOpen(entry);
+                  }
+                }}
               >
                 <EntryIcon entry={entry} size="sm" status={resolveStatus?.(entry)} />
                 <span className={style['column-name']} title={entry.name}>
