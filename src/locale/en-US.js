@@ -33,6 +33,7 @@ const locale = {
   'FileSystem.columnSize': 'Size',
   'FileSystem.folder': 'Folder',
   'FileSystem.emptyFolder': 'This folder is empty',
+  'FileSystem.goUp': 'Go to parent folder',
   'FileSystem.currentFolder': 'Current Folder',
   'FileSystem.notFound': '"{keyword}" not found',
   'FileSystem.search': 'Search',
