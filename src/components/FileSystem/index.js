@@ -1,4 +1,5 @@
 export { default, FileSystemInner, PropertiesPanel } from './FileSystem';
+export { default as EntryIcon } from './EntryIcon';
 export {
   Default as PropertiesPanelDefault,
   InfoRow as PropertiesPanelInfoRow,

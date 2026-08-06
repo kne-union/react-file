@@ -809,6 +809,94 @@ render(<BaseExample />);
 
 ```
 
+- FileSystem 状态徽标
+- 文件/文件夹右上角状态徽标：sync / processing / success / error / cancelled，以及自定义 JSX；支持 entry.status、options.status、getEntryStatus
+- _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),antd(antd),icons(@ant-design/icons),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { FileSystem, EntryIcon } = _ReactFile;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
+const { Space, Tag } = antd;
+const { StarFilled } = icons;
+const { useState } = React;
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
+})(({ remoteModules }) => {
+  const [PureGlobal, InfoPage] = remoteModules;
+  const [items] = useState([
+    { kind: 'folder', path: 'syncing/', name: '同步中的文件夹', status: 'sync' },
+    { kind: 'folder', path: 'done/', name: '已完成文件夹', status: 'success' },
+    { kind: 'file', path: 'report-processing.pdf', name: 'report-processing.pdf', size: 1024000, status: 'processing' },
+    { kind: 'file', path: 'report-error.xlsx', name: 'report-error.xlsx', size: 512000, status: 'error' },
+    { kind: 'file', path: 'notes-done.md', name: 'notes-done.md', size: 3200, status: 'complete' },
+    { kind: 'file', path: 'draft-cancelled.docx', name: 'draft-cancelled.docx', size: 256000, status: 'cancelled' },
+    { kind: 'file', path: 'logo.png', name: 'logo.png', size: 45000, status: '同步' },
+    { kind: 'file', path: 'readme.md', name: 'readme.md', size: 1200, options: { status: '进行中' } },
+    { kind: 'file', path: 'custom-star.txt', name: 'custom-star.txt', size: 800, status: 'custom' }
+  ]);
+
+  return (
+    <PureGlobal
+      preset={{
+        ajax: async api => ({ data: { code: 0, data: api.loader?.() } }),
+        apis: {
+          file: {
+            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL
+          }
+        }
+      }}
+    >
+      <InfoPage>
+        <InfoPage.Part title="内置状态徽标（entry.status / options.status）">
+          <Space wrap size={16} style={{ marginBottom: 16 }}>
+            {[
+              ['sync', '同步'],
+              ['processing', '进行中'],
+              ['success', '完成'],
+              ['error', '错误'],
+              ['cancelled', '已取消']
+            ].map(([status, label]) => (
+              <Space key={status} direction="vertical" align="center" size={4}>
+                <EntryIcon entry={{ kind: 'file', name: 'demo.pdf' }} size="lg" status={status} />
+                <Tag>{label}</Tag>
+              </Space>
+            ))}
+            <Space direction="vertical" align="center" size={4}>
+              <EntryIcon
+                entry={{ kind: 'folder', name: 'folder' }}
+                size="lg"
+                status={<StarFilled style={{ color: '#faad14', fontSize: 7.2 }} />}
+              />
+              <Tag>自定义 JSX</Tag>
+            </Space>
+          </Space>
+        </InfoPage.Part>
+        <InfoPage.Part title="文件系统中的徽标展示">
+          <FileSystem
+            items={items}
+            title="Status Badges"
+            defaultView="icons"
+            getEntryStatus={entry => {
+              if (entry.status === 'custom') {
+                return <StarFilled style={{ color: '#faad14', fontSize: 7.2 }} />;
+              }
+              return entry.status ?? entry.options?.status;
+            }}
+            onFileOpen={entry => {
+              console.log('Open file:', entry);
+            }}
+          />
+        </InfoPage.Part>
+      </InfoPage>
+    </PureGlobal>
+  );
+});
+
+render(<BaseExample />);
+
+```
+
 - FileSystem.PropertiesPanel
 - 使用 FileSystem.PropertiesPanel.Default / InfoRow / Section 扩展属性面板显示字段
 - _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),antd(antd),remoteLoader(@kne/remote-loader)
@@ -1231,6 +1319,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | onFileOpen | function(entry) | - | 打开文件回调 |
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
+| getEntryStatus | function(entry) => string \| ReactNode | - | 返回右上角状态徽标；优先于 `entry.status` / `entry.options.status` |
 
 #### FileSystem.PropertiesPanel
 
@@ -1255,6 +1344,18 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | name | string | 显示名称（可选，默认从路径提取） |
 | size | number | 文件大小（字节，仅file类型） |
 | parentPath | string | 父路径（可选，默认从path提取） |
+| status | string \| ReactNode | 右上角状态徽标；内置：`sync` / `processing` / `success`（`complete`） / `error` / `cancelled`，及中文别名；也可传自定义 JSX |
+| options.status | string \| ReactNode | 同上，当 `status` 未设置时读取 |
+
+#### EntryIcon
+
+文件/文件夹图标组件，支持右上角状态徽标（圆形；相对 20px 规格缩至 60%：约 12px 外径、1.2px 白边与 padding、7.2px 图标）。
+
+| 属性 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| entry | object | - | 含 `kind` / `name`（或 `path`）的条目 |
+| size | 'sm' \| 'md' \| 'lg' \| 'xl' | 'md' | 图标尺寸 |
+| status | string \| ReactNode | - | 徽标；不传时读 `entry.status` / `entry.options.status` |
 
 ---
 

@@ -328,6 +328,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | onFileOpen | function(entry) | - | 打开文件回调 |
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
+| getEntryStatus | function(entry) => string \| ReactNode | - | 返回右上角状态徽标；优先于 `entry.status` / `entry.options.status` |
 
 #### FileSystem.PropertiesPanel
 
@@ -352,6 +353,18 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | name | string | 显示名称（可选，默认从路径提取） |
 | size | number | 文件大小（字节，仅file类型） |
 | parentPath | string | 父路径（可选，默认从path提取） |
+| status | string \| ReactNode | 右上角状态徽标；内置：`sync` / `processing` / `success`（`complete`） / `error` / `cancelled`，及中文别名；也可传自定义 JSX |
+| options.status | string \| ReactNode | 同上，当 `status` 未设置时读取 |
+
+#### EntryIcon
+
+文件/文件夹图标组件，支持右上角状态徽标（圆形；相对 20px 规格缩至 60%：约 12px 外径、1.2px 白边与 padding、7.2px 图标）。
+
+| 属性 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| entry | object | - | 含 `kind` / `name`（或 `path`）的条目 |
+| size | 'sm' \| 'md' \| 'lg' \| 'xl' | 'md' | 图标尺寸 |
+| status | string \| ReactNode | - | 徽标；不传时读 `entry.status` / `entry.options.status` |
 
 ---
 

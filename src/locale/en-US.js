@@ -63,6 +63,7 @@ const locale = {
   'FileSystem.actionRename': 'Rename',
   'FileSystem.actionDownload': 'Download',
   'FileSystem.actionMove': 'Move to',
+  'FileSystem.actionCopy': 'Copy to',
   'FileSystem.actionDelete': 'Delete'
 };
 

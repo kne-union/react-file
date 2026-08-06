@@ -28,7 +28,8 @@ const FileSystemInner = ({
   onPathChange,
   onFileOpen,
   renderFilePreview,
-  canPreviewFile
+  canPreviewFile,
+  getEntryStatus
 }) => {
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
@@ -108,6 +109,21 @@ const FileSystemInner = ({
       setPropertiesPanelClosed(false);
     }
   }, [selectedPaths]);
+
+  // 画廊进入目录后若当前无选中项，默认选中并预览第一项
+  useEffect(() => {
+    if (view !== 'gallery') {
+      return;
+    }
+    const hasSelectedInFolder = selectedPathsRef.current.some(path => currentEntries.some(entry => entry.path === path));
+    if (hasSelectedInFolder || currentEntries.length === 0) {
+      return;
+    }
+    const firstPath = currentEntries[0].path;
+    setSelectedPaths([firstPath]);
+    setSelectionAnchorPath(firstPath);
+    emitSelectionChange([firstPath]);
+  }, [view, currentPath, currentEntries, emitSelectionChange]);
 
   const selectEntry = useCallback(
     (entry, event) => {
@@ -239,6 +255,8 @@ const FileSystemInner = ({
     [navigateTo, onFileOpen]
   );
 
+  const resolveStatus = useCallback(entry => (typeof getEntryStatus === 'function' ? getEntryStatus(entry) : undefined), [getEntryStatus]);
+
   const treeData = useMemo(() => {
     const renderTitle = entry => (
       <span className={classnames(style['list-name'], entry.kind === 'folder' && style['list-name-folder'])} title={entry.name}>
@@ -253,13 +271,13 @@ const FileSystemInner = ({
       key: entry.path,
       entry,
       title: renderTitle(entry),
-      icon: <EntryIcon entry={entry} size="sm" />,
+      icon: <EntryIcon entry={entry} size="sm" status={resolveStatus(entry)} />,
       isLeaf: entry.kind === 'file',
       children: entry.children ? entry.children.map(mapNode) : undefined
     });
 
     return nestedEntries.map(mapNode);
-  }, [nestedEntries]);
+  }, [nestedEntries, resolveStatus]);
 
   const currentFolderName = currentPath === '' ? title : pathName(currentPath) || title;
   const canGoBack = history.index > 0;
@@ -300,7 +318,7 @@ const FileSystemInner = ({
       key: 'name',
       render: (_, record) => (
         <span className={classnames(style['list-name'], record.kind === 'folder' && style['list-name-folder'])} title={record.name}>
-          <EntryIcon entry={record} size="sm" />
+          <EntryIcon entry={record} size="sm" status={resolveStatus(record)} />
           <span className={style['name-clamp']}>{record.name}</span>
         </span>
       )
@@ -324,7 +342,7 @@ const FileSystemInner = ({
     }
 
     if (view === 'icons') {
-      return <IconsView entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} />;
+      return <IconsView entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} resolveStatus={resolveStatus} />;
     }
 
     if (view === 'list') {
@@ -336,10 +354,21 @@ const FileSystemInner = ({
     }
 
     if (view === 'columns') {
-      return <ColumnsView columnPaths={columnPaths} index={index} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} onNavigateColumn={setColumnAnchorPath} />;
+      return <ColumnsView columnPaths={columnPaths} index={index} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} onNavigateColumn={setColumnAnchorPath} resolveStatus={resolveStatus} />;
     }
 
-    return <GalleryView entries={currentEntries} selectedPaths={selectedPaths} onSelect={selectEntry} onOpen={openEntry} renderFilePreview={renderFilePreview} canPreviewFile={canPreviewFile} formatMessage={formatMessage} />;
+    return (
+      <GalleryView
+        entries={currentEntries}
+        selectedPaths={selectedPaths}
+        onSelect={selectEntry}
+        onOpen={openEntry}
+        renderFilePreview={renderFilePreview}
+        canPreviewFile={canPreviewFile}
+        formatMessage={formatMessage}
+        resolveStatus={resolveStatus}
+      />
+    );
   };
 
   const footerSelection =
@@ -394,12 +423,12 @@ const FileSystemInner = ({
   );
 };
 
-const IconsView = ({ entries, selectedPaths, onSelect, onOpen }) => {
+const IconsView = ({ entries, selectedPaths, onSelect, onOpen, resolveStatus }) => {
   return (
     <div className={style['icons-grid']}>
       {entries.map(entry => (
         <div key={entry.path} data-fs-path={entry.path} className={classnames(style['icon-item'], selectedPaths.includes(entry.path) && style.selected)} onClick={event => onSelect(entry, event)} onDoubleClick={() => onOpen(entry)}>
-          <EntryIcon entry={entry} size="lg" />
+          <EntryIcon entry={entry} size="lg" status={resolveStatus?.(entry)} />
           <span className={style['icon-label']} title={entry.name}>
             {entry.name}
           </span>
@@ -469,7 +498,7 @@ const ListTableView = ({ columns, entries, selectedPaths, onSelect, onOpen }) =>
   );
 };
 
-const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNavigateColumn }) => {
+const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNavigateColumn, resolveStatus }) => {
   return (
     <div className={style['columns-wrap']}>
       {columnPaths.map(path => {
@@ -490,7 +519,7 @@ const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNa
                 }}
                 onDoubleClick={() => onOpen(entry)}
               >
-                <EntryIcon entry={entry} size="sm" />
+                <EntryIcon entry={entry} size="sm" status={resolveStatus?.(entry)} />
                 <span className={style['column-name']} title={entry.name}>
                   {entry.name}
                 </span>
@@ -504,13 +533,23 @@ const ColumnsView = ({ columnPaths, index, selectedPaths, onSelect, onOpen, onNa
   );
 };
 
-const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, renderFilePreview, canPreviewFile, formatMessage }) => {
+const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, renderFilePreview, canPreviewFile, formatMessage, resolveStatus }) => {
+  const filmstripRef = useRef(null);
   const primaryPath = selectedPaths[selectedPaths.length - 1];
   const selectedEntry = entries.find(entry => entry.path === primaryPath) || entries[0] || null;
+  const activePath = selectedEntry?.path || null;
+
+  useEffect(() => {
+    if (!activePath || !filmstripRef.current) {
+      return;
+    }
+    const item = filmstripRef.current.querySelector(`[data-fs-path="${CSS.escape(activePath)}"]`);
+    item?.scrollIntoView({ block: 'nearest' });
+  }, [activePath]);
 
   const renderPlaceholder = entry => (
     <div className={style['gallery-preview']}>
-      <EntryIcon entry={entry} size="xl" />
+      <EntryIcon entry={entry} size="xl" status={resolveStatus?.(entry)} />
       <div className={style['gallery-name']} title={entry.name}>
         {entry.name}
       </div>
@@ -534,7 +573,11 @@ const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, renderFilePrevi
     if (selectedEntry.kind === 'file' && renderFilePreview && (!canPreviewFile || canPreviewFile(selectedEntry))) {
       const preview = renderFilePreview(selectedEntry);
       if (preview) {
-        return <div className={style['gallery-stage-content']}>{preview}</div>;
+        return (
+          <div className={style['gallery-stage-content']}>
+            <div className={style['gallery-stage-content-inner']}>{preview}</div>
+          </div>
+        );
       }
     }
 
@@ -546,16 +589,10 @@ const GalleryView = ({ entries, selectedPaths, onSelect, onOpen, renderFilePrevi
       <div className={style['gallery-stage']}>{renderStage()}</div>
       <div className={style['gallery-sidebar']}>
         <div className={style['gallery-sidebar-title']}>{formatMessage({ id: 'FileSystem.currentFolder' })}</div>
-        <div className={style['gallery-filmstrip']}>
+        <div className={style['gallery-filmstrip']} ref={filmstripRef}>
           {entries.map(entry => (
-            <div
-              key={entry.path}
-              data-fs-path={entry.path}
-              className={classnames(style['gallery-film-item'], selectedPaths.includes(entry.path) && style.selected)}
-              onClick={event => onSelect(entry, event)}
-              onDoubleClick={() => onOpen(entry)}
-            >
-              <EntryIcon entry={entry} size="sm" />
+            <div key={entry.path} data-fs-path={entry.path} className={classnames(style['gallery-film-item'], entry.path === activePath && style.selected)} onClick={event => onSelect(entry, event)} onDoubleClick={() => onOpen(entry)}>
+              <EntryIcon entry={entry} size="sm" status={resolveStatus?.(entry)} />
               <span className={style['column-name']} title={entry.name}>
                 {entry.name}
               </span>
