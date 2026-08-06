@@ -65,19 +65,23 @@
   flex: 1;
   min-height: 0;
   min-width: 0;
-  overflow: auto;
+  overflow: hidden;
+  position: relative;
   background: #fff;
 }
 
 .marquee-root {
-  position: relative;
+  position: absolute;
+  inset: 0;
   box-sizing: border-box;
-  min-height: 100%;
+  overflow: auto;
 }
 
 .marquee-fill {
   height: 100%;
-  min-height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -385,11 +389,66 @@
 }
 
 .entry-icon-slot {
+  position: relative;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   vertical-align: middle;
+}
+
+.entry-status {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 1;
+  box-sizing: border-box;
+  width: 12px;
+  height: 12px;
+  padding: 1.2px;
+  border: 1.2px solid #fff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 7.2px;
+  line-height: 1;
+  color: #fff;
+  overflow: hidden;
+  pointer-events: none;
+
+  :global(.anticon),
+  svg {
+    width: 7.2px;
+    height: 7.2px;
+    font-size: 7.2px;
+  }
+}
+
+.entry-status-sync {
+  background: #1677ff;
+}
+
+.entry-status-error {
+  background: #ff4d4f;
+}
+
+.entry-status-success {
+  background: #52c41a;
+}
+
+.entry-status-processing {
+  background: #1677ff;
+}
+
+.entry-status-cancelled {
+  background: #8c8c8c;
+}
+
+.entry-status-custom {
+  background: #fff;
+  color: inherit;
+  padding: 0;
 }
 
 .entry-icon-slot-sm {
@@ -574,6 +633,8 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  max-height: 100%;
+  overflow: hidden;
   align-items: stretch;
 }
 
@@ -582,6 +643,7 @@
   min-width: 0;
   min-height: 0;
   height: 100%;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   padding: 16px;
@@ -590,23 +652,40 @@
 }
 
 .gallery-stage-content {
-  flex: 1;
+  flex: 1 1 0;
   min-height: 0;
   width: 100%;
   overflow: auto;
-  background: #fff;
+  overscroll-behavior: contain;
+  background: #f0f0f0;
   border-radius: 8px;
+}
+
+.gallery-stage-content-inner {
+  box-sizing: border-box;
+  min-height: 100%;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+
+  > * {
+    max-width: 100%;
+  }
 }
 
 .gallery-preview {
   display: flex;
-  flex: 1;
+  flex: 1 1 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 12px;
   max-width: 100%;
   min-height: 0;
+  overflow: auto;
 }
 
 .gallery-name {

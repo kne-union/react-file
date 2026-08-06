@@ -285,6 +285,33 @@
       ]
     },
     {
+      "title": "FileSystem 状态徽标",
+      "description": "文件/文件夹右上角状态徽标：sync / processing / success / error / cancelled，以及自定义 JSX；支持 entry.status、options.status、getEntryStatus",
+      "code": "./file-system-status.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "icons",
+          "packageName": "@ant-design/icons"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
       "title": "FileSystem.PropertiesPanel",
       "description": "使用 FileSystem.PropertiesPanel.Default / InfoRow / Section 扩展属性面板显示字段",
       "code": "./file-system-properties-panel.js",

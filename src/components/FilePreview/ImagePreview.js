@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import style from './style.module.scss';
-import { Spin } from 'antd';
+import { Skeleton } from 'antd';
 import classnames from 'classnames';
 import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
@@ -10,6 +10,8 @@ const ImagePreviewInner = ({ url, scale, rotate, className, maxWidth, origin, ..
   const [error, setError] = useState(false);
   const { formatMessage } = useIntl();
   useEffect(() => {
+    setLoading(true);
+    setError(false);
     const image = new Image();
     image.src = url;
     const handlerLoad = () => {
@@ -38,12 +40,13 @@ const ImagePreviewInner = ({ url, scale, rotate, className, maxWidth, origin, ..
         maxWidth
       }}
     >
-      {loading ? (
-        <div className={style['loading']}>
-          <Spin />
+      {loading && !error ? (
+        <div className={style['loading-skeleton']}>
+          <Skeleton.Image active className={style['image-skeleton']} />
         </div>
       ) : null}
-      {error ? <div className={style['error']}>{formatMessage({ id: 'FilePreview.fileLoadedError' })}</div> : <img alt={formatMessage({ id: 'FilePreview.filePreview' })} {...props} src={url} />}
+      {error ? <div className={style['error']}>{formatMessage({ id: 'FilePreview.fileLoadedError' })}</div> : null}
+      {!loading && !error ? <img alt={formatMessage({ id: 'FilePreview.filePreview' })} {...props} src={url} /> : null}
     </div>
   );
 };

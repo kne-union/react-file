@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useIntl } from '@kne/react-intl';
 import ButtonGroup from '@kne/button-group';
 import '@kne/button-group/dist/index.css';
-import { DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, SwapOutlined, FolderOpenOutlined } from '@ant-design/icons';
+import { DeleteOutlined, DownloadOutlined, EditOutlined, EyeOutlined, SwapOutlined, FolderOpenOutlined, CopyOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
 import EntryIcon from './EntryIcon';
 import { fileExtension, formatByteSize } from './utils';
@@ -112,7 +112,8 @@ const ACTION_META = {
   rename: { icon: <EditOutlined />, localeId: 'FileSystem.actionRename' },
   download: { icon: <DownloadOutlined />, localeId: 'FileSystem.actionDownload' },
   move: { icon: <FolderOpenOutlined />, localeId: 'FileSystem.actionMove' },
-  delete: { icon: <DeleteOutlined />, localeId: 'FileSystem.actionDelete', danger: true, isDelete: true }
+  copy: { icon: <CopyOutlined />, localeId: 'FileSystem.actionCopy' },
+  delete: { icon: <DeleteOutlined />, localeId: 'FileSystem.actionDelete', danger: true }
 };
 
 export const getDefaultActions = ({ selectedEntries, formatMessage, onAction } = {}) => {
@@ -162,11 +163,16 @@ export const getDefaultActions = ({ selectedEntries, formatMessage, onAction } =
         onClick: emit('move')
       },
       {
+        key: 'copy',
+        icon: ACTION_META.copy.icon,
+        children: formatMessage({ id: ACTION_META.copy.localeId }),
+        onClick: emit('copy')
+      },
+      {
         key: 'delete',
         icon: ACTION_META.delete.icon,
         children: formatMessage({ id: ACTION_META.delete.localeId }),
         danger: true,
-        isDelete: true,
         onClick: emit('delete')
       }
     ].filter(Boolean);
@@ -186,11 +192,16 @@ export const getDefaultActions = ({ selectedEntries, formatMessage, onAction } =
       onClick: emit('move')
     },
     {
+      key: 'copy',
+      icon: ACTION_META.copy.icon,
+      children: formatMessage({ id: ACTION_META.copy.localeId }),
+      onClick: emit('copy')
+    },
+    {
       key: 'delete',
       icon: ACTION_META.delete.icon,
       children: formatMessage({ id: ACTION_META.delete.localeId }),
       danger: true,
-      isDelete: true,
       onClick: emit('delete')
     }
   ];
@@ -301,7 +312,6 @@ export const Default = ({ selectedEntries, index, currentPath, extraInfo, extraS
 
     const createdAt = formatDateTime(entry.createdAt || entry.options?.createdAt);
     const updatedAt = formatDateTime(entry.updatedAt || entry.options?.updatedAt);
-    const lastOpenedAt = formatDateTime(entry.lastOpenedAt || entry.options?.lastOpenedAt);
     const extraInfoNode = typeof extraInfo === 'function' ? extraInfo({ entry, selectedEntries, index }) : extraInfo;
     const extraSectionsNode = typeof extraSections === 'function' ? extraSections({ entry, selectedEntries, index }) : extraSections;
 
@@ -323,14 +333,15 @@ export const Default = ({ selectedEntries, index, currentPath, extraInfo, extraS
             <>
               {childCounts.folders > 0 ? <InfoRow label={formatMessage({ id: 'FileSystem.propertiesFolderCount' })} value={formatMessage({ id: 'FileSystem.propertiesCountValue' }, { count: childCounts.folders })} /> : null}
               {childCounts.files > 0 ? <InfoRow label={formatMessage({ id: 'FileSystem.propertiesFileCount' })} value={formatMessage({ id: 'FileSystem.propertiesCountValue' }, { count: childCounts.files })} /> : null}
+              <InfoRow label={formatMessage({ id: 'FileSystem.propertiesCreatedAt' })} value={createdAt} />
             </>
           ) : (
-            <InfoRow label={formatMessage({ id: 'FileSystem.columnSize' })} value={formatByteSize(entry.size)} />
+            <>
+              <InfoRow label={formatMessage({ id: 'FileSystem.columnSize' })} value={formatByteSize(entry.size)} />
+              <InfoRow label={formatMessage({ id: 'FileSystem.propertiesCreatedAt' })} value={createdAt} />
+              <InfoRow label={formatMessage({ id: 'FileSystem.propertiesUpdatedAt' })} value={updatedAt} />
+            </>
           )}
-          <InfoRow label={formatMessage({ id: 'FileSystem.propertiesCreatedAt' })} value={createdAt} />
-          <InfoRow label={formatMessage({ id: 'FileSystem.propertiesUpdatedAt' })} value={updatedAt} />
-          <InfoRow label={formatMessage({ id: 'FileSystem.propertiesLastOpenedAt' })} value={lastOpenedAt} />
-          <InfoRow label={formatMessage({ id: 'FileSystem.propertiesPath' })} value={entry.path} />
           {extraInfoNode}
         </Section>
         {extraSectionsNode}

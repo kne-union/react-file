@@ -44,8 +44,10 @@ const withOSSFile = WrappedComponent => {
 
     const fetchProps = {};
 
-    const formatId = id.split('?')[0];
-
+    const formatId = String(id ?? '').split('?')[0];
+    if (!formatId) {
+      return null;
+    }
     fetchProps[paramsType] = { [paramsName]: formatId };
 
     return (

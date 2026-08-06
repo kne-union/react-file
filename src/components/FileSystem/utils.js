@@ -99,7 +99,14 @@ export const buildFileSystemIndex = items => {
   files.forEach(file => pushChild(file));
 
   children.forEach(siblings => {
-    siblings.sort((left, right) => left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: 'base' }));
+    siblings.sort((left, right) => {
+      const leftIsFolder = left.kind === 'folder' ? 0 : 1;
+      const rightIsFolder = right.kind === 'folder' ? 0 : 1;
+      if (leftIsFolder !== rightIsFolder) {
+        return leftIsFolder - rightIsFolder;
+      }
+      return left.name.localeCompare(right.name, undefined, { numeric: true, sensitivity: 'base' });
+    });
   });
 
   return { children, files, folders };

@@ -63,6 +63,7 @@ const locale = {
   'FileSystem.actionRename': '重命名',
   'FileSystem.actionDownload': '下载',
   'FileSystem.actionMove': '移动到',
+  'FileSystem.actionCopy': '复制到',
   'FileSystem.actionDelete': '删除'
 };
 

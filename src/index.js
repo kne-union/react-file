@@ -25,6 +25,6 @@ export { default as Image } from './components/Image';
 export { default as PrintButton } from './components/PrintButton';
 export { default as FileList, OptionButtons as FileListOptionButtons } from './components/FileList';
 export { default as FileUpload, FileInput, useFileUpload, defaultAccept, computedAccept } from './components/FileUpload';
-export { default as FileSystem, PropertiesPanel } from './components/FileSystem';
+export { default as FileSystem, PropertiesPanel, EntryIcon } from './components/FileSystem';
 export { default as withOSSFile } from './hocs/withOSSFile';
 export { default as preset, globalParams } from './preset';
