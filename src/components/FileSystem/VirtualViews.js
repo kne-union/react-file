@@ -189,9 +189,35 @@ const EntrySkeleton = ({ variant = 'icons' }) => {
   );
 };
 
+const toLoadingSet = loadingIndexes => {
+  if (loadingIndexes instanceof Set) {
+    return loadingIndexes;
+  }
+  if (Array.isArray(loadingIndexes) || loadingIndexes instanceof Map) {
+    return new Set(loadingIndexes);
+  }
+  return new Set();
+};
+
+/** 仅在真正请求中的下标显示骨架；total=0 时用 loading 下标撑起首屏占位 */
+const resolveVirtualCount = (totalCount, entries, loadingSet) => {
+  const base = totalCount != null ? totalCount : entries?.length || 0;
+  if (!loadingSet.size) {
+    return Math.max(0, base);
+  }
+  let loadingMax = 0;
+  loadingSet.forEach(index => {
+    if (index + 1 > loadingMax) {
+      loadingMax = index + 1;
+    }
+  });
+  return Math.max(0, base, loadingMax);
+};
+
 export const IconsView = ({ entries, totalCount, selectedPaths, onSelect, onOpen, resolveStatus, loadingIndexes, onVisibleRangeChange, requestKey = '' }) => {
   const parentRef = useRef(null);
-  const count = totalCount != null ? totalCount : entries.length;
+  const loadingSet = toLoadingSet(loadingIndexes);
+  const count = resolveVirtualCount(totalCount, entries, loadingSet);
   const viewport = useElementSize(parentRef);
   const measured = viewport.width > 0 && viewport.height > 0;
   const cols = Math.max(1, Math.floor((Math.max(viewport.width || 400, ICONS_CELL_WIDTH) - ICONS_PADDING_X) / ICONS_CELL_WIDTH));
@@ -269,8 +295,10 @@ export const IconsView = ({ entries, totalCount, selectedPaths, onSelect, onOpen
                       {entry.name}
                     </span>
                   </div>
-                ) : (
+                ) : loadingSet.has(index) ? (
                   <EntrySkeleton key={`sk-${index}`} />
+                ) : (
+                  <div key={`empty-${index}`} className={style['icon-item']} aria-hidden />
                 )
               );
             }
@@ -301,7 +329,8 @@ export const IconsView = ({ entries, totalCount, selectedPaths, onSelect, onOpen
 
 export const ListTableView = ({ columns, entries, totalCount, selectedPaths, onSelect, onOpen, resolveStatus, loadingIndexes, onVisibleRangeChange, requestKey = '' }) => {
   const parentRef = useRef(null);
-  const count = totalCount != null ? totalCount : entries.length;
+  const loadingSet = toLoadingSet(loadingIndexes);
+  const count = resolveVirtualCount(totalCount, entries, loadingSet);
   const viewport = useElementSize(parentRef);
   const measured = viewport.width > 0 && viewport.height > 0;
   const pageSize = calcPageSize({
@@ -425,9 +454,9 @@ export const ListTableView = ({ columns, entries, totalCount, selectedPaths, onS
                     {entry.name}
                   </span>
                 </>
-              ) : (
+              ) : loadingSet.has(index) ? (
                 <EntrySkeleton variant="inline" />
-              )}
+              ) : null}
             </div>
           );
         })}
@@ -523,6 +552,7 @@ export const ColumnsView = ({
 
 const ColumnPane = ({ columnPath, columnIndex, entries, count, selectedPaths, onSelect, onOpen, onNavigateColumn, resolveStatus, isMobile, lastTapRef, loadingIndexes, onVisibleRangeChange, emitRange, requestKey = '' }) => {
   const parentRef = useRef(null);
+  const loadingSet = toLoadingSet(loadingIndexes);
   const viewport = useElementSize(parentRef);
   const measured = viewport.width > 0 && viewport.height > 0;
   const pageSize = calcPageSize({
@@ -532,7 +562,7 @@ const ColumnPane = ({ columnPath, columnIndex, entries, count, selectedPaths, on
   });
 
   const rowVirtualizer = useVirtualizer({
-    count: Math.max(0, count),
+    count: Math.max(0, resolveVirtualCount(count, entries, loadingSet)),
     getScrollElement: () => parentRef.current,
     estimateSize: () => COLUMN_ITEM_HEIGHT,
     overscan: 8
@@ -633,9 +663,9 @@ const ColumnPane = ({ columnPath, columnIndex, entries, count, selectedPaths, on
                   </span>
                   {entry.kind === 'file' ? <span className={style['column-meta']}>{formatByteSize(entry.size)}</span> : null}
                 </>
-              ) : (
+              ) : loadingSet.has(virtualRow.index) ? (
                 <EntrySkeleton variant="inline" />
-              )}
+              ) : null}
             </div>
           );
         })}
@@ -646,7 +676,8 @@ const ColumnPane = ({ columnPath, columnIndex, entries, count, selectedPaths, on
 
 export const GalleryView = ({ entries, totalCount, selectedPaths, onSelect, onOpen, renderFilePreview, canPreviewFile, formatMessage, resolveStatus, loadingIndexes, onVisibleRangeChange, requestKey = '' }) => {
   const filmstripRef = useRef(null);
-  const count = totalCount != null ? totalCount : entries.length;
+  const loadingSet = toLoadingSet(loadingIndexes);
+  const count = resolveVirtualCount(totalCount, entries, loadingSet);
   const viewport = useElementSize(filmstripRef);
   const measured = viewport.width > 0 && viewport.height > 0;
   const pageSize = calcPageSize({
@@ -795,9 +826,9 @@ export const GalleryView = ({ entries, totalCount, selectedPaths, onSelect, onOp
                         {entry.name}
                       </span>
                     </>
-                  ) : (
+                  ) : loadingSet.has(virtualRow.index) ? (
                     <EntrySkeleton variant="inline" />
-                  )}
+                  ) : null}
                 </div>
               );
             })}
