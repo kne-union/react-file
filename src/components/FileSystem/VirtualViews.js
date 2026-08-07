@@ -199,10 +199,10 @@ const toLoadingSet = loadingIndexes => {
   return new Set();
 };
 
-/** 仅在真正请求中的下标显示骨架；total=0 时用 loading 下标撑起首屏占位 */
+/** 仅在已拿到总数且真正请求中的下标显示骨架；总数未回（base=0）时不撑占位，避免假 loading */
 const resolveVirtualCount = (totalCount, entries, loadingSet) => {
   const base = totalCount != null ? totalCount : entries?.length || 0;
-  if (!loadingSet.size) {
+  if (base <= 0 || !loadingSet.size) {
     return Math.max(0, base);
   }
   let loadingMax = 0;
