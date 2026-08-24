@@ -259,7 +259,7 @@
     },
     {
       "title": "FileSystem 扩展顶部菜单",
-      "description": "通过 toolbarExtra 在导航栏追加上传、新建文件夹、刷新、删除选中等自定义操作",
+      "description": "通过 toolbarExtra 在导航栏追加上传、新建文件夹、刷新、删除选中等自定义操作；FileUpload 会自动上传到当前 uploadPath",
       "code": "./file-system-toolbar-extra.js",
       "scope": [
         {

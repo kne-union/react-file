@@ -7,6 +7,7 @@ import style from './FileSystem.module.scss';
 import EntryIcon from './EntryIcon';
 import PropertiesPanel from './PropertiesPanel';
 import MarqueeSelect from './MarqueeSelect';
+import FileSystemContext from './FileSystemContext';
 import { IconsView as VirtualIconsView, ListTableView as VirtualListTableView, ColumnsView as VirtualColumnsView, GalleryView as VirtualGalleryView } from './VirtualViews';
 import { buildFileSystemIndex, buildNestedEntries, formatByteSize, normalizeFolderPath, normalizeSearchQuery, pathName, pathParent } from './utils';
 import { calcPageSize } from './calcPageSize';
@@ -422,6 +423,17 @@ const FileSystemInner = ({
   const currentFolderName = currentPath === '' ? title : pathName(currentPath) || title;
   const canGoUp = !!currentPath;
 
+  // 分栏单击展开时 currentPath 仍是导航路径；上传应落到正在浏览的最深目录
+  const uploadPath = view === 'columns' && columnSelection.length > 0 ? columnSelection[columnSelection.length - 1] : currentPath;
+
+  const fileSystemContextValue = useMemo(
+    () => ({
+      currentPath,
+      uploadPath
+    }),
+    [currentPath, uploadPath]
+  );
+
   const viewOptions = useMemo(
     () => [
       { label: formatMessage({ id: 'FileSystem.viewGrid' }), value: 'icons', icon: <AppstoreOutlined /> },
@@ -641,43 +653,45 @@ const FileSystemInner = ({
   const marqueeEnabled = !isMobile && (view === 'icons' || (view === 'list' && (isSearching || isAsyncMode)));
 
   return (
-    <div className={classnames(style.root, className)}>
-      <div className={style.toolbar}>
-        <Input allowClear size="small" className={style['search-input']} placeholder={formatMessage({ id: 'FileSystem.search' })} prefix={<SearchOutlined />} value={searchInput} onChange={event => setSearchInput(event.target.value)} />
-        <div className={style['toolbar-nav']}>
-          <Button type="text" size="small" icon={<ArrowLeftOutlined />} disabled={!canGoUp} onClick={goUp} title={formatMessage({ id: 'FileSystem.goUp' })} />
+    <FileSystemContext.Provider value={fileSystemContextValue}>
+      <div className={classnames(style.root, className)}>
+        <div className={style.toolbar}>
+          <Input allowClear size="small" className={style['search-input']} placeholder={formatMessage({ id: 'FileSystem.search' })} prefix={<SearchOutlined />} value={searchInput} onChange={event => setSearchInput(event.target.value)} />
+          <div className={style['toolbar-nav']}>
+            <Button type="text" size="small" icon={<ArrowLeftOutlined />} disabled={!canGoUp} onClick={goUp} title={formatMessage({ id: 'FileSystem.goUp' })} />
+          </div>
+          <div className={style['toolbar-title']} title={currentFolderName}>
+            {currentFolderName}
+          </div>
+          {toolbarExtra ? <div className={style['toolbar-extra']}>{typeof toolbarExtra === 'function' ? toolbarExtra({ selectedEntries, clearSelection, currentPath, uploadPath }) : toolbarExtra}</div> : null}
+          <Segmented size="small" className={style['view-switch']} value={view} onChange={setView} options={segmentedOptions} />
         </div>
-        <div className={style['toolbar-title']} title={currentFolderName}>
-          {currentFolderName}
+        <div className={style.main}>
+          <div className={style.content}>
+            <MarqueeSelect enabled={marqueeEnabled} className={isAsyncMode || view === 'gallery' || view === 'columns' ? style['marquee-fill'] : undefined} onMarqueeSelect={handleMarqueeSelect} onEmptyClick={handleEmptyClick}>
+              {renderContent()}
+            </MarqueeSelect>
+          </div>
+          {showPropertiesPanel ? (
+            <PropertiesPanel
+              selectedEntries={selectedEntries}
+              index={index}
+              currentPath={currentPath}
+              propertiesPanel={propertiesPanel}
+              propertiesActions={propertiesActions}
+              onPropertiesAction={handlePropertiesAction}
+              onClose={() => setPropertiesPanelClosed(true)}
+            />
+          ) : null}
         </div>
-        {toolbarExtra ? <div className={style['toolbar-extra']}>{typeof toolbarExtra === 'function' ? toolbarExtra({ selectedEntries, clearSelection, currentPath }) : toolbarExtra}</div> : null}
-        <Segmented size="small" className={style['view-switch']} value={view} onChange={setView} options={segmentedOptions} />
-      </div>
-      <div className={style.main}>
-        <div className={style.content}>
-          <MarqueeSelect enabled={marqueeEnabled} className={isAsyncMode || view === 'gallery' || view === 'columns' ? style['marquee-fill'] : undefined} onMarqueeSelect={handleMarqueeSelect} onEmptyClick={handleEmptyClick}>
-            {renderContent()}
-          </MarqueeSelect>
+        <div className={style.footer}>
+          <span>
+            {displayCount} {isSearching ? formatMessage({ id: 'FileSystem.resultCount' }) : formatMessage({ id: 'FileSystem.itemCount' })}
+          </span>
+          {footerSelection}
         </div>
-        {showPropertiesPanel ? (
-          <PropertiesPanel
-            selectedEntries={selectedEntries}
-            index={index}
-            currentPath={currentPath}
-            propertiesPanel={propertiesPanel}
-            propertiesActions={propertiesActions}
-            onPropertiesAction={handlePropertiesAction}
-            onClose={() => setPropertiesPanelClosed(true)}
-          />
-        ) : null}
       </div>
-      <div className={style.footer}>
-        <span>
-          {displayCount} {isSearching ? formatMessage({ id: 'FileSystem.resultCount' }) : formatMessage({ id: 'FileSystem.itemCount' })}
-        </span>
-        {footerSelection}
-      </div>
-    </div>
+    </FileSystemContext.Provider>
   );
 };
 

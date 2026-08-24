@@ -182,7 +182,7 @@ const EntrySkeleton = ({ variant = 'icons' }) => {
   }
 
   return (
-    <div className={classnames(style['icon-item'], style['entry-skeleton-icons'])}>
+    <div className={classnames(style['icon-item'], style['entry-skeleton-icons'], style['is-placeholder'])}>
       <span className={style['entry-skeleton-icon']} />
       <span className={style['entry-skeleton-name']} />
     </div>
@@ -298,7 +298,7 @@ export const IconsView = ({ entries, totalCount, selectedPaths, onSelect, onOpen
                 ) : loadingSet.has(index) ? (
                   <EntrySkeleton key={`sk-${index}`} />
                 ) : (
-                  <div key={`empty-${index}`} className={style['icon-item']} aria-hidden />
+                  <div key={`empty-${index}`} className={classnames(style['icon-item'], style['is-placeholder'])} aria-hidden />
                 )
               );
             }
@@ -422,7 +422,7 @@ export const ListTableView = ({ columns, entries, totalCount, selectedPaths, onS
           return (
             <div
               key={virtualRow.key}
-              className={classnames(style['list-tree-row'], entry && selectedPaths.includes(entry.path) && style.selected)}
+              className={classnames(style['list-tree-row'], !entry && style['is-placeholder'], entry && selectedPaths.includes(entry.path) && style.selected)}
               data-fs-path={entry?.path}
               data-fs-index={index}
               style={{
@@ -615,7 +615,7 @@ const ColumnPane = ({ columnPath, columnIndex, entries, count, selectedPaths, on
               key={virtualRow.key}
               data-fs-path={entry?.path}
               data-fs-index={virtualRow.index}
-              className={classnames(style['column-item'], entry && selectedPaths.includes(entry.path) && style.selected)}
+              className={classnames(style['column-item'], !entry && style['is-placeholder'], entry && selectedPaths.includes(entry.path) && style.selected)}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -807,7 +807,7 @@ export const GalleryView = ({ entries, totalCount, selectedPaths, onSelect, onOp
                   key={virtualRow.key}
                   data-fs-path={entry?.path}
                   data-fs-index={virtualRow.index}
-                  className={classnames(style['gallery-film-item'], entry && entry.path === activePath && style.selected)}
+                  className={classnames(style['gallery-film-item'], !entry && style['is-placeholder'], entry && entry.path === activePath && style.selected)}
                   style={{
                     position: 'absolute',
                     top: 0,

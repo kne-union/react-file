@@ -1,20 +1,18 @@
-const { FileSystem } = _ReactFile;
+const { FileSystem, FileUpload } = _ReactFile;
 const { createWithRemoteLoader, getPublicPath } = remoteLoader;
 const { Button, message, Space } = antd;
-const { DeleteOutlined, ReloadOutlined, UploadOutlined, FolderAddOutlined } = icons;
-const { useState } = React;
+const { DeleteOutlined, ReloadOutlined, FolderAddOutlined } = icons;
 
 const BaseExample = createWithRemoteLoader({
   modules: ['components-core:Global@PureGlobal', 'components-core:InfoPage']
 })(({ remoteModules }) => {
   const [PureGlobal, InfoPage] = remoteModules;
-  const [selectedEntries, setSelectedEntries] = useState([]);
-  const [items] = useState([
+  const items = [
     { kind: 'folder', path: 'documents/', name: 'Documents' },
     { kind: 'file', path: 'documents/Q3-report.pdf', name: 'Q3-report.pdf', size: 1024000 },
     { kind: 'file', path: 'documents/notes.md', name: 'notes.md', size: 3200 },
     { kind: 'file', path: 'readme.txt', name: 'readme.txt', size: 1200 }
-  ]);
+  ];
 
   return (
     <PureGlobal
@@ -22,7 +20,17 @@ const BaseExample = createWithRemoteLoader({
         ajax: async api => ({ data: { code: 0, data: api.loader?.() } }),
         apis: {
           file: {
-            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL
+            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL,
+            upload: async ({ file, path }) => {
+              // path 为当前文件夹（进入目录或分栏展开后的 uploadPath）
+              console.log('upload to', path || '(root)', file?.name);
+              return {
+                data: {
+                  code: 0,
+                  data: { id: `mock-${Date.now()}`, filename: file.name, path: path || '' }
+                }
+              };
+            }
           }
         }
       }}
@@ -33,19 +41,16 @@ const BaseExample = createWithRemoteLoader({
             items={items}
             title="My Files"
             defaultView="list"
-            toolbarExtra={
+            toolbarExtra={({ uploadPath, selectedEntries, clearSelection }) => (
               <Space size={8}>
-                <Button size="small" icon={<UploadOutlined />} onClick={() => message.info('自定义上传')}>
+                {/* 在 FileSystem 内未传 directory 时，FileUpload 会自动使用当前 uploadPath */}
+                <FileUpload showUploadList={false} size="small">
                   上传
-                </Button>
-                <Button size="small" icon={<FolderAddOutlined />} onClick={() => message.info('自定义新建文件夹')}>
+                </FileUpload>
+                <Button size="small" icon={<FolderAddOutlined />} onClick={() => message.info(`新建文件夹于 ${uploadPath || '/'}`)}>
                   新建文件夹
                 </Button>
-                <Button
-                  size="small"
-                  icon={<ReloadOutlined />}
-                  onClick={() => message.success('已刷新')}
-                >
+                <Button size="small" icon={<ReloadOutlined />} onClick={() => message.success('已刷新')}>
                   刷新
                 </Button>
                 <Button
@@ -53,15 +58,15 @@ const BaseExample = createWithRemoteLoader({
                   danger
                   icon={<DeleteOutlined />}
                   disabled={!selectedEntries.length}
-                  onClick={() => message.info(`已选择 ${selectedEntries.length} 项`)}
+                  onClick={() => {
+                    message.info(`已选择 ${selectedEntries.length} 项`);
+                    clearSelection();
+                  }}
                 >
                   删除选中
                 </Button>
               </Space>
-            }
-            onSelectionChange={entries => {
-              setSelectedEntries(entries || []);
-            }}
+            )}
             onFileOpen={entry => {
               console.log('Open file:', entry);
             }}

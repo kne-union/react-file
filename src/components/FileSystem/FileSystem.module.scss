@@ -472,8 +472,13 @@
   user-select: none;
   touch-action: manipulation;
 
-  &:hover {
+  // 仅真实条目可悬停；空白占位/骨架不应露出「单元格」高亮
+  &:not(.is-placeholder):hover {
     background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.is-placeholder {
+    pointer-events: none;
   }
 
   &.selected {
@@ -547,8 +552,12 @@
   cursor: default;
   user-select: none;
 
-  &:hover {
+  &:not(.is-placeholder):hover {
     background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.is-placeholder {
+    pointer-events: none;
   }
 
   &.selected {
@@ -583,8 +592,14 @@
   touch-action: manipulation;
   text-align: center;
 
-  &:hover {
+  &:not(.is-placeholder):hover {
     background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.is-placeholder {
+    pointer-events: none;
+    border-color: transparent;
+    background: transparent;
   }
 
   &.selected {
@@ -815,8 +830,12 @@
     top: -1px;
   }
 
-  &:hover {
+  &:not(.is-placeholder):hover {
     background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.is-placeholder {
+    pointer-events: none;
   }
 
   &.selected {
@@ -968,8 +987,12 @@
   user-select: none;
   touch-action: manipulation;
 
-  &:hover {
+  &:not(.is-placeholder):hover {
     background: rgba(0, 0, 0, 0.04);
+  }
+
+  &.is-placeholder {
+    pointer-events: none;
   }
 
   &.selected {

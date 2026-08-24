@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import createDeferred from '@kne/create-deferred';
 import { useContext, usePreset } from '@kne/global-context';
 import useRefCallback from '@kne/use-ref-callback';
@@ -7,6 +7,7 @@ import uniqueId from 'lodash/uniqueId';
 import { createIntl } from '@kne/react-intl';
 import computedAccept from './computedAccept';
 import { uploadFile } from './uploadFile';
+import { useFileSystemContext } from '../FileSystem/FileSystemContext';
 
 const formatAcceptLabel = accept => {
   if (!accept) {
@@ -22,6 +23,7 @@ const formatAcceptLabel = accept => {
 const useFileUpload = p => {
   const { locale } = useContext();
   const { formatMessage } = createIntl({ locale, namespace: 'react-file' });
+  const fileSystem = useFileSystemContext();
   const { multiple, fileSize, maxLength, value, concurrentCount, accept, onAdd, onError, onSave, onChange, onUpload, directory } = Object.assign(
     {},
     {
@@ -35,6 +37,9 @@ const useFileUpload = p => {
     p
   );
 
+  // 未显式传 directory 时，自动使用 FileSystem 当前上传目录（含分栏展开路径）
+  const resolvedDirectory = directory !== undefined ? directory : fileSystem?.uploadPath;
+
   const { apis } = usePreset();
   const { message } = App.useApp();
   const [uploadingList, setUploadingList] = useState([]);
@@ -42,6 +47,8 @@ const useFileUpload = p => {
     return createDeferred(concurrentCount);
   }, [concurrentCount]);
   const acceptLabel = useMemo(() => formatAcceptLabel(accept), [accept]);
+  const directoryRef = useRef(resolvedDirectory);
+  directoryRef.current = resolvedDirectory;
 
   const onFileSelected = useRefCallback(async fileList => {
     const allowCount = maxLength - value.length;
@@ -112,7 +119,7 @@ const useFileUpload = p => {
           const { data } = await deferred(() =>
             uploadFile({
               file,
-              directory,
+              directory: directoryRef.current,
               onUpload,
               apis
             })

@@ -1,5 +1,6 @@
 export { default, FileSystemInner, PropertiesPanel, calcPageSize } from './FileSystem';
 export { default as EntryIcon } from './EntryIcon';
+export { useFileSystemContext } from './FileSystemContext';
 export {
   Default as PropertiesPanelDefault,
   InfoRow as PropertiesPanelInfoRow,
