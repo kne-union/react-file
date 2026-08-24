@@ -39,7 +39,7 @@
 | onSave | function(data, file, uuid) | - | 上传成功后数据处理回调，返回值将作为新的文件对象 |
 | onUpload | function({ file, path? }) | - | 自定义上传函数；优先于 `ossUpload` / preset `apis.file.upload` |
 | ossUpload | function | - | 自定义上传函数（兼容旧写法，等价于 `onUpload`） |
-| directory | string | - | 上传目录；内部映射为后端 `path` 传给上传接口 |
+| directory | string | - | 上传目录；内部映射为后端 `path` 传给上传接口。在 `FileSystem` 内未传时自动使用当前 `uploadPath` |
 | getPermission | function(type) | - | 文件列表操作权限控制函数，type为'preview'/'delete'等 |
 | apis | object | - | API配置对象 |
 | renderModal | function(modalProps) | props => Modal | 自定义弹窗渲染函数 |
@@ -321,7 +321,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | defaultView | 'icons' \| 'list' \| 'columns' \| 'gallery' | 'list' | 默认视图模式 |
 | defaultPath | string | '' | 默认路径 |
 | className | string | - | 自定义类名 |
-| toolbarExtra | ReactNode \| (ctx) => ReactNode | - | 工具栏扩展；函数时接收 `{ selectedEntries, clearSelection, currentPath }` |
+| toolbarExtra | ReactNode \| (ctx) => ReactNode | - | 工具栏扩展；函数时接收 `{ selectedEntries, clearSelection, currentPath, uploadPath }`。`uploadPath` 为实际上传目录（进入的目录；分栏下为正在浏览的最深文件夹）。在 `FileSystem` 内使用 `FileUpload` / `useUploadFile` 且未传 `directory` 时，会自动使用 `uploadPath` |
 | propertiesPanel | boolean \| ReactNode \| (ctx) => ReactNode | true | 右侧属性面板；`false` 关闭；函数时接收 `{ selectedEntries, index, currentPath, close, actions, onAction, defaultActions }` |
 | propertiesActions | false \| ActionItem[] \| (ctx) => ActionItem[] \| object | 内置默认 | 属性面板操作；`false` 关闭；数组按 key 合并；函数完全自定义；`{ list, replace?, ...ButtonGroupProps }` 可替换或合并 |
 | onPropertiesAction | (key, ctx) => void | - | 操作点击回调；`ctx` 含 `entry` / `selectedEntries` / `clearSelection` / `currentPath` |
@@ -429,7 +429,8 @@ const MyComponent = withOSSFile(({ data, id, ...props }) => {
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
 | file | File | - | 待上传文件 |
-| directory | string | - | 上传目录，映射为请求体 `path` |
+| directory | string | - | 上传目录，映射为请求体 `path`；也可直接传 `path`（同义） |
+| path | string | - | 同 `directory`（兼容后端字段名；勿只传 `path` 却期望被忽略） |
 | onUpload | function({ file, path? }) | - | 自定义上传函数；不传则读 `apis` |
 | apis | object | - | API 配置；默认取自 preset |
 
