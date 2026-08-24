@@ -1,8 +1,14 @@
 import { createWithIntlProvider } from '@kne/react-intl';
-import zhCn from './locale/zh-CN';
+import zhCN from './locale/zh-CN';
+import enUS from './locale/en-US';
 
-const withLocale = WrappedComponent => {
-  return createWithIntlProvider('zh-CN', zhCn, 'react-file')(WrappedComponent);
-};
+const withLocale = createWithIntlProvider({
+  defaultLocale: 'zh-CN',
+  messages: {
+    'zh-CN': zhCN,
+    'en-US': enUS
+  },
+  namespace: 'react-file'
+});
 
 export default withLocale;
