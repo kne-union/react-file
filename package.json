@@ -95,7 +95,7 @@
     "react-dom": "^18.2.0"
   },
   "dependencies": {
-    "@ant-design/icons": "^5.5.1",
+    "@ant-design/icons": "^6.3.2",
     "@docmentis/udoc-viewer": "^0.7.16",
     "@extend-ai/react-docx": "^0.7.1",
     "@extend-ai/react-xlsx": "^0.10.2",
