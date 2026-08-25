@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunk_react_file_0_1_58||=[]).push([[2039],{202039(a,e,r){r.r(e),r.d(e,{createMinimalDocxPackage:()=>c.WX,getPart:()=>c._x,packageToArrayBuffer:()=>c.$$,parseDocx:()=>c.YS,withPart:()=>c.Qz});var c=r(892799);r(671124)}}]);
