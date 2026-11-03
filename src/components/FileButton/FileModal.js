@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Modal, Space, App } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
@@ -11,6 +11,7 @@ import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
 import style from './style.module.scss';
 import previewStyle from '../FilePreview/style.module.scss';
+import { ImageToolbarProvider } from '../FilePreview/imageToolbarContext';
 
 let parentScrollLockCount = 0;
 let parentScrollLocked = [];
@@ -66,12 +67,15 @@ export const useFileModalProps = p => {
     {},
     {
       footer: null,
-      openDownload: false,
+      width: 'min(1200px, calc(100vw - 48px))',
       openPrint: false,
       isMobile: false
     },
     p
   );
+  const displayName = title || filename || originName;
+  const showDownload = openDownload !== false;
+  const showPrint = openPrint && ['txt', 'pdf', 'image', 'html'].indexOf(typeFormat(filename || originName)) > -1;
   const [open, onOpenChange] = useControlValue(props, {
     value: 'open',
     default: 'defaultOpen',
@@ -79,6 +83,7 @@ export const useFileModalProps = p => {
   });
   const { message } = App.useApp();
   const ref = useRef();
+  const [toolbarContainer, setToolbarContainer] = useState(null);
   return {
     ...props,
     open,
@@ -87,29 +92,35 @@ export const useFileModalProps = p => {
       onOpenChange(false);
     },
     title: (
-      <Space size={10} className={style['file-title']}>
-        <span className={style['ellipse']}>{title || filename || originName}</span>
-        <span>
-          {openDownload && (
-            <DownloadInner
-              className="btn-no-padding"
-              type="link"
-              id={id}
-              src={src}
-              apis={apis}
-              filename={filename || originName}
-              onSuccess={() => {
-                message.success(formatMessage({ id: 'Download.downloadSuccess' }));
-              }}
-            />
-          )}
-          {openPrint && ['txt', 'pdf', 'image', 'html'].indexOf(typeFormat(filename || originName)) > -1 && <PrintButtonInner contentRef={ref} type="link" icon={<PrinterOutlined />} />}
+      <div className={style['file-title']}>
+        <span className={style['file-title-text']} title={typeof displayName === 'string' ? displayName : undefined}>
+          {displayName}
         </span>
-      </Space>
+        <span ref={setToolbarContainer} className={style['file-title-toolbar']} />
+        {showDownload || showPrint ? (
+          <Space size={4} className={style['file-title-actions']}>
+            {showDownload && (
+              <DownloadInner
+                type="text"
+                id={id}
+                src={src}
+                apis={apis}
+                filename={filename || originName}
+                onSuccess={() => {
+                  message.success(formatMessage({ id: 'Download.downloadSuccess' }));
+                }}
+              />
+            )}
+            {showPrint && <PrintButtonInner contentRef={ref} type="text" icon={<PrinterOutlined />} />}
+          </Space>
+        ) : null}
+      </div>
     ),
     children: (
       <div ref={ref} className={classnames(style['file-modal-outer'], isMobile && style['file-modal-outer-mobile'])}>
-        <FilePreviewInner id={id} src={src} filename={filename || originName} apis={apis} className={previewStyle['modal-preview']} />
+        <ImageToolbarProvider value={{ container: toolbarContainer }}>
+          <FilePreviewInner id={id} src={src} filename={filename || originName} apis={apis} className={previewStyle['modal-preview']} />
+        </ImageToolbarProvider>
       </div>
     )
   };
@@ -169,9 +180,9 @@ export const useFileModal = p => {
                   paddingBottom: 0,
                   height: 'var(--kne-viewport-height, 100vh)'
                 })
-              : propsStyle
+              : Object.assign({ top: 24, paddingBottom: 0 }, propsStyle)
           }
-          wrapClassName={classnames(wrapClassName, isMobile && style['file-modal-wrap-fullscreen'], isMobile && fixedModeClass)}
+          wrapClassName={classnames(wrapClassName, style['file-modal-wrap'], isMobile && style['file-modal-wrap-fullscreen'], isMobile && fixedModeClass)}
           classNames={Object.assign({}, propsClassNames, {
             mask: classnames(propsClassNames?.mask, isMobile && style['file-modal-mask-fullscreen'], isMobile && fixedModeClass)
           })}

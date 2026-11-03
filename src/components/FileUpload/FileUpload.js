@@ -64,7 +64,7 @@ const FileUploadInner = p => {
 
   return (
     <Flex vertical gap={8}>
-      <Flex gap={8}>
+      <Flex vertical gap={4} align="flex-start">
         <FileInputInner {...omit(props, ['value', 'onChange'])} size={size} multiple={multiple} accept={accept} className={className} buttonText={children} onChange={onFileSelected} />
         {tipsText && <div className={style['tips']}>{tipsText}</div>}
       </Flex>

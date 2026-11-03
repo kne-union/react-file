@@ -1,20 +1,21 @@
 import { useEffect, useRef } from 'react';
 import useRefCallback from '@kne/use-ref-callback';
+import classnames from 'classnames';
 import style from './style.module.scss';
 import withLocale from '../../withLocale';
 
-const VideoPreviewInner = ({ url, maxWidth, origin, controls = true, getElement, ...props }) => {
+const VideoPreviewInner = ({ url, maxWidth, origin, controls = true, getElement, className, ...props }) => {
   const ref = useRef(null);
   const getElementCallback = useRefCallback(getElement);
   useEffect(() => {
     getElementCallback(ref.current);
   }, [getElementCallback]);
   if (origin) {
-    return <video controls={controls} {...props} src={url} ref={ref} />;
+    return <video controls={controls} {...props} className={className} src={url} ref={ref} />;
   }
   return (
     <div
-      className={style['container']}
+      className={classnames(className, style['container'])}
       style={{
         maxWidth
       }}

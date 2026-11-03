@@ -1,10 +1,11 @@
+import classnames from 'classnames';
 import style from './style.module.scss';
 import withLocale from '../../withLocale';
 
-const AudioPreviewInner = ({ url, maxWidth, ...props }) => {
+const AudioPreviewInner = ({ url, maxWidth, className, ...props }) => {
   return (
     <div
-      className={style['container']}
+      className={classnames(className, style['container'])}
       style={{
         maxWidth
       }}
