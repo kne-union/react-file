@@ -261,6 +261,7 @@ render(<BaseExample />);
 ```jsx
 const { FileButton } = _ReactFile;
 const { createWithRemoteLoader, getPublicPath } = remoteLoader;
+const { Flex, Typography } = antd;
 
 const BaseExample = createWithRemoteLoader({
   modules: ['components-core:Global@PureGlobal']
@@ -280,7 +281,9 @@ const BaseExample = createWithRemoteLoader({
               3: '/mock/resume.html',
               4: '/mock/resume.txt',
               5: '/mock/audio.wav',
-              6: '/mock/resume.docx'
+              6: '/mock/resume.docx',
+              9: '/mock/small-image.png',
+              10: '/mock/video.mp4'
             };
             return new Promise(resolve => {
               setTimeout(() => {
@@ -292,10 +295,36 @@ const BaseExample = createWithRemoteLoader({
       }
     }
   }}>
-    <FileButton id="1" filename="demo.jpg" openPrint modalProps={{ width: 800 }}>预览demo.jpg</FileButton>
-    <FileButton id="2" filename="demo2.pdf" openPrint modalProps={{ width: 800 }}>预览demo2.pdf</FileButton>
-    <FileButton id="3" filename="demo2.html" openPrint modalProps={{ width: 800 }}>预览demo2.html</FileButton>
-    <FileButton id="6" filename="resume.docx" openPrint modalProps={{ width: 800 }} type="link">resume.docx</FileButton>
+    <Flex vertical gap={16}>
+      <Flex vertical gap={8}>
+        <Typography.Text type="secondary">图片</Typography.Text>
+        <Flex wrap gap={8}>
+          <FileButton id="1" filename="demo.jpg" openPrint modalProps={{ width: 800 }}>demo.jpg</FileButton>
+          <FileButton id="9" filename="small-image.png" openPrint modalProps={{ width: 800 }}>小尺寸图片</FileButton>
+        </Flex>
+      </Flex>
+      <Flex vertical gap={8}>
+        <Typography.Text type="secondary">文档</Typography.Text>
+        <Flex wrap gap={8}>
+          <FileButton id="2" filename="demo2.pdf" openPrint modalProps={{ width: 800 }}>demo2.pdf</FileButton>
+          <FileButton id="3" filename="demo2.html" openPrint modalProps={{ width: 800 }}>demo2.html</FileButton>
+          <FileButton id="6" filename="resume.docx" openPrint modalProps={{ width: 800 }}>resume.docx</FileButton>
+        </Flex>
+      </Flex>
+      <Flex vertical gap={8}>
+        <Typography.Text type="secondary">音视频</Typography.Text>
+        <Flex wrap gap={8}>
+          <FileButton id="10" filename="video.mp4" modalProps={{ width: 800 }}>video.mp4</FileButton>
+          <FileButton id="5" filename="audio.wav" modalProps={{ width: 800 }}>audio.wav</FileButton>
+        </Flex>
+      </Flex>
+      <Flex vertical gap={8}>
+        <Typography.Text type="secondary">链接样式</Typography.Text>
+        <Flex wrap gap={8}>
+          <FileButton id="6" filename="resume.docx" openPrint modalProps={{ width: 800 }} type="link">resume.docx</FileButton>
+        </Flex>
+      </Flex>
+    </Flex>
   </PureGlobal>;
 });
 
@@ -446,7 +475,8 @@ const BaseExample = createWithRemoteLoader({
                   5: '/mock/audio.wav',
                   6: '/mock/resume.docx',
                   7: '/mock/example.zip',
-                  8: '/mock/resume.xlsx'
+                  8: '/mock/resume.xlsx',
+                  9: '/mock/small-image.png'
                 };
                 return new Promise(resolve => {
                   setTimeout(() => {
@@ -461,6 +491,9 @@ const BaseExample = createWithRemoteLoader({
       <InfoPage>
         <InfoPage.Part title="预览图片">
           <FilePreview id="1" />
+        </InfoPage.Part>
+        <InfoPage.Part title="预览小尺寸图片">
+          <FilePreview id="9" />
         </InfoPage.Part>
         <InfoPage.Part title="预览PDF">
           <FilePreview id="2" />
@@ -1192,7 +1225,7 @@ const BaseExample = createWithRemoteLoader({
             toolbarExtra={({ uploadPath, selectedEntries, clearSelection }) => (
               <Space size={8}>
                 {/* 在 FileSystem 内未传 directory 时，FileUpload 会自动使用当前 uploadPath */}
-                <FileUpload showUploadList={false} size="small">
+                <FileUpload showUploadList={false} size="small" renderTips={() => null}>
                   上传
                 </FileUpload>
                 <Button size="small" icon={<FolderAddOutlined />} onClick={() => message.info(&#96;新建文件夹于 ${uploadPath || '/'}&#96;)}>
@@ -1724,7 +1757,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | originName | string | - | 原始文件名，作为filename的备选 |
 | title | string | - | 弹窗标题，默认使用filename |
 | modalProps | object | - | 传递给弹窗的属性，如{ width: 800 } |
-| openDownload | boolean | false | 弹窗中是否显示下载按钮 |
+| openDownload | boolean | true | 弹窗中是否显示下载按钮，传 false 隐藏 |
 | openPrint | boolean | false | 弹窗中是否显示打印按钮（仅txt/pdf/image/html类型支持） |
 | children | ReactNode \| function(filename) | - | 按钮内容，支持函数返回 |
 | ...antd Button props | - | - | 支持所有antd Button属性（默认icon为LinkOutlined） |
@@ -1746,7 +1779,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | open | boolean | - | 是否显示（受控） |
 | defaultOpen | boolean | - | 默认是否显示 |
 | onOpenChange | function(open) | - | 显示状态变化回调 |
-| openDownload | boolean | false | 是否显示下载按钮 |
+| openDownload | boolean | true | 是否显示下载按钮，传 false 隐藏 |
 | openPrint | boolean | false | 是否显示打印按钮 |
 | footer | ReactNode | null | 弹窗底部内容 |
 | apis | object | - | API配置对象 |
