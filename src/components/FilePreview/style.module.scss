@@ -211,8 +211,121 @@
 
 .modal-preview.container {
   max-width: none;
+  display: flex;
+  flex-direction: column;
+
+  > img {
+    margin: auto;
+    max-width: 100%;
+    max-height: calc(var(--kne-viewport-height, 100vh) - 160px);
+    object-fit: contain;
+  }
 }
 
+.modal-preview.container > .loading-skeleton {
+  flex: 1 1 auto;
+}
+
+.modal-preview.container > .video-inner,
+.modal-preview.container > .audio-inner {
+  margin: auto 0;
+  padding: 16px;
+}
+
+.modal-preview.container > .video-inner video {
+  max-height: calc(var(--kne-viewport-height, 100vh) - 180px);
+}
+
+.modal-preview.container.image-viewer {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.image-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+}
+
+.image-toolbar-group {
+  display: flex;
+  align-items: center;
+  padding: 1px 4px;
+  border: 1px solid var(--ant-color-border-secondary, #f0f0f0);
+  border-radius: 999px;
+
+  > * + * {
+    position: relative;
+    margin-left: 9px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -5px;
+      top: 50%;
+      width: 1px;
+      height: 16px;
+      transform: translateY(-50%);
+      background: var(--ant-color-border, #d9d9d9);
+    }
+  }
+}
+
+.image-toolbar-zoom {
+  min-width: 40px;
+  text-align: right;
+  color: var(--ant-color-text-secondary, rgba(0, 0, 0, 0.65));
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+@include resp.mobile-container {
+  .image-toolbar-zoom {
+    display: none;
+  }
+}
+
+.image-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 16px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.image-stage-pannable {
+  cursor: grab;
+  user-select: none;
+}
+
+.image-stage-dragging {
+  cursor: grabbing;
+
+  .image-stage-box > img {
+    transition: none;
+  }
+}
+
+.image-stage-box {
+  position: relative;
+  flex: none;
+  margin: auto;
+
+  > img {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    transition: transform 0.2s;
+  }
+}
+
+// 弹窗标题栏已显示文件名，预览内工具栏不再重复
 .modal-preview.office-preview {
   border: none;
   border-radius: 0;
@@ -222,9 +335,18 @@
   flex-direction: column;
   overflow: hidden;
 
+  .office-file-name {
+    display: none;
+  }
+
+  .office-toolbar {
+    flex: none;
+    padding: 6px 12px;
+  }
+
   .office-viewer-body {
     flex: 1;
-    min-height: 0;
+    min-height: 0 !important;
   }
 }
 

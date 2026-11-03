@@ -57,9 +57,9 @@ const ListInner = p => {
 
         return (
           <AntdList.Item className={style['list-item-outer']}>
-            <div className={style['list-item']}>
+            <div className={classnames(style['list-item'], type === 'uploading' && style['is-uploading'])}>
               <div className={style['item-icon']}>
-                <FileType type={last(filename?.split('.'))} size={28} />
+                <FileType type={last(filename?.split('.'))} size={20} />
               </div>
               <div className={style['item-content']}>
                 <div className={style['item-filename']} title={filename || ''}>
@@ -71,9 +71,9 @@ const ListInner = p => {
                 {type !== 'uploading' ? (
                   <OptionButtonsInner getPermission={getPermission} item={item} apis={apis} onDelete={onDelete} renderModal={renderModal} onEdit={onEdit} />
                 ) : (
-                  <Space className={style['loading']}>
+                  <Space size={6} className={style['loading']}>
                     <Spin size="small" />
-                    <Typography.Link>{formatMessage({ id: 'FileList.uploading' })}</Typography.Link>
+                    <span>{formatMessage({ id: 'FileList.uploading' })}</span>
                   </Space>
                 )}
               </div>
@@ -81,7 +81,6 @@ const ListInner = p => {
           </AntdList.Item>
         );
       }}
-      bordered
     />
   );
 };

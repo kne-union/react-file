@@ -44,7 +44,7 @@ const BaseExample = createWithRemoteLoader({
             toolbarExtra={({ uploadPath, selectedEntries, clearSelection }) => (
               <Space size={8}>
                 {/* 在 FileSystem 内未传 directory 时，FileUpload 会自动使用当前 uploadPath */}
-                <FileUpload showUploadList={false} size="small">
+                <FileUpload showUploadList={false} size="small" renderTips={() => null}>
                   上传
                 </FileUpload>
                 <Button size="small" icon={<FolderAddOutlined />} onClick={() => message.info(`新建文件夹于 ${uploadPath || '/'}`)}>

@@ -238,7 +238,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | originName | string | - | 原始文件名，作为filename的备选 |
 | title | string | - | 弹窗标题，默认使用filename |
 | modalProps | object | - | 传递给弹窗的属性，如{ width: 800 } |
-| openDownload | boolean | false | 弹窗中是否显示下载按钮 |
+| openDownload | boolean | true | 弹窗中是否显示下载按钮，传 false 隐藏 |
 | openPrint | boolean | false | 弹窗中是否显示打印按钮（仅txt/pdf/image/html类型支持） |
 | children | ReactNode \| function(filename) | - | 按钮内容，支持函数返回 |
 | ...antd Button props | - | - | 支持所有antd Button属性（默认icon为LinkOutlined） |
@@ -260,7 +260,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | open | boolean | - | 是否显示（受控） |
 | defaultOpen | boolean | - | 默认是否显示 |
 | onOpenChange | function(open) | - | 显示状态变化回调 |
-| openDownload | boolean | false | 是否显示下载按钮 |
+| openDownload | boolean | true | 是否显示下载按钮，传 false 隐藏 |
 | openPrint | boolean | false | 是否显示打印按钮 |
 | footer | ReactNode | null | 弹窗底部内容 |
 | apis | object | - | API配置对象 |
