@@ -1850,6 +1850,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
 | getEntryStatus | function(entry) => string \| ReactNode | - | 返回右上角状态徽标；优先于 `entry.status` / `entry.options.status` |
+| renderEntryIcon | function({ entry, size, pixelSize, icon }) => ReactNode | - | 自定义文件图标（如缩略图），作用于所有视图与属性面板；`icon` 为默认类型图标，返回 `null` / `undefined` 时使用默认图标；文件夹不调用。函数需保持引用稳定 |
 | entries | array | - | 异步分页：当前目录稀疏数组（`length === totalCount`，未加载为 empty） |
 | totalCount | number | - | 异步分页：当前目录总数量；与 `onVisibleRangeChange` 同时传入即开启虚拟滚动 |
 | loadingIndexes | Set \| array | - | 异步分页：正在加载的下标，显示骨架占位 |
