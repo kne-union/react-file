@@ -4,6 +4,7 @@ import FileType from '@kne/react-file-type';
 import { CheckOutlined, CloseOutlined, LoadingOutlined, SyncOutlined } from '@ant-design/icons';
 import { ReactComponent as FolderIcon } from './icons/folder.svg';
 import { fileExtension } from './utils';
+import { useFileSystemContext } from './FileSystemContext';
 import style from './FileSystem.module.scss';
 
 const ICON_SIZES = {
@@ -82,10 +83,24 @@ const resolveStatusBadge = status => {
 const EntryIcon = ({ entry, className, size = 'md', status: statusProp }) => {
   const pixelSize = ICON_SIZES[size] || ICON_SIZES.md;
   const badge = resolveStatusBadge(resolveEntryStatus(entry, statusProp));
+  const renderEntryIcon = useFileSystemContext()?.renderEntryIcon;
+
+  let icon;
+  if (entry.kind === 'folder') {
+    icon = <FolderIcon focusable="false" className={classnames(style['entry-icon'], style['entry-icon-folder'])} />;
+  } else {
+    icon = <FileType type={fileExtension(entry.name || entry.path)} size={pixelSize} />;
+    if (typeof renderEntryIcon === 'function') {
+      const custom = renderEntryIcon({ entry, size, pixelSize, icon });
+      if (custom != null && custom !== false) {
+        icon = custom;
+      }
+    }
+  }
 
   return (
     <span aria-hidden className={classnames(style['entry-icon-slot'], style[`entry-icon-slot-${size}`], entry.kind === 'folder' && style['entry-icon-slot-folder'], className)}>
-      {entry.kind === 'folder' ? <FolderIcon focusable="false" className={classnames(style['entry-icon'], style['entry-icon-folder'])} /> : <FileType type={fileExtension(entry.name || entry.path)} size={pixelSize} />}
+      {icon}
       {badge ? <span className={classnames(style['entry-status'], style[`entry-status-${badge.tone}`])}>{badge.content}</span> : null}
     </span>
   );

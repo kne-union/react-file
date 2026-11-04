@@ -55,7 +55,8 @@ const FileSystemInner = ({
   onRegisterFolder,
   renderFilePreview,
   canPreviewFile,
-  getEntryStatus
+  getEntryStatus,
+  renderEntryIcon
 }) => {
   const { formatMessage } = useIntl();
   const isMobile = useIsMobile();
@@ -429,9 +430,10 @@ const FileSystemInner = ({
   const fileSystemContextValue = useMemo(
     () => ({
       currentPath,
-      uploadPath
+      uploadPath,
+      renderEntryIcon
     }),
-    [currentPath, uploadPath]
+    [currentPath, uploadPath, renderEntryIcon]
   );
 
   const viewOptions = useMemo(
