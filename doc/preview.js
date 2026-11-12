@@ -25,7 +25,8 @@ const BaseExample = createWithRemoteLoader({
                   6: '/mock/resume.docx',
                   7: '/mock/example.zip',
                   8: '/mock/resume.xlsx',
-                  9: '/mock/small-image.png'
+                  9: '/mock/small-image.png',
+                  10: '/mock/james-webb-space-telescope.pptx'
                 };
                 return new Promise(resolve => {
                   setTimeout(() => {
@@ -59,6 +60,9 @@ const BaseExample = createWithRemoteLoader({
         <InfoPage.Part title="预览OFFICE">
           <FilePreview id="6" filename="resume.docx" />
           <FilePreview id="8" filename="resume.xlsx" />
+        </InfoPage.Part>
+        <InfoPage.Part title="预览PPT">
+          <FilePreview id="10" filename="james-webb-space-telescope.pptx" />
         </InfoPage.Part>
         <InfoPage.Part title="预览ZIP">
           <FilePreview id="7" />

@@ -4,6 +4,10 @@
 
 React文件操作组件库，提供文件上传、多格式预览、下载、列表管理及文件系统浏览，支持i18n
 
+### 关键词
+
+react, file, upload, preview, download, file-system, image, avatar, antd, i18n, office, pdf, zip
+
 ### 安装
 
 ```shell
@@ -14,10 +18,10 @@ npm i --save @kne/react-file
 
 React文件操作组件库，提供文件上传、多格式预览、下载、列表管理及文件系统浏览的完整解决方案，支持国际化。
 
-### 主要特性
+#### 主要特性
 
 - **文件上传** - 支持单文件/多文件上传，可自定义文件类型、大小限制和并发数
-- **文件预览** - 根据文件类型自动选择预览方式，支持图片、音频、视频、PDF、Office文档、HTML、Markdown、JSON、ZIP、文本等
+- **文件预览** - 根据文件类型自动选择预览方式，支持图片、音频、视频、PDF、Office文档（Word/Excel/PowerPoint 浏览器本地解析）、HTML、Markdown、JSON、ZIP、文本等
 - **文件下载** - 支持OSS文件ID下载、直接URL下载和Blob数据下载
 - **文件列表** - 展示已上传文件列表，支持上传中状态、预览、下载、删除操作
 - **文件系统** - 提供文件系统浏览组件，支持图标、列表、分栏、画廊四种视图模式
@@ -25,33 +29,33 @@ React文件操作组件库，提供文件上传、多格式预览、下载、列
 - **打印功能** - 内置打印按钮组件，支持打印前/后回调
 - **国际化** - 内置中英文语言包，支持多语言切换
 
-### 组件概览
+#### 组件概览
 
-#### File
+##### File
 文件组件，通过OSS文件ID获取文件URL，使用render props模式。
 
-#### FileUpload
+##### FileUpload
 文件上传组件，支持单文件和多文件上传，可自定义接受的文件类型和上传限制。
 
-#### FilePreview
+##### FilePreview
 文件预览组件，根据文件类型自动选择合适的预览方式。支持本地URL和OSS文件ID两种方式。
 
-#### FileList
+##### FileList
 文件列表组件，用于展示和管理已上传的文件，支持上传中状态、预览、下载和删除操作。
 
-#### FileButton
+##### FileButton
 文件操作按钮组件，点击后弹出文件预览弹窗，支持下载和打印。
 
-#### Download
+##### Download
 文件下载按钮组件，支持OSS文件ID下载和直接URL下载。
 
-#### Image
+##### Image
 图片组件，支持默认头像、性别区分的头像显示，以及加载失败时的占位图。
 
-#### FileSystem
+##### FileSystem
 文件系统浏览组件，提供图标、列表、分栏、画廊四种视图，支持导航历史、搜索与异步分页虚拟滚动（大数据目录）。
 
-#### PrintButton
+##### PrintButton
 打印按钮组件，用于触发浏览器打印功能。
 
 
@@ -470,7 +474,8 @@ const BaseExample = createWithRemoteLoader({
                   6: '/mock/resume.docx',
                   7: '/mock/example.zip',
                   8: '/mock/resume.xlsx',
-                  9: '/mock/small-image.png'
+                  9: '/mock/small-image.png',
+                  10: '/mock/james-webb-space-telescope.pptx'
                 };
                 return new Promise(resolve => {
                   setTimeout(() => {
@@ -504,6 +509,9 @@ const BaseExample = createWithRemoteLoader({
         <InfoPage.Part title="预览OFFICE">
           <FilePreview id="6" filename="resume.docx" />
           <FilePreview id="8" filename="resume.xlsx" />
+        </InfoPage.Part>
+        <InfoPage.Part title="预览PPT">
+          <FilePreview id="10" filename="james-webb-space-telescope.pptx" />
         </InfoPage.Part>
         <InfoPage.Part title="预览ZIP">
           <FilePreview id="7" />
@@ -1511,11 +1519,11 @@ render(<BaseExample />);
 
 ### API
 
-### File
+#### File
 
 文件组件，通过OSS文件ID获取文件URL，使用render props模式。内部使用`withOSSFile` HOC获取文件URL。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1529,11 +1537,11 @@ render(<BaseExample />);
 
 ---
 
-### FileUpload
+#### FileUpload
 
 文件上传组件，支持单文件和多文件上传。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1559,11 +1567,11 @@ render(<BaseExample />);
 
 ---
 
-### FileInput
+#### FileInput
 
 文件输入组件，提供文件选择按钮。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1576,11 +1584,11 @@ render(<BaseExample />);
 
 ---
 
-### FilePreview
+#### FilePreview
 
 文件预览组件，根据文件类型自动选择合适的预览方式。提供`src`时使用`TypePreview`，提供`id`时使用`OSSFilePreview`。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1590,7 +1598,7 @@ render(<BaseExample />);
 | originName | string | - | 原始文件名，作为filename的备选 |
 | apis | object | - | API配置对象 |
 
-#### 预览子组件
+##### 预览子组件
 
 以下子组件均可单独使用：
 
@@ -1602,7 +1610,8 @@ render(<BaseExample />);
 | PdfPreview | PDF预览 |
 | DocxPreview | Word文档预览 |
 | XlsxPreview | Excel预览 |
-| OfficePreview | Office文档预览（根据文件类型选择DocxPreview或XlsxPreview） |
+| PptxPreview | PowerPoint演示文稿预览（.ppt/.pptx，基于@extend-ai/react-pptx在浏览器本地解析） |
+| OfficePreview | Office文档预览（根据文件类型选择DocxPreview、XlsxPreview或PptxPreview） |
 | HtmlPreview | HTML预览 |
 | MarkdownPreview | Markdown预览 |
 | JsonPreview | JSON预览 |
@@ -1611,13 +1620,36 @@ render(<BaseExample />);
 | UnknownPreview | 未知类型文件预览 |
 | OSSFilePreview | OSS文件预览（通过ID获取URL后自动选择预览方式） |
 
+> PDF、Word、Excel、PPT 预览的顶部缩放工具栏在「缩小」按钮左侧均提供「恢复推荐尺寸」按钮：Word / PDF 回到初始化缩放（`scale`，默认 100%），PPT 按当前模式重新适配页面（单页 fit-page、全部 fit-width），Excel 调用 viewer 的 `resetZoom()` 回到 `defaultZoomScale`。已处于推荐尺寸时该按钮置灰禁用。
+
 ---
 
-### MarkdownPreview
+#### PptxPreview
+
+PowerPoint 演示文稿预览组件。基于 `@extend-ai/react-pptx` 在浏览器端通过 WebAssembly 解析 `.ppt` / `.pptx`，无需服务端转换或 Office Online。默认「单页」模式一次只展示一张幻灯片，并在展示区内水平、垂直居中；展示区左右各有绝对定位的圆形悬浮翻页按钮（不随内容滚动，桌面端 hover 到预览区域才显示，移动端常显），工具栏显示当前页码。工具栏用图标切换器（单页 / 全部）切到「全部」模式时连续浏览所有幻灯片（启用虚拟滚动），页码与翻页按钮一并隐藏；隐藏顶部工具栏时悬浮翻页按钮依然可用。两种模式共用缩放控件，`OfficePreview` 会自动为演示文稿文件选择该组件，并保留切换到「原生预览」的能力。
+
+##### 属性
+
+| 属性 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| url | string | - | PPT/PPTX 文件URL地址 |
+| filename | string | 'presentation.pptx' | 文件名，显示在预览工具栏 |
+| className | string | - | 自定义容器类名 |
+| height | number | 600 | 预览区域最小高度 |
+| showHeader | boolean | true | 是否显示顶部工具栏 |
+| pptxWasmUrl | string | `https://cdn.jsdelivr.net/npm/@extend-ai/react-pptx@0.5.0/dist/pptx_wasm_bg.wasm` | 解析用的 wasm 静态地址，也可通过 `preset({ apis: { file: { pptxWasmUrl } } })` 全局配置（与 `pdfjsUrl` 一致） |
+| apis | object | - | API配置对象，与全局preset.apis合并 |
+| onRemotePreview | function | - | 传入后显示「原生预览」按钮，用于切换到远程Office预览 |
+
+wasm 由组件在加载演示文稿前通过 `setWasmSource()` 指向上述静态地址，宿主打包器无需处理 `.wasm` 资源；如需内网部署，把 `pptx_wasm_bg.wasm` 放到静态目录并配置 `pptxWasmUrl` 即可。
+
+---
+
+#### MarkdownPreview
 
 Markdown文件预览组件。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1627,11 +1659,11 @@ Markdown文件预览组件。
 
 ---
 
-### JsonPreview
+#### JsonPreview
 
 JSON文件预览组件，使用@kne/json-view提供友好的JSON数据展示。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1647,11 +1679,11 @@ JSON文件预览组件，使用@kne/json-view提供友好的JSON数据展示。
 
 ---
 
-### ZipPreview
+#### ZipPreview
 
 ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和目录结构。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1661,11 +1693,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### FileList
+#### FileList
 
 文件列表组件，用于展示和管理文件。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1677,7 +1709,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | apis | object | - | API配置对象 |
 | renderModal | function(modalProps) | props => Modal | 自定义弹窗渲染函数 |
 
-#### dataSource 数据项
+##### dataSource 数据项
 
 | 字段 | 类型 | 描述 |
 |------|------|------|
@@ -1691,11 +1723,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### FileListOptionButtons
+#### FileListOptionButtons
 
 文件列表操作按钮组件，提供预览、编辑、下载、删除操作。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1710,11 +1742,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### Download
+#### Download
 
 文件下载按钮组件，基于antd Button封装。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1727,7 +1759,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | onClick | function | - | 点击按钮的回调函数 |
 | ...antd Button props | - | - | 支持所有antd Button属性 |
 
-#### 静态方法
+##### 静态方法
 
 | 方法 | 描述 |
 |------|------|
@@ -1737,11 +1769,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### FileButton
+#### FileButton
 
 文件操作按钮组件，点击后弹出文件预览弹窗。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1758,11 +1790,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### FileModal
+#### FileModal
 
 文件预览弹窗组件。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1780,11 +1812,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### Image
+#### Image
 
 图片组件，支持默认头像和加载失败处理。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1799,7 +1831,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | onClick | function | - | 点击事件 |
 | children | function({ alt, className, src }) | - | 自定义渲染函数 |
 
-#### Image.Avatar
+##### Image.Avatar
 
 头像子组件。
 
@@ -1821,11 +1853,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### FileSystem
+#### FileSystem
 
 文件系统浏览组件，提供图标、列表、分栏、画廊四种视图模式。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1844,6 +1876,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | renderFilePreview | function(entry) | - | 画廊视图中的文件预览渲染函数 |
 | canPreviewFile | function(entry) | - | 判断文件是否可预览的函数 |
 | getEntryStatus | function(entry) => string \| ReactNode | - | 返回右上角状态徽标；优先于 `entry.status` / `entry.options.status` |
+| renderEntryIcon | function({ entry, size, pixelSize, icon }) => ReactNode | - | 自定义文件图标（如缩略图），作用于所有视图与属性面板；`icon` 为默认类型图标，返回 `null` / `undefined` 时使用默认图标；文件夹不调用。函数需保持引用稳定 |
 | entries | array | - | 异步分页：当前目录稀疏数组（`length === totalCount`，未加载为 empty） |
 | totalCount | number | - | 异步分页：当前目录总数量；与 `onVisibleRangeChange` 同时传入即开启虚拟滚动 |
 | loadingIndexes | Set \| array | - | 异步分页：正在加载的下标，显示骨架占位 |
@@ -1854,7 +1887,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 `calcPageSize({ view, width, height, buffer? })` 可按视口估算建议 `perPage`（也可写作 `FileSystem.calcPageSize`）。`view` 为 `icons` / `list` / `columns` / `gallery`；`buffer` 默认 `2`，结果夹在 20–200。
 
-#### FileSystem.PropertiesPanel
+##### FileSystem.PropertiesPanel
 
 | 成员 | 说明 |
 |------|------|
@@ -1868,7 +1901,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 多选逻辑与 Windows / macOS 文件管理器一致：普通点击单选；Ctrl（Windows）/ Command（macOS）+ 点击切换选中；Shift + 点击按当前目录顺序区间选中；在空白处拖拽可框选（Ctrl/Command + 框选为追加）；点击空白取消选中。树形列表视图暂不支持框选。
 
-#### items 数据项
+##### items 数据项
 
 | 字段 | 类型 | 描述 |
 |------|------|------|
@@ -1880,7 +1913,7 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | status | string \| ReactNode | 右上角状态徽标；内置：`sync` / `processing` / `success`（`complete`） / `error` / `cancelled`，及中文别名；也可传自定义 JSX |
 | options.status | string \| ReactNode | 同上，当 `status` 未设置时读取 |
 
-#### EntryIcon
+##### EntryIcon
 
 文件/文件夹图标组件，支持右上角状态徽标（圆形；相对 20px 规格缩至 60%：约 12px 外径、1.2px 白边与 padding、7.2px 图标）。
 
@@ -1892,11 +1925,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### PrintButton
+#### PrintButton
 
 打印按钮组件，触发浏览器打印功能。
 
-#### 属性
+##### 属性
 
 | 属性 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1910,11 +1943,11 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 
 ---
 
-### withOSSFile
+#### withOSSFile
 
 高阶组件，通过OSS文件ID获取文件URL并注入到被包裹组件。
 
-#### 用法
+##### 用法
 
 ```jsx
 const MyComponent = withOSSFile(({ data, id, ...props }) => {
@@ -1923,7 +1956,7 @@ const MyComponent = withOSSFile(({ data, id, ...props }) => {
 });
 ```
 
-#### 被注入的属性
+##### 被注入的属性
 
 | 属性 | 类型 | 描述 |
 |------|------|------|
@@ -1933,11 +1966,11 @@ const MyComponent = withOSSFile(({ data, id, ...props }) => {
 
 ---
 
-### uploadFile
+#### uploadFile
 
 统一上传入口。库内上传应走此 API；会解析自定义 `onUpload` 或 preset `apis.file.upload` / `ossUpload` / `upload`，并将 `directory` 映射为后端 `path`。
 
-#### 参数
+##### 参数
 
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1947,7 +1980,7 @@ const MyComponent = withOSSFile(({ data, id, ...props }) => {
 | onUpload | function({ file, path? }) | - | 自定义上传函数；不传则读 `apis` |
 | apis | object | - | API 配置；默认取自 preset |
 
-#### 返回值
+##### 返回值
 
 上传接口的原始返回值（通常为 `{ data: { code, data, msg } }` 形态，由业务 `apis.file.upload` 决定）。
 
@@ -1959,11 +1992,11 @@ await uploadFile({ file, directory: 'docs/2026' });
 
 ---
 
-### useUploadFile
+#### useUploadFile
 
 返回绑定当前 preset `apis` 的 `uploadFile` 函数，便于在组件内直接调用。
 
-#### 返回值
+##### 返回值
 
 | 类型 | 描述 |
 |------|------|
@@ -1978,11 +2011,11 @@ await upload({ file, directory: 'avatars' });
 
 ---
 
-### useFileUpload
+#### useFileUpload
 
 文件上传Hook，处理文件上传逻辑。
 
-#### 参数
+##### 参数
 
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -1998,7 +2031,7 @@ await upload({ file, directory: 'avatars' });
 | onUpload | function({ file, path? }) | - | 自定义上传函数 |
 | directory | string | - | 上传目录；内部映射为后端 `path` |
 
-#### 返回值
+##### 返回值
 
 | 字段 | 类型 | 描述 |
 |------|------|------|
@@ -2007,11 +2040,11 @@ await upload({ file, directory: 'avatars' });
 
 ---
 
-### useDownload
+#### useDownload
 
 文件下载Hook。
 
-#### 参数
+##### 参数
 
 | 参数 | 类型 | 默认值 | 描述 |
 |------|------|--------|------|
@@ -2023,7 +2056,7 @@ await upload({ file, directory: 'avatars' });
 | onError | function(error) | - | 下载失败回调 |
 | onSuccess | function | - | 下载成功回调 |
 
-#### 返回值
+##### 返回值
 
 | 字段 | 类型 | 描述 |
 |------|------|------|
@@ -2033,11 +2066,11 @@ await upload({ file, directory: 'avatars' });
 
 ---
 
-### downloadBlobFile
+#### downloadBlobFile
 
 Blob文件下载工具函数，支持URL字符串、Blob对象和远程URL下载。
 
-#### 参数
+##### 参数
 
 ```javascript
 downloadBlobFile(input, filename, locale)
@@ -2051,11 +2084,11 @@ downloadBlobFile(input, filename, locale)
 
 ---
 
-### download
+#### download
 
 文件下载工具函数，通过创建a标签触发下载。
 
-#### 参数
+##### 参数
 
 ```javascript
 download(url, filename)
@@ -2068,11 +2101,11 @@ download(url, filename)
 
 ---
 
-### computedAccept
+#### computedAccept
 
 计算接受的文件类型，将文件类型数组转为浏览器accept属性值。
 
-#### 参数
+##### 参数
 
 ```javascript
 computedAccept(accept)
@@ -2082,7 +2115,7 @@ computedAccept(accept)
 |------|------|------|
 | accept | string \| string[] | 文件类型，如'.jpg,.png'或['.jpg', '.png'] |
 
-#### 返回值
+##### 返回值
 
 | 类型 | 描述 |
 |------|------|
@@ -2090,11 +2123,11 @@ computedAccept(accept)
 
 ---
 
-### typeFormat
+#### typeFormat
 
 根据文件扩展名获取文件类型标识。
 
-#### 参数
+##### 参数
 
 ```javascript
 typeFormat(filename)
@@ -2104,7 +2137,7 @@ typeFormat(filename)
 |------|------|------|
 | filename | string | 文件名 |
 
-#### 返回值
+##### 返回值
 
 | 类型 | 描述 |
 |------|------|
@@ -2112,7 +2145,7 @@ typeFormat(filename)
 
 ---
 
-### preset / globalParams
+#### preset / globalParams
 
 全局参数预设（对齐 `@kne/table-view`），用于扩展或覆盖文件预览类型。
 
@@ -2141,11 +2174,11 @@ preset({
 
 ---
 
-### typeFormatComponent
+#### typeFormatComponent
 
 根据文件名获取对应的预览组件。
 
-#### 参数
+##### 参数
 
 ```javascript
 typeFormatComponent(filename)
@@ -2155,7 +2188,7 @@ typeFormatComponent(filename)
 |------|------|------|
 | filename | string | 文件名 |
 
-#### 返回值
+##### 返回值
 
 | 类型 | 描述 |
 |------|------|

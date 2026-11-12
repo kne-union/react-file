@@ -95,7 +95,17 @@ const PdfPreviewInner = p => {
       className={className}
       filename={displayFileName}
       extra={toolbarExtra}
-      actions={[<PreviewZoomControls key="zoom" zoom={zoom} onZoomChange={setZoom} disabled={!isDocumentReady} />]}
+      actions={[
+        <PreviewZoomControls
+          key="zoom"
+          zoom={zoom}
+          onZoomChange={setZoom}
+          disabled={!isDocumentReady}
+          onResetZoom={() => setZoom(scaleProp)}
+          resetDisabled={Number(zoom) === Number(scaleProp)}
+          resetZoomLabel={formatMessage({ id: 'FilePreview.resetZoom' })}
+        />
+      ]}
       bodyRef={ref}
       bodyStyle={{ width: '100%', ...(height ? { minHeight: height } : {}) }}
     >

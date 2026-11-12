@@ -16,7 +16,7 @@ const InnerTypePreview = ({ url, filename, type, ...props }) => {
 
   return (
     <PreviewSuspense>
-      <PreviewComponent {...props} url={fileUrl} />
+      <PreviewComponent {...props} url={fileUrl} filename={filename} />
     </PreviewSuspense>
   );
 };

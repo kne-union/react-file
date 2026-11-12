@@ -2,9 +2,9 @@ import { globalParams } from '../../globalParams';
 
 export const PREVIEWABLE_FILE_PATTERN = /\.(txt|md|pdf|png|jpg|jpeg|gif|bmp|webp|svg|html|htm|doc|docx|xls|xlsx|ppt|pptx|csv|mp3|wav|ogg|aac|mp4|avi|mov|mkv|flv|zip|rar|7z|tar|gz|json)$/i;
 
-// Archive entries that can be previewed locally (excludes legacy Office formats
+// Archive entries that can be previewed locally (excludes .doc/.xls/.csv formats
 // requiring Microsoft's online viewer and nested archives)
-export const ZIP_PREVIEWABLE_FILE_PATTERN = /\.(txt|md|pdf|png|jpg|jpeg|gif|bmp|webp|svg|html|htm|docx|xlsx|mp3|wav|ogg|aac|mp4|avi|mov|mkv|flv|json)$/i;
+export const ZIP_PREVIEWABLE_FILE_PATTERN = /\.(txt|md|pdf|png|jpg|jpeg|gif|bmp|webp|svg|html|htm|docx|xlsx|ppt|pptx|mp3|wav|ogg|aac|mp4|avi|mov|mkv|flv|json)$/i;
 
 const getExtension = source => {
   if (typeof source !== 'string') {
@@ -46,6 +46,8 @@ export const EXTENSION_MIME = {
   docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   xls: 'application/vnd.ms-excel',
   xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ppt: 'application/vnd.ms-powerpoint',
+  pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   zip: 'application/zip',
   mp4: 'video/mp4',
   mp3: 'audio/mpeg'
@@ -63,6 +65,10 @@ export const getOfficePreviewType = (url, filename) => {
   }
   if (/\.xlsx$/.test(source)) {
     return 'xlsx';
+  }
+  // .ppt 与 .pptx 均由 @extend-ai/react-pptx 在本地解析
+  if (/\.(ppt|pptx)$/.test(source)) {
+    return 'pptx';
   }
   return 'office';
 };
