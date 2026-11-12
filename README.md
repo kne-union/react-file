@@ -23,7 +23,7 @@ React文件操作组件库，提供文件上传、多格式预览、下载、列
 #### 主要特性
 
 - **文件上传** - 支持单文件/多文件上传，可自定义文件类型、大小限制和并发数
-- **文件预览** - 根据文件类型自动选择预览方式，支持图片、音频、视频、PDF、Office文档、HTML、Markdown、JSON、ZIP、文本等
+- **文件预览** - 根据文件类型自动选择预览方式，支持图片、音频、视频、PDF、Office文档（Word/Excel/PowerPoint 浏览器本地解析）、HTML、Markdown、JSON、ZIP、文本等
 - **文件下载** - 支持OSS文件ID下载、直接URL下载和Blob数据下载
 - **文件列表** - 展示已上传文件列表，支持上传中状态、预览、下载、删除操作
 - **文件系统** - 提供文件系统浏览组件，支持图标、列表、分栏、画廊四种视图模式
@@ -476,7 +476,8 @@ const BaseExample = createWithRemoteLoader({
                   6: '/mock/resume.docx',
                   7: '/mock/example.zip',
                   8: '/mock/resume.xlsx',
-                  9: '/mock/small-image.png'
+                  9: '/mock/small-image.png',
+                  10: '/mock/james-webb-space-telescope.pptx'
                 };
                 return new Promise(resolve => {
                   setTimeout(() => {
@@ -510,6 +511,9 @@ const BaseExample = createWithRemoteLoader({
         <InfoPage.Part title="预览OFFICE">
           <FilePreview id="6" filename="resume.docx" />
           <FilePreview id="8" filename="resume.xlsx" />
+        </InfoPage.Part>
+        <InfoPage.Part title="预览PPT">
+          <FilePreview id="10" filename="james-webb-space-telescope.pptx" />
         </InfoPage.Part>
         <InfoPage.Part title="预览ZIP">
           <FilePreview id="7" />
@@ -1608,7 +1612,8 @@ render(<BaseExample />);
 | PdfPreview | PDF预览 |
 | DocxPreview | Word文档预览 |
 | XlsxPreview | Excel预览 |
-| OfficePreview | Office文档预览（根据文件类型选择DocxPreview或XlsxPreview） |
+| PptxPreview | PowerPoint演示文稿预览（.ppt/.pptx，基于@extend-ai/react-pptx在浏览器本地解析） |
+| OfficePreview | Office文档预览（根据文件类型选择DocxPreview、XlsxPreview或PptxPreview） |
 | HtmlPreview | HTML预览 |
 | MarkdownPreview | Markdown预览 |
 | JsonPreview | JSON预览 |
@@ -1616,6 +1621,29 @@ render(<BaseExample />);
 | TextPreview | 文本文件预览 |
 | UnknownPreview | 未知类型文件预览 |
 | OSSFilePreview | OSS文件预览（通过ID获取URL后自动选择预览方式） |
+
+> PDF、Word、Excel、PPT 预览的顶部缩放工具栏在「缩小」按钮左侧均提供「恢复推荐尺寸」按钮：Word / PDF 回到初始化缩放（`scale`，默认 100%），PPT 按当前模式重新适配页面（单页 fit-page、全部 fit-width），Excel 调用 viewer 的 `resetZoom()` 回到 `defaultZoomScale`。已处于推荐尺寸时该按钮置灰禁用。
+
+---
+
+#### PptxPreview
+
+PowerPoint 演示文稿预览组件。基于 `@extend-ai/react-pptx` 在浏览器端通过 WebAssembly 解析 `.ppt` / `.pptx`，无需服务端转换或 Office Online。默认「单页」模式一次只展示一张幻灯片，并在展示区内水平、垂直居中；展示区左右各有绝对定位的圆形悬浮翻页按钮（不随内容滚动，桌面端 hover 到预览区域才显示，移动端常显），工具栏显示当前页码。工具栏用图标切换器（单页 / 全部）切到「全部」模式时连续浏览所有幻灯片（启用虚拟滚动），页码与翻页按钮一并隐藏；隐藏顶部工具栏时悬浮翻页按钮依然可用。两种模式共用缩放控件，`OfficePreview` 会自动为演示文稿文件选择该组件，并保留切换到「原生预览」的能力。
+
+##### 属性
+
+| 属性 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| url | string | - | PPT/PPTX 文件URL地址 |
+| filename | string | 'presentation.pptx' | 文件名，显示在预览工具栏 |
+| className | string | - | 自定义容器类名 |
+| height | number | 600 | 预览区域最小高度 |
+| showHeader | boolean | true | 是否显示顶部工具栏 |
+| pptxWasmUrl | string | `https://cdn.jsdelivr.net/npm/@extend-ai/react-pptx@0.5.0/dist/pptx_wasm_bg.wasm` | 解析用的 wasm 静态地址，也可通过 `preset({ apis: { file: { pptxWasmUrl } } })` 全局配置（与 `pdfjsUrl` 一致） |
+| apis | object | - | API配置对象，与全局preset.apis合并 |
+| onRemotePreview | function | - | 传入后显示「原生预览」按钮，用于切换到远程Office预览 |
+
+wasm 由组件在加载演示文稿前通过 `setWasmSource()` 指向上述静态地址，宿主打包器无需处理 `.wasm` 资源；如需内网部署，把 `pptx_wasm_bg.wasm` 放到静态目录并配置 `pptxWasmUrl` 即可。
 
 ---
 
