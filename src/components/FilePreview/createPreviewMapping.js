@@ -13,6 +13,7 @@ export const createPreviewMapping = ({ includeZipPreview = true } = {}) => {
     image: lazyPreviewInner(() => import('./ImagePreview'), 'ImagePreviewInner'),
     html: lazyPreviewInner(() => import('./HtmlPreview'), 'HtmlPreviewInner'),
     office: lazyPreviewInner(() => import('./OfficePreview'), 'OfficePreviewInner'),
+    pptx: lazyPreviewInner(() => import('./PptxPreview'), 'PptxPreviewInner'),
     audio: lazyPreviewInner(() => import('./AudioPreview'), 'AudioPreviewInner'),
     video: lazyPreviewInner(() => import('./VideoPreview'), 'VideoPreviewInner'),
     zip: includeZipPreview ? lazyPreviewInner(() => import('./ZipPreview'), 'ZipPreviewInner') : UnknownPreview,

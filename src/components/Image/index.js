@@ -13,7 +13,12 @@ import { usePreset } from '@kne/global-context';
 import withLocale from '../../withLocale';
 
 const loadingElement = <Skeleton.Avatar shape="square" active />;
-const photoFail = <PhotoFail />;
+// 加载失败：灰底占位容器中放固定尺寸的图标，避免 SVG 被拉伸到整个图片区域
+const photoFail = (
+  <div className={style['error']}>
+    <PhotoFail className={style['error-icon']} />
+  </div>
+);
 const avatarDefault = <AvatarDefault />;
 const avatarFemale = <AvatarFemale />;
 const avatarMale = <AvatarMale />;
@@ -178,7 +183,7 @@ Image.Avatar = p => {
   return (
     <div
       {...props}
-      className={classnames(className, style['img-outer'])}
+      className={classnames(className, style['img-outer'], style['img-outer-avatar'])}
       style={{
         width: width && height ? width : size,
         height: width && height ? height : size

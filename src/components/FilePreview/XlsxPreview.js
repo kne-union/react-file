@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { Alert, Button, Select, Space, Spin, Tabs } from 'antd';
-import { CloudOutlined, DownloadOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
+import { Alert, Button, Select, Space, Spin, Tabs, Tooltip } from 'antd';
+import { CloudOutlined, CompressOutlined, DownloadOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { useIsMobile } from '@kne/responsive-utils';
 import { XlsxViewer } from '@extend-ai/react-xlsx';
 import classnames from 'classnames';
@@ -30,9 +30,12 @@ const buildZoomOptions = controller => {
 
 const formatZoomLabel = ({ label, value }) => label ?? `${value}%`;
 
-const XlsxToolbar = ({ controller, fileName, onRemotePreview, remotePreviewLabel }) => {
+const XlsxToolbar = ({ controller, fileName, onRemotePreview, remotePreviewLabel, resetZoomLabel }) => {
   const isMobile = useIsMobile();
   const zoomOptions = useMemo(() => buildZoomOptions(controller), [controller]);
+  // resetZoom 清除当前 sheet 的缩放覆盖后回到 defaultZoomScale，
+  // 因此「已处于推荐尺寸」等价于当前缩放等于 defaultZoomScale（与组件内置工具栏判定一致）
+  const isRecommendedZoom = Number.isFinite(controller.defaultZoomScale) && Math.round(controller.zoomScale) === Math.round(controller.defaultZoomScale);
 
   const sheetTabs =
     controller.sheets?.length > 1 ? (
@@ -51,6 +54,9 @@ const XlsxToolbar = ({ controller, fileName, onRemotePreview, remotePreviewLabel
   const headerActions = useMemo(() => {
     const items = [
       <Space key="zoom" size={4} align="center">
+        <Tooltip title={resetZoomLabel}>
+          <Button size="small" type="text" icon={<CompressOutlined />} disabled={isRecommendedZoom} onClick={() => controller.resetZoom()} aria-label={resetZoomLabel} />
+        </Tooltip>
         <Button size="small" type="text" icon={<MinusOutlined />} disabled={!controller.canZoomOut} onClick={() => controller.zoomOut()} />
         <Select size="small" value={controller.zoomScale} style={{ width: isMobile ? 72 : 88 }} options={zoomOptions} labelRender={formatZoomLabel} onChange={value => controller.setZoomScale(Number(value))} />
         <Button size="small" type="text" icon={<PlusOutlined />} disabled={!controller.canZoomIn} onClick={() => controller.zoomIn()} />
@@ -67,7 +73,7 @@ const XlsxToolbar = ({ controller, fileName, onRemotePreview, remotePreviewLabel
     }
 
     return items;
-  }, [controller, isMobile, onRemotePreview, remotePreviewLabel, zoomOptions]);
+  }, [controller, isMobile, isRecommendedZoom, onRemotePreview, remotePreviewLabel, resetZoomLabel, zoomOptions]);
 
   return (
     <div className={style['office-toolbar-stack']}>
@@ -100,9 +106,21 @@ const XlsxPreviewInner = ({ url, filename, className, height = 600, showHeader =
           </div>
         }
         errorState={error => <Alert type="error" message={error?.message || formatMessage({ id: 'FilePreview.fileLoadedError' })} showIcon />}
-        toolbar={controller =>
-          showHeader ? <XlsxToolbar key={controller.revision} controller={controller} fileName={filename} onRemotePreview={onRemotePreview} remotePreviewLabel={formatMessage({ id: 'FilePreview.remotePreview' })} /> : null
-        }
+        toolbar={controller => {
+          if (!showHeader) {
+            return null;
+          }
+          return (
+            <XlsxToolbar
+              key={controller.revision}
+              controller={controller}
+              fileName={filename}
+              onRemotePreview={onRemotePreview}
+              remotePreviewLabel={formatMessage({ id: 'FilePreview.remotePreview' })}
+              resetZoomLabel={formatMessage({ id: 'FilePreview.resetZoom' })}
+            />
+          );
+        }}
       />
     </div>
   );

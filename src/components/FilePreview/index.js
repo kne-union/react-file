@@ -8,6 +8,7 @@ export { default as UnknownPreview } from './UnknownPreview';
 export { default as OfficePreview } from './OfficePreview';
 export { default as DocxPreview } from './DocxPreview';
 export { default as XlsxPreview } from './XlsxPreview';
+export { default as PptxPreview } from './PptxPreview';
 export { default as OSSFilePreview } from './OSSFilePreview';
 export { default as AudioPreview } from './AudioPreview';
 export { default as VideoPreview } from './VideoPreview';

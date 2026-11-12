@@ -8,6 +8,7 @@ import classnames from 'classnames';
 import { HtmlPreviewInner } from './HtmlPreview';
 import { DocxPreviewInner } from './DocxPreview';
 import { XlsxPreviewInner } from './XlsxPreview';
+import { PptxPreviewInner } from './PptxPreview';
 import PreviewShell from './PreviewShell';
 import { getOfficePreviewType } from './fileExtensions';
 import { UnknownPreviewInner } from './UnknownPreview';
@@ -71,7 +72,7 @@ const OfficePreviewInner = ({ url, filename, apis, className, showHeader = true,
   const [previewMode, setPreviewMode] = useState('local');
   const previewType = getOfficePreviewType(url, filename);
 
-  if (previewType === 'docx' || previewType === 'xlsx') {
+  if (previewType === 'docx' || previewType === 'xlsx' || previewType === 'pptx') {
     if (enableRemotePreview && previewMode === 'remote') {
       return <OfficeRemotePreview {...props} url={url} filename={filename} apis={apis} className={className} showHeader={showHeader} onLocalPreview={() => setPreviewMode('local')} />;
     }
@@ -80,6 +81,10 @@ const OfficePreviewInner = ({ url, filename, apis, className, showHeader = true,
 
     if (previewType === 'docx') {
       return <DocxPreviewInner {...props} url={url} filename={filename} className={className} showHeader={showHeader} onRemotePreview={onRemotePreview} />;
+    }
+
+    if (previewType === 'pptx') {
+      return <PptxPreviewInner {...props} url={url} filename={filename} className={className} showHeader={showHeader} onRemotePreview={onRemotePreview} />;
     }
 
     return <XlsxPreviewInner {...props} url={url} filename={filename} className={className} showHeader={showHeader} onRemotePreview={onRemotePreview} />;

@@ -11,14 +11,17 @@ describe('fileExtensions', () => {
     expect(typeFormat(null)).toBe('unknown');
   });
 
-  test('getOfficePreviewType distinguishes docx and xlsx', () => {
+  test('getOfficePreviewType distinguishes docx, xlsx and pptx', () => {
     expect(getOfficePreviewType('file.docx')).toBe('docx');
     expect(getOfficePreviewType('file.xlsx')).toBe('xlsx');
+    expect(getOfficePreviewType('file.pptx')).toBe('pptx');
+    expect(getOfficePreviewType('file.ppt')).toBe('pptx');
     expect(getOfficePreviewType('file.doc')).toBe('office');
   });
 
   test('guessContentType returns mime by extension', () => {
     expect(guessContentType('a.pdf')).toBe('application/pdf');
+    expect(guessContentType('a.pptx')).toBe('application/vnd.openxmlformats-officedocument.presentationml.presentation');
     expect(guessContentType('a.unknown')).toBe('application/octet-stream');
   });
 
@@ -27,9 +30,11 @@ describe('fileExtensions', () => {
     expect(PREVIEWABLE_FILE_PATTERN.test('folder/data.bin')).toBe(false);
   });
 
-  test('ZIP_PREVIEWABLE_FILE_PATTERN excludes legacy office and nested archives', () => {
+  test('ZIP_PREVIEWABLE_FILE_PATTERN includes ppt/pptx and excludes legacy office and nested archives', () => {
     expect(ZIP_PREVIEWABLE_FILE_PATTERN.test('folder/readme.md')).toBe(true);
     expect(ZIP_PREVIEWABLE_FILE_PATTERN.test('folder/report.docx')).toBe(true);
+    expect(ZIP_PREVIEWABLE_FILE_PATTERN.test('folder/slides.pptx')).toBe(true);
+    expect(ZIP_PREVIEWABLE_FILE_PATTERN.test('folder/slides.ppt')).toBe(true);
     expect(ZIP_PREVIEWABLE_FILE_PATTERN.test('folder/report.doc')).toBe(false);
     expect(ZIP_PREVIEWABLE_FILE_PATTERN.test('folder/report.xls')).toBe(false);
     expect(ZIP_PREVIEWABLE_FILE_PATTERN.test('folder/nested.zip')).toBe(false);
@@ -65,6 +70,13 @@ describe('createPreviewMapping', () => {
 
     expect(outer.typeFormatComponent('a.zip')).not.toBe(inner.typeFormatComponent('a.zip'));
     expect(inner.typeFormatComponent('a.zip')).toBe(inner.typeComponentMapping.unknown);
+  });
+
+  test('registers a dedicated pptx preview component', () => {
+    const { typeComponentMapping } = createPreviewMapping();
+
+    expect(typeComponentMapping.pptx).toBeDefined();
+    expect(typeComponentMapping.pptx).not.toBe(typeComponentMapping.unknown);
   });
 });
 

@@ -13,6 +13,7 @@ export {
   OfficePreview,
   DocxPreview,
   XlsxPreview,
+  PptxPreview,
   OSSFilePreview,
   AudioPreview,
   VideoPreview,
