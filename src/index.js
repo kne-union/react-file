@@ -21,7 +21,7 @@ export {
   typeFormatComponent,
   getPreviewMapping
 } from './components/FilePreview';
-export { default as FileButton, useFileModalProps, useFileModal, FileModal } from './components/FileButton';
+export { default as FileButton, getFileModalProps, useFileModalProps, useFileModal, FileModal } from './components/FileButton';
 export { default as Image } from './components/Image';
 export { default as PrintButton } from './components/PrintButton';
 export { default as FileList, OptionButtons as FileListOptionButtons } from './components/FileList';

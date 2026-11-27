@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Alert, Button, Select, Space, Spin, Tabs, Tooltip } from 'antd';
 import { CloudOutlined, CompressOutlined, DownloadOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { useIsMobile } from '@kne/responsive-utils';
@@ -8,6 +8,21 @@ import withLocale from '../../withLocale';
 import { useIntl } from '@kne/react-intl';
 import PreviewHeader from './PreviewHeader';
 import style from './style.module.scss';
+
+// XlsxViewer 只有 errorState 渲染回调，用 effect 把失败接到远程预览切换上
+const XlsxLocalError = ({ error, onRemotePreview, fallbackMessage }) => {
+  useEffect(() => {
+    if (onRemotePreview) {
+      onRemotePreview();
+    }
+  }, [onRemotePreview]);
+
+  if (onRemotePreview) {
+    return null;
+  }
+
+  return <Alert type="error" message={error?.message || fallbackMessage} showIcon />;
+};
 
 const ZOOM_OPTIONS = [50, 75, 100, 125, 150, 200];
 
@@ -105,7 +120,7 @@ const XlsxPreviewInner = ({ url, filename, className, height = 600, showHeader =
             <Spin />
           </div>
         }
-        errorState={error => <Alert type="error" message={error?.message || formatMessage({ id: 'FilePreview.fileLoadedError' })} showIcon />}
+        errorState={error => <XlsxLocalError error={error} onRemotePreview={onRemotePreview} fallbackMessage={formatMessage({ id: 'FilePreview.fileLoadedError' })} />}
         toolbar={controller => {
           if (!showHeader) {
             return null;
