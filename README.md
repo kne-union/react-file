@@ -332,6 +332,62 @@ render(<BaseExample />);
 
 ```
 
+- getFileModalProps
+- 命令式弹窗：用宿主体系的 useModal 打开文件预览，图片缩放/旋转工具栏可用
+- _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),antd(antd),remoteLoader(@kne/remote-loader)
+
+```jsx
+const { getFileModalProps } = _ReactFile;
+const { createWithRemoteLoader, getPublicPath } = remoteLoader;
+const { Button, Flex } = antd;
+
+const urlMap = {
+  1: '/mock/resume.png',
+  2: '/mock/resume.pdf'
+};
+
+const Buttons = createWithRemoteLoader({
+  modules: ['components-core:Modal@useModal']
+})(({ remoteModules }) => {
+  const [useModal] = remoteModules;
+  const modal = useModal();
+  return (
+    <Flex wrap gap={8}>
+      <Button onClick={() => modal(getFileModalProps({ id: '1', filename: 'demo.png', openPrint: true }))}>命令式预览图片</Button>
+      <Button onClick={() => modal(getFileModalProps({ id: '2', filename: 'demo.pdf' }))}>命令式预览 PDF</Button>
+    </Flex>
+  );
+});
+
+const BaseExample = createWithRemoteLoader({
+  modules: ['components-core:Global@PureGlobal']
+})(({ remoteModules }) => {
+  const [PureGlobal] = remoteModules;
+  return (
+    <PureGlobal
+      preset={{
+        ajax: async api => {
+          return { data: { code: 0, data: api.loader() } };
+        },
+        apis: {
+          file: {
+            staticUrl: getPublicPath('react-file') || window.PUBLIC_URL,
+            getUrl: {
+              loader: async ({ params }) => urlMap[params.id]
+            }
+          }
+        }
+      }}
+    >
+      <Buttons />
+    </PureGlobal>
+  );
+});
+
+render(<BaseExample />);
+
+```
+
 - FileList
 - 文件列表
 - _ReactFile(@kne/current-lib_react-file)[import * as _ReactFile from "@kne/react-file"],(@kne/current-lib_react-file/dist/index.css),antd(antd),remoteLoader(@kne/remote-loader)
@@ -1811,6 +1867,46 @@ ZIP压缩包文件预览组件，支持查看压缩包内部的文件列表和�
 | openPrint | boolean | false | 是否显示打印按钮 |
 | footer | ReactNode | null | 弹窗底部内容 |
 | apis | object | - | API配置对象 |
+| renderModal | function(modalProps) | antd Modal | 自定义弹窗外壳，见下方 renderModal 协议 |
+
+##### renderModal 协议
+
+`FileModal`、`FileButton`（`modalProps.renderModal`）、`FileList`、`FileUpload` 接受同一个 `renderModal(modalProps)`，用于把内容放进宿主体系的 Modal（如 components-core Modal）：
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| open | boolean | 是否显示 |
+| onClose | function() | 关闭弹窗 |
+| onCancel | function() | 同 onClose，兼容 antd Modal |
+| title | ReactNode | 标题（文件名、图片工具栏、下载/打印按钮） |
+| children | ReactNode | 预览内容 |
+| footer | ReactNode | 默认 null |
+| width | string \| number | 默认 `min(1200px, calc(100vw - 48px))` |
+
+#### getFileModalProps
+
+纯函数（不调用 hook），返回文件预览弹窗的内容配置 `{ title, children, footer, width }`。标题与正文都是自带状态的独立组件，因此可以直接交给命令式弹窗（如 `useModal()(config)`），图片缩放、旋转工具栏不依赖调用方状态。
+
+```jsx
+const modal = useModal();
+modal(getFileModalProps({ id, filename, openDownload: true }));
+```
+
+| 参数 | 类型 | 默认值 | 描述 |
+|------|------|--------|------|
+| id | string | - | OSS文件ID |
+| src | string | - | 文件URL |
+| filename | string | - | 文件名 |
+| originName | string | - | filename 的备选 |
+| title | ReactNode | - | 标题，默认使用文件名 |
+| openDownload | boolean | true | 是否显示下载按钮 |
+| openPrint | boolean | false | 是否显示打印按钮（仅txt/pdf/image/html） |
+| apis | object | - | API配置对象 |
+| ...其他 | - | - | 原样透传到返回值（如 width、footer） |
+
+#### useFileModal
+
+`FileModal` 的 hook 形式，返回 `useFileModalProps` 的结果以及 `renderModal(nextProps)`，调用方需在 JSX 中渲染 `renderModal()`。
 
 ---
 
