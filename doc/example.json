@@ -109,6 +109,29 @@
       ]
     },
     {
+      "title": "getFileModalProps",
+      "description": "命令式弹窗：用宿主体系的 useModal 打开文件预览，图片缩放/旋转工具栏可用",
+      "code": "./file-modal-props.js",
+      "scope": [
+        {
+          "name": "_ReactFile",
+          "packageName": "@kne/current-lib_react-file",
+          "importStatement": "import * as _ReactFile from \"@kne/react-file\""
+        },
+        {
+          "packageName": "@kne/current-lib_react-file/dist/index.css"
+        },
+        {
+          "name": "antd",
+          "packageName": "antd"
+        },
+        {
+          "name": "remoteLoader",
+          "packageName": "@kne/remote-loader"
+        }
+      ]
+    },
+    {
       "title": "FileList",
       "description": "文件列表",
       "code": "./file-list.js",

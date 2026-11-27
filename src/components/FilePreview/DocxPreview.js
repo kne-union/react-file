@@ -90,6 +90,11 @@ const DocxPreviewInner = ({ url, filename, className, height = 600, showHeader =
         }
       } catch (loadError) {
         if (!cancelled) {
+          // 有远程预览时直接切换，避免本地失败页一闪而过
+          if (onRemotePreview) {
+            onRemotePreview();
+            return;
+          }
           setError(loadError?.message || formatMessage({ id: 'FilePreview.fileLoadedError' }));
           setLoading(false);
         }
@@ -101,7 +106,7 @@ const DocxPreviewInner = ({ url, filename, className, height = 600, showHeader =
     return () => {
       cancelled = true;
     };
-  }, [url, displayFileName, importDocxFile, formatMessage]);
+  }, [url, displayFileName, importDocxFile, formatMessage, onRemotePreview]);
 
   const toolbarExtra =
     pagination.totalPages > 0 ? (

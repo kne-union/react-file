@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { Modal, Space, App } from 'antd';
 import { PrinterOutlined } from '@ant-design/icons';
 import classnames from 'classnames';
-import { findExamplePhoneMountNode, useMobilePopupMount, useScrollElement } from '@kne/responsive-utils';
+import { findExamplePhoneMountNode, useIsMobile, useMobilePopupMount, useScrollElement } from '@kne/responsive-utils';
 import { DownloadInner } from '../Download';
 import { PrintButtonInner } from '../PrintButton';
 import { FilePreviewInner, typeFormat } from '../FilePreview';
@@ -61,68 +61,117 @@ const useLockParentScroll = (enabled, getScrollElement) => {
   }, [enabled, getScrollElement]);
 };
 
-export const useFileModalProps = p => {
+// 标题与正文是两棵独立子树，且命令式弹窗会固定 title/children，二者只能经由每次打开新建的 store 通信，不能依赖宿主组件 state
+const createFileModalStore = () => {
+  let toolbarContainer = null;
+  const listeners = new Set();
+  return {
+    contentRef: { current: null },
+    setToolbarContainer: node => {
+      toolbarContainer = node;
+      listeners.forEach(listener => listener());
+    },
+    getToolbarContainer: () => toolbarContainer,
+    subscribe: listener => {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    }
+  };
+};
+
+const FileModalTitle = withLocale(({ store, displayName, filename, id, src, apis, showDownload, showPrint }) => {
   const { formatMessage } = useIntl();
-  const { title, filename, originName, openDownload, openPrint, id, src, apis, isMobile, ...props } = Object.assign(
+  const { message } = App.useApp();
+  return (
+    <div className={style['file-title']}>
+      <span className={style['file-title-text']} title={typeof displayName === 'string' ? displayName : undefined}>
+        {displayName}
+      </span>
+      <span ref={store.setToolbarContainer} className={style['file-title-toolbar']} />
+      {showDownload || showPrint ? (
+        <Space size={4} className={style['file-title-actions']}>
+          {showDownload && (
+            <DownloadInner
+              type="text"
+              id={id}
+              src={src}
+              apis={apis}
+              filename={filename}
+              onSuccess={() => {
+                message.success(formatMessage({ id: 'Download.downloadSuccess' }));
+              }}
+            />
+          )}
+          {showPrint && <PrintButtonInner contentRef={store.contentRef} type="text" icon={<PrinterOutlined />} />}
+        </Space>
+      ) : null}
+    </div>
+  );
+});
+
+const FileModalContent = withLocale(({ store, filename, id, src, apis, isMobile: isMobileProp }) => {
+  const isMobileQuery = useIsMobile();
+  const isMobile = typeof isMobileProp === 'boolean' ? isMobileProp : isMobileQuery;
+  const toolbarContainer = useSyncExternalStore(store.subscribe, store.getToolbarContainer);
+  const toolbar = useMemo(() => ({ container: toolbarContainer }), [toolbarContainer]);
+  return (
+    <div ref={store.contentRef} className={classnames(style['file-modal-outer'], isMobile && style['file-modal-outer-mobile'])}>
+      <ImageToolbarProvider value={toolbar}>
+        <FilePreviewInner id={id} src={src} filename={filename} apis={apis} className={previewStyle['modal-preview']} />
+      </ImageToolbarProvider>
+    </div>
+  );
+});
+
+const buildFileModalProps = (p, store) => {
+  const {
+    title,
+    filename: filenameProp,
+    originName,
+    openDownload,
+    openPrint,
+    id,
+    src,
+    apis,
+    isMobile,
+    ...props
+  } = Object.assign(
     {},
     {
       footer: null,
       width: 'min(1200px, calc(100vw - 48px))',
-      openPrint: false,
-      isMobile: false
+      openPrint: false
     },
     p
   );
-  const displayName = title || filename || originName;
-  const showDownload = openDownload !== false;
-  const showPrint = openPrint && ['txt', 'pdf', 'image', 'html'].indexOf(typeFormat(filename || originName)) > -1;
+  const filename = filenameProp || originName;
+  const fileProps = { store, filename, id, src, apis };
+  return {
+    ...props,
+    title: <FileModalTitle {...fileProps} displayName={title || filename} showDownload={openDownload !== false} showPrint={openPrint && ['txt', 'pdf', 'image', 'html'].indexOf(typeFormat(filename)) > -1} />,
+    children: <FileModalContent {...fileProps} isMobile={isMobile} />
+  };
+};
+
+export const getFileModalProps = props => buildFileModalProps(props, createFileModalStore());
+
+export const useFileModalProps = p => {
+  const [store] = useState(createFileModalStore);
+  const props = buildFileModalProps(p, store);
   const [open, onOpenChange] = useControlValue(props, {
     value: 'open',
     default: 'defaultOpen',
     onChange: 'onOpenChange'
   });
-  const { message } = App.useApp();
-  const ref = useRef();
-  const [toolbarContainer, setToolbarContainer] = useState(null);
+  const onClose = () => {
+    onOpenChange(false);
+  };
   return {
     ...props,
     open,
     onOpenChange,
-    onCancel: () => {
-      onOpenChange(false);
-    },
-    title: (
-      <div className={style['file-title']}>
-        <span className={style['file-title-text']} title={typeof displayName === 'string' ? displayName : undefined}>
-          {displayName}
-        </span>
-        <span ref={setToolbarContainer} className={style['file-title-toolbar']} />
-        {showDownload || showPrint ? (
-          <Space size={4} className={style['file-title-actions']}>
-            {showDownload && (
-              <DownloadInner
-                type="text"
-                id={id}
-                src={src}
-                apis={apis}
-                filename={filename || originName}
-                onSuccess={() => {
-                  message.success(formatMessage({ id: 'Download.downloadSuccess' }));
-                }}
-              />
-            )}
-            {showPrint && <PrintButtonInner contentRef={ref} type="text" icon={<PrinterOutlined />} />}
-          </Space>
-        ) : null}
-      </div>
-    ),
-    children: (
-      <div ref={ref} className={classnames(style['file-modal-outer'], isMobile && style['file-modal-outer-mobile'])}>
-        <ImageToolbarProvider value={{ container: toolbarContainer }}>
-          <FilePreviewInner id={id} src={src} filename={filename || originName} apis={apis} className={previewStyle['modal-preview']} />
-        </ImageToolbarProvider>
-      </div>
-    )
+    onClose,
+    onCancel: onClose
   };
 };
 

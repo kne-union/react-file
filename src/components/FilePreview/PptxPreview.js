@@ -197,10 +197,21 @@ const PptxPreviewInner = ({ url, filename, className, height = 600, showHeader =
             <Spin />
           </div>
         )}
-        renderError={loadError => <Alert type="error" message={loadError?.message || formatMessage({ id: 'FilePreview.fileLoadedError' })} showIcon className={style.error} />}
+        renderError={loadError => {
+          if (onRemotePreview) {
+            return null;
+          }
+          return <Alert type="error" message={loadError?.message || formatMessage({ id: 'FilePreview.fileLoadedError' })} showIcon className={style.error} />;
+        }}
         onReady={handleReady}
         onLoad={handleLoad}
-        onError={setError}
+        onError={err => {
+          if (onRemotePreview) {
+            onRemotePreview();
+            return;
+          }
+          setError(err);
+        }}
         onSlideChange={handleSlideChange}
         onZoomChange={handleZoomChange}
       />
